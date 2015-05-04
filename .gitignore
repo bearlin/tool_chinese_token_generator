@@ -1,3 +1,10 @@
+# !/bin/sh
+
+# References:
+# https://github.com/github/gitignore
+#
+# gitignore/C++.gitignore
+# ---------------------------------
 # Compiled Object files
 *.slo
 *.lo
@@ -26,3 +33,31 @@
 *.exe
 *.out
 *.app
+# ---------------------------------
+
+# gitignore/CMake.gitignore
+# ---------------------------------
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+# ---------------------------------
+#
+# gitignore/Global/Tags.gitignore
+# ---------------------------------
+# Ignore tags created by etags, ctags, gtags (GNU global) and cscope
+TAGS
+!TAGS/
+tags
+!tags/
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+cscope.files
+cscope.out
+cscope.in.out
+cscope.po.out
+# ---------------------------------
+
