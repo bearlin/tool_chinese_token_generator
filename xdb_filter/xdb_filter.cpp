@@ -120,257 +120,257 @@ char tmp_buf1[MAX_LINE_SIZE];
 /* header struct */
 typedef struct _node_info_header_
 {
-	unsigned int l_offset;
-	unsigned int l_length;
-	unsigned int r_offset;
-	unsigned int r_length;
-	unsigned char k_length;
+  unsigned int l_offset;
+  unsigned int l_length;
+  unsigned int r_offset;
+  unsigned int r_length;
+  unsigned char k_length;
 } node_info_header;
 
 typedef struct _node_info_attr_
 {
-	float tf;
-	float idf;
-	unsigned char flag;
-	char attr[3];
+  float tf;
+  float idf;
+  unsigned char flag;
+  char attr[3];
 } node_info_attr;
 
 typedef struct _node_info_
 {
-	unsigned int l_offset;
-	unsigned int l_length;
-	unsigned int r_offset;
-	unsigned int r_length;
-	unsigned char k_length;
-	unsigned char k_data[300];
+  unsigned int l_offset;
+  unsigned int l_length;
+  unsigned int r_offset;
+  unsigned int r_length;
+  unsigned char k_length;
+  unsigned char k_data[300];
 
-	float tf;
-	float idf;
-	unsigned char flag;
-	char attr[3];
+  float tf;
+  float idf;
+  unsigned char flag;
+  char attr[3];
 } node_info;
 
 typedef struct _prime_node_
 {
-	int offset;
-	int length;
+  int offset;
+  int length;
 } prime_node;
 
 int _get_hash_index(unsigned char* key, int hash_base, int hash_prime )
 {
-	int l = strlen((char*)key);
-	int h = hash_base;
-	while (l--)
-	{
-		h += (int)(h << 5);
-		h ^= key[l];
-		h &= 0x7fffffff;
-	}
+  int l = strlen((char*)key);
+  int h = hash_base;
+  while (l--)
+  {
+    h += (int)(h << 5);
+    h ^= key[l];
+    h &= 0x7fffffff;
+  }
 
-	return (h % hash_prime);
+  return (h % hash_prime);
 }
 
 int searchTokenInfo( char *token_content, long node_offset, long node_length, int hash_base, int hash_prime, node_info_attr *attr, FILE* fp_xdb  ) {
-	int hash_index;
-	//fpos_t f_offset;
-	long f_offset;
-	prime_node pr_node;
-	node_info_header node_ih;
-	node_info_attr node_ia;
-	char szBuff[300];
-	int cmp_result;
+  int hash_index;
+  //fpos_t f_offset;
+  long f_offset;
+  prime_node pr_node;
+  node_info_header node_ih;
+  node_info_attr node_ia;
+  char szBuff[300];
+  int cmp_result;
 
-	unsigned int l_offset, l_len;
-	unsigned int r_offset, r_len;
-	char k_len;
+  unsigned int l_offset, l_len;
+  unsigned int r_offset, r_len;
+  char k_len;
 
-	if ( NULL == fp_xdb ) 
-		return -1;
+  if ( NULL == fp_xdb ) 
+    return -1;
 
-	if( (node_offset < 0 ) && (node_length < 0) ) {
-		hash_index = _get_hash_index((unsigned char*)token_content, hash_base, hash_prime );
+  if( (node_offset < 0 ) && (node_length < 0) ) {
+    hash_index = _get_hash_index((unsigned char*)token_content, hash_base, hash_prime );
 
-		int t = sizeof(xdb_header);
-		int g = sizeof(prime_node);
+    int t = sizeof(xdb_header);
+    int g = sizeof(prime_node);
 
-		f_offset = sizeof(xdb_header)+hash_index*sizeof(prime_node);
-		//fsetpos(fp_xdb, &f_offset);
+    f_offset = sizeof(xdb_header)+hash_index*sizeof(prime_node);
+    //fsetpos(fp_xdb, &f_offset);
     fseek(fp_xdb, f_offset, SEEK_SET);
-		fread(&pr_node, sizeof(prime_node),1,fp_xdb);
-		node_offset = pr_node.offset;
-		node_length = pr_node.length;
-	}
+    fread(&pr_node, sizeof(prime_node),1,fp_xdb);
+    node_offset = pr_node.offset;
+    node_length = pr_node.length;
+  }
 
-	// read node
-	f_offset = node_offset;
-	//fsetpos(fp_xdb, &f_offset);
+  // read node
+  f_offset = node_offset;
+  //fsetpos(fp_xdb, &f_offset);
   fseek(fp_xdb, f_offset, SEEK_SET);
 
-	fread(&node_ih.l_offset, sizeof(unsigned int), 1, fp_xdb );
-	fread(&node_ih.l_length, sizeof(unsigned int), 1, fp_xdb );
-	fread(&node_ih.r_offset, sizeof(unsigned int), 1, fp_xdb );
-	fread(&node_ih.r_length, sizeof(unsigned int), 1, fp_xdb );
-	fread(&node_ih.k_length, sizeof(unsigned char), 1, fp_xdb );
+  fread(&node_ih.l_offset, sizeof(unsigned int), 1, fp_xdb );
+  fread(&node_ih.l_length, sizeof(unsigned int), 1, fp_xdb );
+  fread(&node_ih.r_offset, sizeof(unsigned int), 1, fp_xdb );
+  fread(&node_ih.r_length, sizeof(unsigned int), 1, fp_xdb );
+  fread(&node_ih.k_length, sizeof(unsigned char), 1, fp_xdb );
 
-	memset(szBuff, 0, sizeof(szBuff) );
-	fread(szBuff, 1,node_ih.k_length,fp_xdb);
+  memset(szBuff, 0, sizeof(szBuff) );
+  fread(szBuff, 1,node_ih.k_length,fp_xdb);
 
-	cmp_result = strcmp(szBuff, token_content);
+  cmp_result = strcmp(szBuff, token_content);
 
-	if( 0 == cmp_result )
-	{
-		fread( &(attr->tf), sizeof(float), 1, fp_xdb );
-		fread( &(attr->idf), sizeof(float), 1, fp_xdb );
-		fread( &(attr->flag), sizeof(unsigned char), 1, fp_xdb );
-		fread( &(attr->attr), sizeof(unsigned char), 3, fp_xdb );
-		//fread(attr, sizeof(node_info_attr),1,fp_xdb);
-		return 0;
-	} else if( cmp_result > 0 ) {
-		if( (0 == node_ih.l_offset) && (0 == node_ih.l_length) )
-			return -1; // no node
+  if( 0 == cmp_result )
+  {
+    fread( &(attr->tf), sizeof(float), 1, fp_xdb );
+    fread( &(attr->idf), sizeof(float), 1, fp_xdb );
+    fread( &(attr->flag), sizeof(unsigned char), 1, fp_xdb );
+    fread( &(attr->attr), sizeof(unsigned char), 3, fp_xdb );
+    //fread(attr, sizeof(node_info_attr),1,fp_xdb);
+    return 0;
+  } else if( cmp_result > 0 ) {
+    if( (0 == node_ih.l_offset) && (0 == node_ih.l_length) )
+      return -1; // no node
 
-		return searchTokenInfo( token_content, node_ih.l_offset, node_ih.l_length, hash_base, hash_prime, attr, fp_xdb );
-	} else {
-		//if( cmp_result < 0 )
+    return searchTokenInfo( token_content, node_ih.l_offset, node_ih.l_length, hash_base, hash_prime, attr, fp_xdb );
+  } else {
+    //if( cmp_result < 0 )
 
-		if( (0 == node_ih.r_offset) && (0 == node_ih.r_length) )
-			return -1; // no node
+    if( (0 == node_ih.r_offset) && (0 == node_ih.r_length) )
+      return -1; // no node
 
-		return searchTokenInfo( token_content, node_ih.r_offset, node_ih.r_length, hash_base, hash_prime, attr, fp_xdb );
-	}
+    return searchTokenInfo( token_content, node_ih.r_offset, node_ih.r_length, hash_base, hash_prime, attr, fp_xdb );
+  }
 
-	return -1;
+  return -1;
 }
 
 ////////////////////// Search Node /////////////////////////////////////
 
-#define UTF8_CHAR_KIND_NONE		0
-#define UTF8_CHAR_KIND_1		1  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
-#define UTF8_CHAR_KIND_2		2  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
-#define UTF8_CHAR_KIND_3		3  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
-#define UTF8_CHAR_KIND_4		4  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
+#define UTF8_CHAR_KIND_NONE    0
+#define UTF8_CHAR_KIND_1    1  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
+#define UTF8_CHAR_KIND_2    2  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
+#define UTF8_CHAR_KIND_3    3  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
+#define UTF8_CHAR_KIND_4    4  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
 
 static int getUTF8CharKind( unsigned char x ) 
 {
-	if( x <= 0x7f )
-		return UTF8_CHAR_KIND_1;  // ASCII
+  if( x <= 0x7f )
+    return UTF8_CHAR_KIND_1;  // ASCII
 
-	if( x >= 0xC0 && x <= 0xDF )
-		return UTF8_CHAR_KIND_2;  // Latin characters
+  if( x >= 0xC0 && x <= 0xDF )
+    return UTF8_CHAR_KIND_2;  // Latin characters
 
-	if( x >= 0xE0 && x <= 0xEF )
-		return UTF8_CHAR_KIND_3;  // CJKS
+  if( x >= 0xE0 && x <= 0xEF )
+    return UTF8_CHAR_KIND_3;  // CJKS
 
-	if( x >= 0xF0 && x <= 0xF7 )
-		return UTF8_CHAR_KIND_4;  // CJKS
+  if( x >= 0xF0 && x <= 0xF7 )
+    return UTF8_CHAR_KIND_4;  // CJKS
 
-	return UTF8_CHAR_KIND_NONE;
+  return UTF8_CHAR_KIND_NONE;
 }
 
 int convUTF8ToUTF16(unsigned char* utf8_code_data, unsigned int* data, int data_length ) 
 {
-	unsigned char* pUTF8_CODE;
-	unsigned char  UTF8_CODE;
-	unsigned char  UTF8_CODE_NEXT[2];
-	unsigned char  hiByte, loByte;
-	int result_length;
+  unsigned char* pUTF8_CODE;
+  unsigned char  UTF8_CODE;
+  unsigned char  UTF8_CODE_NEXT[2];
+  unsigned char  hiByte, loByte;
+  int result_length;
 
-	if( NULL == utf8_code_data )
-		return -1;
+  if( NULL == utf8_code_data )
+    return -1;
 
-	if( NULL == data )
-		return -1;
+  if( NULL == data )
+    return -1;
 
-	if( 0 == data_length )
-		return -1;
+  if( 0 == data_length )
+    return -1;
 
-	pUTF8_CODE = utf8_code_data;
-	result_length  = 0;
+  pUTF8_CODE = utf8_code_data;
+  result_length  = 0;
 
-	while( 0x00 != (UTF8_CODE = *pUTF8_CODE) ) {
-		if( (UTF8_CODE > 0x00) && (UTF8_CODE <= 0x7F)   ) { 
-			// 000000 - 00007F
-			data[result_length++] = (unsigned int)UTF8_CODE;
-		} else if( (UTF8_CODE >= 0xC0) && (UTF8_CODE <= 0xDF) ) { 
-			// 110yyyyy(C0-DF) 10zzzzzz(80-BF)  UTF-8
-			// 00000yyy yyzzzzzz(UTF-16)
-			UTF8_CODE_NEXT[0] = *(pUTF8_CODE+1);
-			if( (UTF8_CODE_NEXT[0] >= 0x80) && (UTF8_CODE_NEXT[0] <= 0xBF) ) {
-				hiByte = (UTF8_CODE & 0x1C) >> 2;
-				loByte = ((UTF8_CODE & 0x03) << 6) |(UTF8_CODE_NEXT[0] & 0x3f);
-				data[result_length++] = ((unsigned int)hiByte << 8) | ((unsigned int)loByte);
-				pUTF8_CODE++;
-			}
-			else {
-				data[result_length++] = (unsigned int)UTF8_CODE;
-			}
-		} else if( (UTF8_CODE >= 0xE0) && (UTF8_CODE <= 0xEF) ) { 
-			// 1110xxxx(E0-EF)  10yyyyyy(80-BF) 10zzzzzz(80-BF) UTF-8
-			// xxxxyyyy yyzzzzzz(UTF-16)
-			UTF8_CODE_NEXT[0] = *(pUTF8_CODE+1);
-			UTF8_CODE_NEXT[1] = *(pUTF8_CODE+2);
+  while( 0x00 != (UTF8_CODE = *pUTF8_CODE) ) {
+    if( (UTF8_CODE > 0x00) && (UTF8_CODE <= 0x7F)   ) { 
+      // 000000 - 00007F
+      data[result_length++] = (unsigned int)UTF8_CODE;
+    } else if( (UTF8_CODE >= 0xC0) && (UTF8_CODE <= 0xDF) ) { 
+      // 110yyyyy(C0-DF) 10zzzzzz(80-BF)  UTF-8
+      // 00000yyy yyzzzzzz(UTF-16)
+      UTF8_CODE_NEXT[0] = *(pUTF8_CODE+1);
+      if( (UTF8_CODE_NEXT[0] >= 0x80) && (UTF8_CODE_NEXT[0] <= 0xBF) ) {
+        hiByte = (UTF8_CODE & 0x1C) >> 2;
+        loByte = ((UTF8_CODE & 0x03) << 6) |(UTF8_CODE_NEXT[0] & 0x3f);
+        data[result_length++] = ((unsigned int)hiByte << 8) | ((unsigned int)loByte);
+        pUTF8_CODE++;
+      }
+      else {
+        data[result_length++] = (unsigned int)UTF8_CODE;
+      }
+    } else if( (UTF8_CODE >= 0xE0) && (UTF8_CODE <= 0xEF) ) { 
+      // 1110xxxx(E0-EF)  10yyyyyy(80-BF) 10zzzzzz(80-BF) UTF-8
+      // xxxxyyyy yyzzzzzz(UTF-16)
+      UTF8_CODE_NEXT[0] = *(pUTF8_CODE+1);
+      UTF8_CODE_NEXT[1] = *(pUTF8_CODE+2);
 
-			if( ((UTF8_CODE_NEXT[0] >= 0x80) && (UTF8_CODE_NEXT[0] <= 0xBF)) && ((UTF8_CODE_NEXT[1] >= 0x80) && (UTF8_CODE_NEXT[1] <= 0xBF)) ) {
-				hiByte = ((UTF8_CODE & 0x0f) << 4) | ((UTF8_CODE_NEXT[0] & 0x3C) >> 2);
-				loByte = ((UTF8_CODE_NEXT[0] & 0x03) << 6) | (UTF8_CODE_NEXT[1] & 0x3F);
-				data[result_length++] = ((unsigned int)hiByte << 8) | ((unsigned int)loByte);
-				pUTF8_CODE++;
-				pUTF8_CODE++;
-			}
-			else {
-				data[result_length++] = (unsigned int)UTF8_CODE;
-			}
-		} else {
-			data[result_length++] = (unsigned int)UTF8_CODE;
-		}
+      if( ((UTF8_CODE_NEXT[0] >= 0x80) && (UTF8_CODE_NEXT[0] <= 0xBF)) && ((UTF8_CODE_NEXT[1] >= 0x80) && (UTF8_CODE_NEXT[1] <= 0xBF)) ) {
+        hiByte = ((UTF8_CODE & 0x0f) << 4) | ((UTF8_CODE_NEXT[0] & 0x3C) >> 2);
+        loByte = ((UTF8_CODE_NEXT[0] & 0x03) << 6) | (UTF8_CODE_NEXT[1] & 0x3F);
+        data[result_length++] = ((unsigned int)hiByte << 8) | ((unsigned int)loByte);
+        pUTF8_CODE++;
+        pUTF8_CODE++;
+      }
+      else {
+        data[result_length++] = (unsigned int)UTF8_CODE;
+      }
+    } else {
+      data[result_length++] = (unsigned int)UTF8_CODE;
+    }
 
-		pUTF8_CODE++;
-	}
+    pUTF8_CODE++;
+  }
 
     return result_length;
 }
 
 int isAllChineseToken( char* token_content, int token_len ) {
-	int idx = 0;
-	int kind;
-	unsigned int utf16_data[10];
+  int idx = 0;
+  int kind;
+  unsigned int utf16_data[10];
 
-	if( 3 == token_len ) {
-		kind = convUTF8ToUTF16((unsigned char*)token_content, utf16_data, 10 );
+  if( 3 == token_len ) {
+    kind = convUTF8ToUTF16((unsigned char*)token_content, utf16_data, 10 );
 
-		if( 1 == kind ) {
-			// check for symbol
-			if( (utf16_data[0] <= 0x3400) || (utf16_data[0] >= 0xFAD9) )
-				return 0;
-		}
-	}
+    if( 1 == kind ) {
+      // check for symbol
+      if( (utf16_data[0] <= 0x3400) || (utf16_data[0] >= 0xFAD9) )
+        return 0;
+    }
+  }
 
-	while( idx < token_len ) {
-		kind = getUTF8CharKind( (unsigned char)token_content[idx] ) ;
+  while( idx < token_len ) {
+    kind = getUTF8CharKind( (unsigned char)token_content[idx] ) ;
 
-		if( UTF8_CHAR_KIND_3 != kind )
-			return 0;
+    if( UTF8_CHAR_KIND_3 != kind )
+      return 0;
 
-		idx += kind;
-	}
+    idx += kind;
+  }
 
-	return 1;
+  return 1;
 }
 
 int isValidChineseToken( scws_res_t cur, char* token_content ) {
 
-	if( cur->len < 3 )
-		return 0;
+  if( cur->len < 3 )
+    return 0;
 
-	if( 0 == strcasecmp(cur->attr, "en") )
-		return 0;
+  if( 0 == strcasecmp(cur->attr, "en") )
+    return 0;
 
-	if( (0 == strcasecmp(cur->attr, "un")) || (0 == strcasecmp(cur->attr, "nz"))  ) {
-		if( 0 == isAllChineseToken( token_content, cur->len ) )
-			return 0;
-	}
+  if( (0 == strcasecmp(cur->attr, "un")) || (0 == strcasecmp(cur->attr, "nz"))  ) {
+    if( 0 == isAllChineseToken( token_content, cur->len ) )
+      return 0;
+  }
 
-	return 1;
+  return 1;
 }
 
 int TokenTotalChineseWordCountGet(const char* str)
@@ -474,12 +474,12 @@ int SuffixTokenMapInit(std::map<std::string,int> &suffix_token_map)
     }
 
     strtok(tmp_buf1,"\n\r");
-	  if (3 > strlen(tmp_buf1))
-		  continue;
+    if (3 > strlen(tmp_buf1))
+      continue;
     if ((tmp_buf1[0] == '#') || (tmp_buf1[0] == ';'))
       continue;
 
-	  //printf("SuffixTable line_no:%d = %s", line_no, tmp_buf1);
+    //printf("SuffixTable line_no:%d = %s", line_no, tmp_buf1);
     //strtok(tmp_buf1,"\n\r");
     suffix_tok = tmp_buf1;
     if (suffix_token_map.end() == suffix_token_map.find(suffix_tok))
@@ -527,7 +527,7 @@ int isTokenEndWithIgnoredSuffix(const char* str, int* pSuffixOff, char* tmp_buf,
   token_len = strlen(tmp_buf);
   
   if (UTF8_CHAR_KIND_3 > token_len)
-			return 0;
+      return 0;
 
   TokenTotalChineseWordCount = TokenTotalChineseWordCountGet(tmp_buf);
   //printf("str[%s] TokenTotalChineseWordCount[%d] MaxSuffixTokenLength[%d]\n", str, TokenTotalChineseWordCount, MaxSuffixTokenLength);
@@ -535,7 +535,7 @@ int isTokenEndWithIgnoredSuffix(const char* str, int* pSuffixOff, char* tmp_buf,
   if (MaxSuffixTokenLength >= TokenTotalChineseWordCount)
     MaxSuffixTokenLength = TokenTotalChineseWordCount - 1;
   if (0 == MaxSuffixTokenLength)
-			return 0;
+      return 0;
   
   for (SuffixWordCnt = MaxSuffixTokenLength; SuffixWordCnt > 0; SuffixWordCnt--)
   {
@@ -557,7 +557,7 @@ int isTokenEndWithIgnoredSuffix(const char* str, int* pSuffixOff, char* tmp_buf,
   return 0;
 }
 
-int TokenGetOneWord(const char* str, char* tmp_buf, int wordIdx)
+int TokenGetOneWord(const char* str, char* tmp_buf, size_t aBufferLength, int wordIdx)
 {
   int token_len = 0;
   int idx = 0;
@@ -565,7 +565,7 @@ int TokenGetOneWord(const char* str, char* tmp_buf, int wordIdx)
   int found = 0;
   
   //printf("TokenGetOneWord str:[%s] wordIdx:%d\n", str, wordIdx);
-  memset (tmp_buf,0,sizeof(tmp_buf));
+  memset(tmp_buf , 0, aBufferLength);
   
   token_len = strlen(str);
 
@@ -574,10 +574,10 @@ int TokenGetOneWord(const char* str, char* tmp_buf, int wordIdx)
   
   while (idx < token_len) 
   {
-		kind = getUTF8CharKind( (unsigned char)str[idx] ) ;
+    kind = getUTF8CharKind( (unsigned char)str[idx] ) ;
 
-		if( UTF8_CHAR_KIND_3 != kind )
-			return 0;
+    if( UTF8_CHAR_KIND_3 != kind )
+      return 0;
 
     if ((idx / UTF8_CHAR_KIND_3) == wordIdx)
     {
@@ -588,8 +588,8 @@ int TokenGetOneWord(const char* str, char* tmp_buf, int wordIdx)
       break;
     }
 
-		idx += kind;
-	}
+    idx += kind;
+  }
     
   return found;
 }
@@ -598,22 +598,22 @@ int TokenGetOneWord(const char* str, char* tmp_buf, int wordIdx)
 // Length of multibyte character from first byte of Utf8
 static const unsigned char g_mblen_table_utf8[] = 
 {
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
 };
 
 const unsigned int KNormBufUnitSize = 0x200;
@@ -834,18 +834,18 @@ int main(int argc, char* argv[])
     if (0 == line_no%1000)
       printf("Parsing Line(%d)....\n", line_no );
     
-	  if( 0 == strlen(line_text) )
-		  continue;
+    if( 0 == strlen(line_text) )
+      continue;
 
-	  text_size = 0;
-	  memset(text,0, sizeof(text) );
+    text_size = 0;
+    memset(text,0, sizeof(text) );
 
     pline = line_text;
     while( ('\r' != *pline) && ( '\n' != *pline) && ( 0 != *pline) )
-		  text[text_size++] = *(pline++);
+      text[text_size++] = *(pline++);
 
-	  //printf("%s\n", text);
-	  scws_send_text(s, text, text_size );
+    //printf("%s\n", text);
+    scws_send_text(s, text, text_size );
     while (res = cur = scws_get_result(s))
     {
       while (cur != NULL)
@@ -878,11 +878,11 @@ int main(int argc, char* argv[])
           fprintf(fp_s01_not_ch, "%s off=%d idf=%4.2f len=%d attr=%s\n", szTmp, cur->off, cur->idf, cur->len, cur->attr);
         }
 
-    		cur = cur->next;
-    		//if( NULL == cur) cur = scws_get_result(s);
-    	}
+        cur = cur->next;
+        //if( NULL == cur) cur = scws_get_result(s);
+      }
 
-    	scws_free_result(res);
+      scws_free_result(res);
     }
   }
   scws_free(s);
@@ -1134,7 +1134,7 @@ int main(int argc, char* argv[])
     strcpy(tmp_buf, it->first.c_str());
     strtok(tmp_buf,"\n\r");
     wordIdx = 0;
-    while (TokenGetOneWord(tmp_buf, tmpWord, wordIdx++))
+    while (TokenGetOneWord(tmp_buf, tmpWord, sizeof(tmpWord), wordIdx++))
     {
       if (token_map_with_one_word.end() == token_map_with_one_word.find(tmpWord))
       {
@@ -1201,7 +1201,7 @@ int main(int argc, char* argv[])
   file_path += SCWS_XDB_PATH;
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
-	  return -1;
+    return -1;
   fread( &header, sizeof(xdb_header), 1, fp_xdb);
   
 #if 1
@@ -1399,7 +1399,7 @@ int main(int argc, char* argv[])
   file_path += SCWS_XDB_PATH;
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
-	  return -1;
+    return -1;
   fread( &header, sizeof(xdb_header), 1, fp_xdb);
   
   file_path = DATA_DIR;
@@ -1575,7 +1575,7 @@ int main(int argc, char* argv[])
   // Start converting.
   iNormText.resize(32);
   while (fgets(tmp_buf1, sizeof(tmp_buf1), fp_in_s07_optimized_full)) 
-	{
+  {
     line_no++;
     if (0 == line_no%1000)
       printf("Converting Line(%d)....\n", line_no );
@@ -1584,15 +1584,15 @@ int main(int argc, char* argv[])
       continue;
 
     strncpy(tmp_buf, tmp_buf1, sizeof(tmp_buf));
-		szLine_Len = strlen(tmp_buf);
+    szLine_Len = strlen(tmp_buf);
 
     if( 0 == szLine_Len )
-		  continue;
+      continue;
 
-		pKey = strtok(tmp_buf, "\t ");
-		if (pKey) 
-		{
-			//printf("Converting [%s] of %s", pKey, tmp_buf1 );
+    pKey = strtok(tmp_buf, "\t ");
+    if (pKey) 
+    {
+      //printf("Converting [%s] of %s", pKey, tmp_buf1 );
 
       // Normalizer
       //iNormText.resize(32);
@@ -1621,12 +1621,12 @@ int main(int argc, char* argv[])
         //log to file.
         fprintf(fp_out_s07_normalized_full, "%s", tmp_buf1);
       }
-		}
+    }
     else
     {
       printf("Failed converting:%s", tmp_buf1 );
     }
-	}
+  }
   printf("Total converting Line(%d)....\n", line_no );
 
   fclose(fp_in_s07_optimized_full);
@@ -1635,6 +1635,6 @@ int main(int argc, char* argv[])
   //------------------------------------------------------------------------------------------------
 #endif //_CONVERT_NORMALIZE_
 
-	return 0;
+  return 0;
 }
 
