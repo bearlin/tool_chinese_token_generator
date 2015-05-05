@@ -5,7 +5,9 @@
 #ifndef __XDB_DUMPER_H__
 #define __XDB_DUMPER_H__
 
-class CXdbDumper
+#include "TokenGeneratorChineseConfig.h"
+
+class CXdbDumper : public CTokenGeneratorChineseConfig
 {
 public:
   CXdbDumper();

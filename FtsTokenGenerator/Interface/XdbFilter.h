@@ -5,7 +5,9 @@
 #ifndef __XDB_FILTER_H__
 #define __XDB_FILTER_H__
 
-class CXdbFilter
+#include "TokenGeneratorChineseConfig.h"
+
+class CXdbFilter : public CTokenGeneratorChineseConfig
 {
 public:
   CXdbFilter();
@@ -15,6 +17,12 @@ public:
 
 private:
 
+  bool CollectTokens();
+  bool AddExtraTokens();
+  bool RemoveUnwantTokens();
+  bool AddMissingOneWordTokens();
+  bool RemoveSpecialSuffixTokens();
+  bool RetrieveTokenInfo();
 };
 
 #endif // __XDB_FILTER_H__

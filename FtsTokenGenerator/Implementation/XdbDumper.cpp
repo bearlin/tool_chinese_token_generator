@@ -18,6 +18,9 @@ CXdbDumper::~CXdbDumper()
 bool CXdbDumper::Run()
 {
   std::cout << "Running CXdbDumper" << std::endl;
+  std::cout << "iInputPath:" << iInputPath << std::endl;
+  std::cout << "iOutputPath:" << iOutputPath<< std::endl;
+  std::cout << "iLogPath:" << iLogPath<< std::endl;
 
   return true;
 }
