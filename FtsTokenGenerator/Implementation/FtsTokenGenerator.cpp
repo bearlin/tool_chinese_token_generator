@@ -4,6 +4,7 @@
 
 #include "FtsTokenGenerator.h"
 #include "TokenGeneratorChinese.h"
+#include "TokenGeneratorTai.h"
 #include <iostream>
 
 CFtsTokenGenerator::CFtsTokenGenerator() :
@@ -36,9 +37,14 @@ bool CFtsTokenGenerator::Run()
     CTokenGeneratorChinese chineseTokenGenerator;
     return chineseTokenGenerator.Run();
   }
+  else if (ETai == iLanguageType)
+  {
+    CTokenGeneratorTai taiTokenGenerator;
+    return taiTokenGenerator.Run();
+  }
   else
   {
-    //std::cout << "Unsupported language type:" << iLanguageType << std::endl;
+    std::cout << "Unsupported language type:" << iLanguageType << std::endl;
     return false;
   }
 }

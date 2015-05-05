@@ -8,7 +8,7 @@
 #include "FtsTokenGenerator.h"
 #include <string>
 
-class CTokenGeneratorChinese : public CFtsTokenGenerator
+class CTokenGeneratorChinese
 {
 public:
   CTokenGeneratorChinese();

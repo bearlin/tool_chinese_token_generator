@@ -38,6 +38,12 @@ bool CTokenGeneratorChinese::Run()
   CXdbFilter xdbFilter;
   xdbFilter.Run();
 
+  CXdbGenerator xdbGenerator;
+  xdbGenerator.Run();
+
+  CXdbDumper xdbDumper;
+  xdbDumper.Run();
+
   return true;
 }
 

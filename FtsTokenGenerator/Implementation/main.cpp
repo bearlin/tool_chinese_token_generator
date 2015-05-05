@@ -10,6 +10,7 @@ main()
   std::cout << "start main()" << std::endl;
   CFtsTokenGenerator tokenGenerator;
   tokenGenerator.SetLanguageType(EChinese);
+  //tokenGenerator.SetLanguageType(ETai);
   tokenGenerator.GetLanguageType();
   if (true == tokenGenerator.Run())
   {
