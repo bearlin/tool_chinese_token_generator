@@ -179,6 +179,7 @@ int searchTokenInfo( char *token_content, long node_offset, long node_length, in
   node_info_attr node_ia;
   char szBuff[300];
   int cmp_result;
+  size_t readSize = 0;
 
   unsigned int l_offset, l_len;
   unsigned int r_offset, r_len;
@@ -196,7 +197,9 @@ int searchTokenInfo( char *token_content, long node_offset, long node_length, in
     f_offset = sizeof(xdb_header)+hash_index*sizeof(prime_node);
     //fsetpos(fp_xdb, &f_offset);
     fseek(fp_xdb, f_offset, SEEK_SET);
-    fread(&pr_node, sizeof(prime_node),1,fp_xdb);
+    readSize = fread(&pr_node, 1, sizeof(prime_node), fp_xdb);
+    if (readSize != sizeof(prime_node)*1) {fputs("Reading error 01", stderr); exit(EXIT_FAILURE);}
+
     node_offset = pr_node.offset;
     node_length = pr_node.length;
   }
@@ -206,24 +209,35 @@ int searchTokenInfo( char *token_content, long node_offset, long node_length, in
   //fsetpos(fp_xdb, &f_offset);
   fseek(fp_xdb, f_offset, SEEK_SET);
 
-  fread(&node_ih.l_offset, sizeof(unsigned int), 1, fp_xdb );
-  fread(&node_ih.l_length, sizeof(unsigned int), 1, fp_xdb );
-  fread(&node_ih.r_offset, sizeof(unsigned int), 1, fp_xdb );
-  fread(&node_ih.r_length, sizeof(unsigned int), 1, fp_xdb );
-  fread(&node_ih.k_length, sizeof(unsigned char), 1, fp_xdb );
+  readSize = fread(&node_ih.l_offset, 1, sizeof(unsigned int), fp_xdb );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 02", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&node_ih.l_length, 1, sizeof(unsigned int), fp_xdb );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 03", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&node_ih.r_offset, 1, sizeof(unsigned int), fp_xdb );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 04", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&node_ih.r_length, 1, sizeof(unsigned int), fp_xdb );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 05", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&node_ih.k_length, 1, sizeof(unsigned char), fp_xdb );
+  if (readSize != sizeof(unsigned char)*1) {fputs("Reading error 06", stderr); exit(EXIT_FAILURE);}
 
   memset(szBuff, 0, sizeof(szBuff) );
-  fread(szBuff, 1,node_ih.k_length,fp_xdb);
+  readSize = fread(szBuff, 1, node_ih.k_length, fp_xdb);
+  if (readSize != node_ih.k_length*1) {fputs("Reading error 07", stderr); exit(EXIT_FAILURE);}
 
   cmp_result = strcmp(szBuff, token_content);
 
   if( 0 == cmp_result )
   {
-    fread( &(attr->tf), sizeof(float), 1, fp_xdb );
-    fread( &(attr->idf), sizeof(float), 1, fp_xdb );
-    fread( &(attr->flag), sizeof(unsigned char), 1, fp_xdb );
-    fread( &(attr->attr), sizeof(unsigned char), 3, fp_xdb );
-    //fread(attr, sizeof(node_info_attr),1,fp_xdb);
+    readSize = fread( &(attr->tf), 1, sizeof(float), fp_xdb );
+    if (readSize != sizeof(float)*1) {fputs("Reading error 08", stderr); exit(EXIT_FAILURE);}
+    readSize = fread( &(attr->idf), 1, sizeof(float), fp_xdb );
+    if (readSize != sizeof(float)*1) {fputs("Reading error 09", stderr); exit(EXIT_FAILURE);}
+    readSize = fread( &(attr->flag), 1, sizeof(unsigned char), fp_xdb );
+    if (readSize != sizeof(unsigned char)*1) {fputs("Reading error 10", stderr); exit(EXIT_FAILURE);}
+    readSize = fread( &(attr->attr), sizeof(unsigned char), 3, fp_xdb );
+    if (readSize != sizeof(unsigned char)*3) {fputs("Reading error 11", stderr); exit(EXIT_FAILURE);}
+    //readSize = fread(attr, 1, sizeof(node_info_attr), fp_xdb);
+    //if (readSize != sizeof(node_info_attr)*1) {fputs("Reading error 12", stderr); exit(EXIT_FAILURE);}
     return 0;
   } else if( cmp_result > 0 ) {
     if( (0 == node_ih.l_offset) && (0 == node_ih.l_length) )
@@ -745,6 +759,8 @@ int main(int argc, char* argv[])
   int idx_tmp = 0;
   int idx_max = 0;
 
+  size_t readSize = 0;
+
   // Stage 0: Initializations.
   //------------------------------------------------------------------------------------------------
   printf("Stage 0: Initializations.\n");
@@ -1202,7 +1218,8 @@ int main(int argc, char* argv[])
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
     return -1;
-  fread( &header, sizeof(xdb_header), 1, fp_xdb);
+  readSize = fread( &header, 1, sizeof(xdb_header), fp_xdb);
+  if (readSize != sizeof(xdb_header)*1) {fputs("Reading error 13", stderr); exit(EXIT_FAILURE);}
   
 #if 1
   // Start to parse each token in token_map.
@@ -1400,7 +1417,8 @@ int main(int argc, char* argv[])
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
     return -1;
-  fread( &header, sizeof(xdb_header), 1, fp_xdb);
+  readSize = fread( &header, 1, sizeof(xdb_header), fp_xdb);
+  if (readSize != sizeof(xdb_header)*1) {fputs("Reading error 14", stderr); exit(EXIT_FAILURE);}
   
   file_path = DATA_DIR;
   file_path += OUT_PATH_S06_SUFFIX_FULL;
