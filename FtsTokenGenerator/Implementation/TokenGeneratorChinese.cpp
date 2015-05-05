@@ -25,25 +25,25 @@ bool CTokenGeneratorChinese::Run()
 
   // run xdb_filter, xdb_gen, xdb_dump, ...
   CXdbFilter xdbFilter;
-  xdbFilter.SetInputPath("../config/XdbFilter/TC/input/");
-  xdbFilter.SetOutputPath("../config/XdbFilter/TC/output_ALL//");
-  xdbFilter.SetLogPath("../config/XdbFilter/TC/output_ALL//");
+  xdbFilter.SetInputPath("../config/XdbFilter/");
+  xdbFilter.SetOutputPath("../config/XdbFilter/");
+  xdbFilter.SetLogPath("../config/XdbFilter/");
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
     return false;
 
   //CXdbGenerator xdbGenerator;
-  //xdbGenerator.SetInputPath("../config/xdbGenerator/TC/input/");
-  //xdbGenerator.SetOutputPath("../config/xdbGenerator/TC/output_ALL//");
-  //xdbGenerator.SetLogPath("../config/xdbGenerator/TC/output_ALL//");
+  //xdbGenerator.SetInputPath("../config/xdbGenerator/");
+  //xdbGenerator.SetOutputPath("../config/xdbGenerator/");
+  //xdbGenerator.SetLogPath("../config/xdbGenerator/");
   //runSuccess = xdbGenerator.Run();
   //if (false == runSuccess)
   //  return false;
 
   //CXdbDumper xdbDumper;
-  //xdbDumper.SetInputPath("../config/xdbDumper/TC/input/");
-  //xdbDumper.SetOutputPath("../config/xdbDumper/TC/output_ALL//");
-  //xdbDumper.SetLogPath("../config/xdbDumper/TC/output_ALL//");
+  //xdbDumper.SetInputPath("../config/xdbDumper/");
+  //xdbDumper.SetOutputPath("../config/xdbDumper/");
+  //xdbDumper.SetLogPath("../config/xdbDumper/");
   //runSuccess = xdbDumper.Run();
   //if (false == runSuccess)
   //  return false;
