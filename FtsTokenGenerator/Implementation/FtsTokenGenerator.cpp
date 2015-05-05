@@ -3,41 +3,43 @@
 //
 
 #include "FtsTokenGenerator.h"
+#include "TokenGeneratorChinese.h"
 #include <iostream>
 
 CFtsTokenGenerator::CFtsTokenGenerator() :
   iLanguageType(EChinese)
 {
-  std::cout << "CFtsTokenGenerator: default iLanguageType=" << iLanguageType << std::endl;
+  //std::cout << "CFtsTokenGenerator: default iLanguageType=" << iLanguageType << std::endl;
 }
 
 CFtsTokenGenerator::~CFtsTokenGenerator()
 {
-  std::cout << "~CFtsTokenGenerator" << std::endl;
+  //std::cout << "~CFtsTokenGenerator" << std::endl;
 }
 
 void CFtsTokenGenerator::SetLanguageType(TLanguageType aType)
 {
-  std::cout << "SetLanguageType:" << aType << std::endl;
+  //std::cout << "SetLanguageType:" << aType << std::endl;
   iLanguageType = aType;
 }
 
 TLanguageType CFtsTokenGenerator::GetLanguageType()
 {
-  std::cout << "GetLanguageType:" << iLanguageType << std::endl;
+  //std::cout << "GetLanguageType:" << iLanguageType << std::endl;
   return iLanguageType;
 }
 bool CFtsTokenGenerator::Run()
 {
-  std::cout << "Run with language type=" << iLanguageType << std::endl;
+  //std::cout << "Run with language type=" << iLanguageType << std::endl;
+  if (EChinese == iLanguageType)
+  {
+    CTokenGeneratorChinese chineseTokenGenerator;
+    return chineseTokenGenerator.Run();
+  }
+  else
+  {
+    //std::cout << "Unsupported language type:" << iLanguageType << std::endl;
+    return false;
+  }
 }
 
-main()
-{
-  std::cout << "start main()" << std::endl;
-  CFtsTokenGenerator tokenGenerator;
-  tokenGenerator.SetLanguageType(EChinese);
-  tokenGenerator.GetLanguageType();
-  tokenGenerator.Run();
-  std::cout << "end main()" << std::endl;
-}

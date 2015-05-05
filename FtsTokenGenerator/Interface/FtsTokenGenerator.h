@@ -11,12 +11,12 @@
 class CFtsTokenGenerator : public IFtsTokenGenerator
 {
 public:
-   CFtsTokenGenerator();
-  ~CFtsTokenGenerator();
+  CFtsTokenGenerator();
+  virtual ~CFtsTokenGenerator();
 
   void SetLanguageType(TLanguageType aType);
   TLanguageType GetLanguageType();
-  bool Run();
+  virtual bool Run();
 
 private:
   TLanguageType iLanguageType;
