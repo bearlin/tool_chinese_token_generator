@@ -16,12 +16,7 @@ public:
 
   virtual bool Run();
 
-  void SetInputFilePath(std::string aInputPath);
-  void SetOutputFilePath(std::string aOutputPath);
-
 private:
-  std::string iInputPath;
-  std::string iOutputPath;
 
 };
 

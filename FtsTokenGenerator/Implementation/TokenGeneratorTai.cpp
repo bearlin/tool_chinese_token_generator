@@ -5,9 +5,7 @@
 #include "TokenGeneratorTai.h"
 #include <iostream>
 
-CTokenGeneratorTai::CTokenGeneratorTai() :
-  iInputPath("."),
-  iOutputPath(".")
+CTokenGeneratorTai::CTokenGeneratorTai()
 {
   std::cout << "CTokenGeneratorTai" << std::endl;
 }
@@ -15,16 +13,6 @@ CTokenGeneratorTai::CTokenGeneratorTai() :
 CTokenGeneratorTai::~CTokenGeneratorTai()
 {
   std::cout << "~CTokenGeneratorTai" << std::endl;
-}
-
-void CTokenGeneratorTai::SetInputFilePath(std::string aInputPath)
-{
-  iInputPath = aInputPath;
-}
-
-void CTokenGeneratorTai::SetOutputFilePath(std::string aOutputPath)
-{
-  iOutputPath = aOutputPath;
 }
 
 bool CTokenGeneratorTai::Run()
