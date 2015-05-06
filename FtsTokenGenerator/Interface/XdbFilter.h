@@ -45,66 +45,44 @@
 // Enable this macro will remove all tokens end with "路".
 #define REMOVE_FULL_TOKENS_WITH_SPECIAL_END  //"路"
 
-// Enable this macro will add all AreaNames tokens from file.
-#define TOKENS_ADD_FROM_AREA_NAME_FILE
-
-// Enable this macro will remove all tokens in {TC|SC}\input\_removed_tokens_table.txt.
-#define TOKENS_REMOVE_FROM_FILE
-
 #define MAX_LINE_SIZE (1024)
 
 ////////////////////// FILE PATH /////////////////////////////////////
-#ifdef USE_TC
-#define IN_PATH_S00_SUFFIX_TABLE "input/_ignored_suffix_table_tc_utf8.txt"
-#else //USE_TC
-#define IN_PATH_S00_SUFFIX_TABLE "input/_ignored_suffix_table_sc_utf8.txt"
-#endif //USE_TC
-#define OUT_PATH_S00_SUFFIX_TOK_MAP "output_ALL/s00_log_map_suffix_tokens.txt"
+#define OUT_PATH_S00_SUFFIX_TOK_MAP "s00_log_map_suffix_tokens.txt"
 
-#define OUT_PATH_S01_NOT_CH "output_ALL/s01_log_tokens_not_ch.txt"
-#define OUT_PATH_S01_DUPLICATE "output_ALL/s01_log_tokens_duplicate.txt"
-#define OUT_PATH_S01_MAP_RAW "output_ALL/s01_log_map_raw.txt" //This is also the input file after disabled MAP_INIT.
-#define OUT_PATH_S01_MAP_RELOAD "output_ALL/s01_log_map_raw_reload.txt"
+#define OUT_PATH_S01_NOT_CH "s01_log_tokens_not_ch.txt"
+#define OUT_PATH_S01_DUPLICATE "s01_log_tokens_duplicate.txt"
+#define OUT_PATH_S01_MAP_RAW "s01_log_map_raw.txt" //This is also the input file after disabled MAP_INIT.
+#define OUT_PATH_S01_MAP_RELOAD "s01_log_map_raw_reload.txt"
 
-#define OUT_PATH_S02_MAP_SUFFIX "output_ALL/s02_log_map_plus_suffix_tokens.txt"
-#ifdef TOKENS_ADD_FROM_AREA_NAME_FILE
-#define IN_PATH_S02_AREA_NAME_FILE "input/areas/05_all_area_map02.txt"
-#define OUT_PATH_S02_LOG_AREA_NAME_FILE "output_ALL/s02_log_area_name_file.txt"
-#define OUT_PATH_S02_LOG_MAP_PLUS_AREA_NAME "output_ALL/s02_log_map_plus_area_name_tokens.txt"
-#endif
-#ifdef TOKENS_REMOVE_FROM_FILE
-#define IN_PATH_S02_REMOVE_TOK_FILE "input/_removed_tokens_table.txt"
-#define OUT_PATH_S02_LOG_REMOVE_TOK_FILE "output_ALL/s02_log_remove_tokens.txt"
-#define OUT_PATH_S02_LOG_MAP_AFTER_REMOVE_TOK "output_ALL/s02_log_map_minus_remove_tokens.txt"
-#endif
+#define OUT_PATH_S02_MAP_SUFFIX "s02_log_map_plus_suffix_tokens.txt"
+#define OUT_PATH_S02_LOG_AREA_NAME_FILE "s02_log_area_name_file.txt"
+#define OUT_PATH_S02_LOG_MAP_PLUS_AREA_NAME "s02_log_map_plus_area_name_tokens.txt"
+#define OUT_PATH_S02_LOG_REMOVE_TOK_FILE "s02_log_remove_tokens.txt"
+#define OUT_PATH_S02_LOG_MAP_AFTER_REMOVE_TOK "s02_log_map_minus_remove_tokens.txt"
 
-#define OUT_PATH_S03_MAP_WITH_ONE_WORDS "output_ALL/s03_log_map_plus_one_word_tokens.txt"
-#define OUT_PATH_S03_CH_ONE_WORD "output_ALL/s03_log_map_added_one_word_tokens.txt"
+#define OUT_PATH_S03_MAP_WITH_ONE_WORDS "s03_log_map_plus_one_word_tokens.txt"
+#define OUT_PATH_S03_CH_ONE_WORD "s03_log_map_added_one_word_tokens.txt"
 
-#define OUT_PATH_S04_CH_NOT_FOUND "output_ALL/s04_log_tokens_not_found.txt"
-#define OUT_PATH_S04_CH_PART "output_ALL/s04_log_tokens_part.txt"
-#define OUT_PATH_S04_CH_FULL "output_ALL/s04_log_tokens_full.txt"
+#define OUT_PATH_S04_CH_NOT_FOUND "s04_log_tokens_not_found.txt"
+#define OUT_PATH_S04_CH_PART "s04_log_tokens_part.txt"
+#define OUT_PATH_S04_CH_FULL "s04_log_tokens_full.txt"
 
-#define OUT_PATH_S05_FOUND_SUFFIX "output_ALL/s05_log_tokens_found_suffix_tokens.txt"
-#define OUT_PATH_S05_ADDED_REMOVED_SUFFIX "output_ALL/s05_log_tokens_added_removed_suffix.txt"
-#define OUT_PATH_S05_MAP_OPTIMIZED "output_ALL/s05_log_map_optimized.txt"
+#define OUT_PATH_S05_FOUND_SUFFIX "s05_log_tokens_found_suffix_tokens.txt"
+#define OUT_PATH_S05_ADDED_REMOVED_SUFFIX "s05_log_tokens_added_removed_suffix.txt"
+#define OUT_PATH_S05_MAP_OPTIMIZED "s05_log_map_optimized.txt"
 #ifdef REMOVE_FULL_TOKENS_WITH_SPECIAL_END
-#define OUT_PATH_S05_REMOVED_SPECIAL_END_TOKENS "output_ALL/s05_log_tokens_remove_special_end.txt"
+#define OUT_PATH_S05_REMOVED_SPECIAL_END_TOKENS "s05_log_tokens_remove_special_end.txt"
 #endif
 
-#define OUT_PATH_S06_SUFFIX_NOT_FOUND "output_ALL/s06_log_tokens_not_found.txt"
-#define OUT_PATH_S06_SUFFIX_PART "output_ALL/s06_log_tokens_part.txt"
-#define OUT_PATH_S06_SUFFIX_FULL "output_ALL/s06_log_tokens_full.txt"
+#define OUT_PATH_S06_SUFFIX_NOT_FOUND "s06_log_tokens_not_found.txt"
+#define OUT_PATH_S06_SUFFIX_PART "s06_log_tokens_part.txt"
+#define OUT_PATH_S06_SUFFIX_FULL "s06_log_tokens_full.txt"
 
 #define _CONVERT_NORMALIZE_
 #ifdef _CONVERT_NORMALIZE_
-#ifdef USE_TC
-#define IN_PATH_S07_NORM_MAP     "input/xdb/fts-tc-n.tok"
-#else //USE_TC
-#define IN_PATH_S07_NORM_MAP     "input/xdb/fts-sc-n.tok"
-#endif //USE_TC
-#define OUT_PATH_S07_SUFFIX_FULL_NOR "output_ALL/s07_log_tokens_full_normalized.txt"
-#define OUT_PATH_S08_SUFFIX_FULL_FUZZY "output_ALL/s08_log_tokens_full_fuzzy.txt"
+#define OUT_PATH_S07_SUFFIX_FULL_NOR "s07_log_tokens_full_normalized.txt"
+#define OUT_PATH_S08_SUFFIX_FULL_FUZZY "s08_log_tokens_full_fuzzy.txt"
 #endif //_CONVERT_NORMALIZE_
 ////////////////////// FILE PATH /////////////////////////////////////
 
@@ -116,18 +94,24 @@ public:
 
   bool Run();
 
-  void SetDataDir(std::string aDataDir);
   void SetInputScwsXdb(std::string aInputScwsXdb);
   void SetInputScwsRule(std::string aInputScwsRule);
   void SetInputSourceData(std::string aInputSourceData);
+  void SetInputNormalizeMap(std::string aInputNormalizeMap);
+  void SetInputSpecialSuffixTable(std::string aInputSpecialSuffixTable);
+  void SetInputAreaName(std::string aInputAreaName);
+  void SetInputRemoveToken(std::string aInputRemoveToken);
   std::string GetOutputTokenList();
   std::string GetOutputTokenListNormalized();
   std::string GetOutputTokenListFuzzy();
 
 private:
-  std::string iDataDir;
   std::string iInputScwsXdb;
   std::string iInputScwsRule;
+  std::string iInputNormalizeMap;
+  std::string iInputSpecialSuffixTable;
+  std::string iInputAreaName;
+  std::string iInputRemoveToken;
   std::string iInputSourceData;
   std::string iOutputTokenList;
   std::string iOutputTokenListNormalized;

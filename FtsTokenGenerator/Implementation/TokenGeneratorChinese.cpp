@@ -24,21 +24,25 @@ bool CTokenGeneratorChinese::Run()
   bool runSuccess = false;
 
   // Run XdbFilter, XdbGenerator and XdbDumper...
-#if 0
+#if 1
   CXdbFilter xdbFilter;
-  xdbFilter.SetInputPath("../config/XdbFilter/");
-  xdbFilter.SetOutputPath("../config/XdbFilter/");
-  xdbFilter.SetLogPath("../config/XdbFilter/");
+  xdbFilter.SetInputPath("../config/XdbFilter/TC/input/");
+  xdbFilter.SetOutputPath("../config/XdbFilter/TC/output_ALL/");
+  xdbFilter.SetLogPath("../config/XdbFilter/TC/output_ALL/");
 
   // Set I/O path...
-  xdbFilter.SetDataDir("TC/");
-  xdbFilter.SetInputScwsXdb("input/xdb/dict_cht.utf8.xdb");
-  xdbFilter.SetInputScwsRule("input/xdb/fts-tc-r.tok");
-  //xdbFilter.SetDataDir("SC/");
-  //xdbFilter.SetInputScwsXdb("input/xdb/dict.utf8.xdb");
-  //xdbFilter.SetInputScwsRule("input/xdb/fts-sc-r.tok");
-  //xdbFilter.SetInputSourceData("input/ALL.txt");
-  xdbFilter.SetInputSourceData("input/test.txt");
+  xdbFilter.SetInputScwsXdb("xdb/dict_cht.utf8.xdb");
+  //xdbFilter.SetInputScwsXdb("xdb/dict.utf8.xdb");
+  xdbFilter.SetInputScwsRule("xdb/fts-tc-r.tok");
+  //xdbFilter.SetInputScwsRule("xdb/fts-sc-r.tok");
+  xdbFilter.SetInputNormalizeMap("xdb/fts-tc-n.tok");
+  //xdbFilter.SetInputNormalizeMap("xdb/fts-sc-n.tok");
+  xdbFilter.SetInputSpecialSuffixTable("_ignored_suffix_table_tc_utf8.txt");
+  //xdbFilter.SetInputSpecialSuffixTable("_ignored_suffix_table_sc_utf8.txt");
+  xdbFilter.SetInputAreaName("areas/05_all_area_map02.txt");
+  xdbFilter.SetInputRemoveToken("_removed_tokens_table.txt");
+  //xdbFilter.SetInputSourceData("ALL.txt");
+  xdbFilter.SetInputSourceData("test.txt");
 
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
@@ -49,7 +53,7 @@ bool CTokenGeneratorChinese::Run()
   std::cout << "xdbFilter.GetOutputTokenListFuzzy():" <<xdbFilter.GetOutputTokenListFuzzy()<< std::endl;
 #endif
 
-#if 1
+#if 0
   CXdbGenerator xdbGenerator;
   xdbGenerator.SetInputPath("../config/XdbGenerator/");
   xdbGenerator.SetOutputPath("../config/XdbGenerator/");
