@@ -20,6 +20,24 @@
 #include "xdict.h"
 #include "scws.h"
 
+// Use xdb_filter tool to filter, optimize and generate tokens list according to TomTom Addresses/POIs, steps: 
+// 1. Dump all Addresses/POIs from TomTom map(Taiwan or China).
+// 2. Use xdb_filter tool, xdb_filter will send these Addresses/POIs to SCWS to get basic TomTom tokens list, 
+//    before using SCWS, the .xdb and .ini files used by SCWS need to be adjusted as we want(ex: remove all prefix/suffix in the .ini file).
+// 3. Add one word tokens according to TomTom tokens(see codes around TokenGetOneWord()).
+// 4. Remove/Add TomTom tokens from list according to specific rules(ex: We may remove tokens with '縣','市','鎮','村','鄉','區','特區','園區','新村' suffix), 
+//    and user interactive remove/add tokens can be enabled(see ENABLE_USER_INTERACTIVE_CONTROL).
+// 5. Generate new fuzzy .xdb(by using xdb_gen and xdb_dump tools) and fuzzy map(by using MTC asia branch) for testing.
+
+//[Normalization procedures]
+//[Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
+//[Abandon] step 1: Add/Delete/Update tokens in the original simple_export file and save to another updated simple_export file.
+//step 1: use xdb_filter tool to filter, optimize and generate tt_tokens_list according to TomTom Addresses/POIs.
+//step 2: use xdb_gen tool to generate a xdb(non-fuzzy) from this tt_tokens_list file.
+//step 3: use xdb_dump tool to generate the non-normalized/normalized token files from this non-fuzzy xdb(with the latest fts-{tc|sc}-n.tok file), then merge them to a merge_export file.
+//step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
+// TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
+
 #define MAP_INIT  // To allow xdb_filter starting from reload existent raw map.
 //#define ENABLE_USER_INTERACTIVE_CONTROL // To allow user interactive remove/add tokens.
 #define USE_TC

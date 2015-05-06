@@ -23,7 +23,8 @@ bool CTokenGeneratorChinese::Run()
   //std::cout << "Running CTokenGeneratorChinese" << std::endl;
   bool runSuccess = false;
 
-  // run xdb_filter, xdb_gen, xdb_dump, ...
+  // Run XdbFilter, XdbGenerator and XdbDumper...
+#if 0
   CXdbFilter xdbFilter;
   xdbFilter.SetInputPath("../config/XdbFilter/");
   xdbFilter.SetOutputPath("../config/XdbFilter/");
@@ -31,22 +32,27 @@ bool CTokenGeneratorChinese::Run()
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
     return false;
+#endif
 
-  //CXdbGenerator xdbGenerator;
-  //xdbGenerator.SetInputPath("../config/xdbGenerator/");
-  //xdbGenerator.SetOutputPath("../config/xdbGenerator/");
-  //xdbGenerator.SetLogPath("../config/xdbGenerator/");
-  //runSuccess = xdbGenerator.Run();
-  //if (false == runSuccess)
-  //  return false;
+#if 1
+  CXdbGenerator xdbGenerator;
+  xdbGenerator.SetInputPath("../config/XdbGenerator/");
+  xdbGenerator.SetOutputPath("../config/XdbGenerator/");
+  xdbGenerator.SetLogPath("../config/XdbGenerator/");
+  runSuccess = xdbGenerator.Run();
+  if (false == runSuccess)
+    return false;
+#endif
 
-  //CXdbDumper xdbDumper;
-  //xdbDumper.SetInputPath("../config/xdbDumper/");
-  //xdbDumper.SetOutputPath("../config/xdbDumper/");
-  //xdbDumper.SetLogPath("../config/xdbDumper/");
-  //runSuccess = xdbDumper.Run();
-  //if (false == runSuccess)
-  //  return false;
+#if 0
+  CXdbDumper xdbDumper;
+  xdbDumper.SetInputPath("../config/XdbDumper/");
+  xdbDumper.SetOutputPath("../config/XdbDumper/");
+  xdbDumper.SetLogPath("../config/XdbDumper/");
+  runSuccess = xdbDumper.Run();
+  if (false == runSuccess)
+    return false;
+#endif
 
   return true;
 }

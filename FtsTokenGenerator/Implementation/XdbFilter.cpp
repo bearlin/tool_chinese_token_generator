@@ -4,7 +4,7 @@
 
 #include "XdbFilter.h"
 
-CXdbFilter::CXdbFilter() : 
+CXdbFilter::CXdbFilter() :
   g_mblen_table_utf8 {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

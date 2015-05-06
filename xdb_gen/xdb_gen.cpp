@@ -489,7 +489,7 @@ NEXT:
   fclose(fp);
   return 0;
 }
-#endif
+#endif //_GET_PRIME_
 
 #ifdef _GEN_XDB_
 void write_sort_data_to_xdb(int start, int end, unsigned int node_offset, unsigned int father_offset, int prime, std::vector<node_info>::iterator iter, FILE *fp_xdb )
@@ -910,4 +910,4 @@ int main(int argc, char* argv[])
   fclose(fp);
   return 0;
 }
-#endif
+#endif //_GEN_XDB_
