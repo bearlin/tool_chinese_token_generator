@@ -70,8 +70,7 @@ bool CXdbGenerator::Run()
   long fPos,fTmpPos;
   //fpos_t fPos,fTmpPos;
 
-  file_path = iInputPath+iDataDir;
-  file_path += iInputTokenList;
+  file_path = iInputPath + iInputTokenList;
   fp = fopen(file_path.c_str(), "r");
   if( NULL == fp )
   {
@@ -81,8 +80,7 @@ bool CXdbGenerator::Run()
   printf("fp :%s\n", file_path.c_str());
 
 #ifdef ENABLE_LOG
-  file_path = iOutputPath+iDataDir;
-  file_path += LOG_PATH;
+  file_path = iLogPath + LOG_PATH;
   fp_log = fopen(file_path.c_str(), "w");
   if(NULL == fp_log)
   {
@@ -92,8 +90,7 @@ bool CXdbGenerator::Run()
   }
   printf("fp_log :%s\n", file_path.c_str());
 
-  file_path = iOutputPath+iDataDir;
-  file_path += LOG_REPEAT_PATH;
+  file_path = iLogPath + LOG_REPEAT_PATH;
   fp_log_repeat= fopen(file_path.c_str(), "w");
   if(NULL == fp_log_repeat)
   {
@@ -329,11 +326,6 @@ bool CXdbGenerator::Run()
   return true;
 }
 
-void CXdbGenerator::SetDataDir(std::string aDataDir)
-{
-  iDataDir = aDataDir;
-}
-
 void CXdbGenerator::SetInputTokenList(std::string aInputTokenList)
 {
   iInputTokenList = aInputTokenList;
@@ -346,7 +338,7 @@ void CXdbGenerator::SetOutputXdb(std::string aOutputXdb)
 
 std::string CXdbGenerator::GetOutputXdbPath()
 {
-  return iOutputPath + iDataDir + iOutputXdb;
+  return iOutputPath + iOutputXdb;
 }
 
 int CXdbGenerator::_get_hash_index(unsigned char* key, int hash_base, int hash_prime )

@@ -23,23 +23,8 @@
 //step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
 // TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
 
-#if 1 // traditional Chinese
-#if 1 //step 2: use xdb_gen tool to generate a updated xdb from this updated simple_export file.
 #define LOG_PATH "log(s06_log_tokens_full.txt).txt" 
 #define LOG_REPEAT_PATH "log_repeat(s06_log_tokens_full.txt).txt" 
-#else //step 4: use xdb_gen tool generate a final normalized xdb from this merge_export file.
-#define LOG_PATH "log(merge_export(SILK31).txt).txt" 
-#define LOG_REPEAT_PATH "log_repeat(merge_export(SILK31).txt).txt" 
-#endif
-#else // simplify Chinese
-#if 0 //step 2: use xdb_gen tool to generate a updated xdb from this updated simple_export file.
-#define LOG_PATH "log(s06_log_tokens_full.txt).txt" 
-#define LOG_REPEAT_PATH "log_repeat(s06_log_tokens_full.txt).txt" 
-#else //step 4: use xdb_gen tool generate a final normalized xdb from this merge_export file.
-#define LOG_PATH "log(merge_export(SILK31).txt).txt" 
-#define LOG_REPEAT_PATH "log_repeat(merge_export(SILK31).txt).txt" 
-#endif
-#endif
 
 #define ENABLE_LOG
 
@@ -78,13 +63,11 @@ public:
 
   bool Run();
 
-  void SetDataDir(std::string aDataDir);
   void SetInputTokenList(std::string aInputTokenList);
   void SetOutputXdb(std::string aOutputXdb);
   std::string GetOutputXdbPath();
 
 private:
-  std::string iDataDir;
   std::string iInputTokenList;
   std::string iOutputXdb;
 
