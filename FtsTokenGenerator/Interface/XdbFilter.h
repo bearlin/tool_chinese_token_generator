@@ -116,13 +116,6 @@ public:
 
   bool Run();
 
-  std::string iDataDir;
-  std::string iInputScwsXdb;
-  std::string iInputScwsRule;
-  std::string iInputSourceData;
-  std::string iOutputTokenList;
-  std::string iOutputTokenListNormalized;
-  std::string iOutputTokenListFuzzy;
   void SetInputDataDir(std::string aDataDir);
   void SetInputScwsXdb(std::string aInputScwsXdb);
   void SetInputScwsRule(std::string aInputScwsRule);
@@ -132,6 +125,14 @@ public:
   std::string GetOutputTokenListFuzzy();
 
 private:
+  std::string iDataDir;
+  std::string iInputScwsXdb;
+  std::string iInputScwsRule;
+  std::string iInputSourceData;
+  std::string iOutputTokenList;
+  std::string iOutputTokenListNormalized;
+  std::string iOutputTokenListFuzzy;
+
   char tmp_buf1[MAX_LINE_SIZE];
 
   ////////////////////// Search Node /////////////////////////////////////
