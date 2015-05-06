@@ -116,7 +116,7 @@ public:
 
   bool Run();
 
-  void SetInputDataDir(std::string aDataDir);
+  void SetDataDir(std::string aDataDir);
   void SetInputScwsXdb(std::string aInputScwsXdb);
   void SetInputScwsRule(std::string aInputScwsRule);
   void SetInputSourceData(std::string aInputSourceData);

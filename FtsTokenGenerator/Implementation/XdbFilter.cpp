@@ -91,7 +91,7 @@ bool CXdbFilter::Run()
   return true;
 }
 
-void CXdbFilter::SetInputDataDir(std::string aDataDir)
+void CXdbFilter::SetDataDir(std::string aDataDir)
 {
   iDataDir = aDataDir;
 }
