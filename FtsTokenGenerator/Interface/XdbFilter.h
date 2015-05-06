@@ -151,15 +151,18 @@ private:
     int length;
   } prime_node;
 
+  #define SEARCH_TOKEN_INFO_FOUND       (0)
+  #define SEARCH_TOKEN_INFO_NOT_FOUND   (-1)
+
   int _get_hash_index(unsigned char* key, int hash_base, int hash_prime );
   int searchTokenInfo( char *token_content, long node_offset, long node_length, int hash_base, int hash_prime, node_info_attr *attr, FILE* fp_xdb  );
   ////////////////////// Search Node /////////////////////////////////////
 
-  #define UTF8_CHAR_KIND_NONE    0
-  #define UTF8_CHAR_KIND_1    1  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_2    2  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_3    3  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_4    4  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_NONE    (0)
+  #define UTF8_CHAR_KIND_1    (1)  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_2    (2)  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_3    (3)  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_4    (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
   int getUTF8CharKind(unsigned char x);
   int convUTF8ToUTF16(unsigned char* utf8_code_data, unsigned int* data, int data_length);
   int isAllChineseToken(char* token_content, int token_len);
