@@ -24,7 +24,7 @@ bool CTokenGeneratorChinese::Run()
   bool runSuccess = false;
 
   // Run XdbFilter, XdbGenerator and XdbDumper...
-#if 0
+#if 1
   CXdbFilter xdbFilter;
   xdbFilter.SetInputPath("../config/XdbFilter/TC/input/");
   xdbFilter.SetOutputPath("../config/XdbFilter/TC/output_ALL/");
@@ -48,26 +48,28 @@ bool CTokenGeneratorChinese::Run()
   if (false == runSuccess)
     return false;
 
-  std::cout << "xdbFilter.GetOutputTokenList():" <<xdbFilter.GetOutputTokenList()<< std::endl;
-  std::cout << "xdbFilter.GetOutputTokenListNormalized():" <<xdbFilter.GetOutputTokenListNormalized()<< std::endl;
-  std::cout << "xdbFilter.GetOutputTokenListFuzzy():" <<xdbFilter.GetOutputTokenListFuzzy()<< std::endl;
+  std::cout << "xdbFilter OutputTokenList path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenList()<< std::endl;
+  std::cout << "xdbFilter OutputTokenListNormalized path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListNormalized()<< std::endl;
+  std::cout << "xdbFilter OutputTokenListFuzzy path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListFuzzy()<< std::endl;
 #endif
 
 #if 1
   CXdbGenerator xdbGenerator;
-  xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
+  xdbGenerator.SetInputPath(xdbFilter.GetOutputPath());
+  //xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
   xdbGenerator.SetOutputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
   xdbGenerator.SetLogPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
 
-   // Set I/O path...
-  xdbGenerator.SetInputTokenList("s06_log_tokens_full.txt");
+  // Set I/O path...
+  xdbGenerator.SetInputTokenList(xdbFilter.GetOutputTokenList());
+  //xdbGenerator.SetInputTokenList("s06_log_tokens_full.txt");
   xdbGenerator.SetOutputXdb("xdb(s06_log_tokens_full.txt).xdb");
 
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
     return false;
 
-  std::cout << "xdbGenerator.GetOutputXdbPath():" <<xdbGenerator.GetOutputXdbPath()<< std::endl;
+  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
 #endif
 
 #if 0

@@ -28,6 +28,11 @@ void CTokenGeneratorChineseConfig::SetOutputPath(std::string aOutputPath)
   iOutputPath = aOutputPath;
 }
 
+std::string CTokenGeneratorChineseConfig::GetOutputPath()
+{
+  return iOutputPath;
+}
+
 void CTokenGeneratorChineseConfig::SetLogPath(std::string aLogPath)
 {
   iLogPath = aLogPath;

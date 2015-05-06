@@ -65,7 +65,7 @@ public:
 
   void SetInputTokenList(std::string aInputTokenList);
   void SetOutputXdb(std::string aOutputXdb);
-  std::string GetOutputXdbPath();
+  std::string GetOutputXdb();
 
 private:
   std::string iInputTokenList;

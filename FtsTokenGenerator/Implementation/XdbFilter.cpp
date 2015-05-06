@@ -5,6 +5,9 @@
 #include "XdbFilter.h"
 
 CXdbFilter::CXdbFilter() :
+  iOutputTokenList(OUT_PATH_S06_SUFFIX_FULL),
+  iOutputTokenListNormalized(OUT_PATH_S07_SUFFIX_FULL_NOR),
+  iOutputTokenListFuzzy(OUT_PATH_S08_SUFFIX_FULL_FUZZY),
   g_mblen_table_utf8{
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -811,7 +814,6 @@ bool CXdbFilter::RetrieveTokenInfo()
     return false;
   }
   printf("fp_out_s06_suffix_full:%s\n", file_path.c_str());
-  iOutputTokenList = file_path;
 
   file_path = iLogPath + OUT_PATH_S06_SUFFIX_PART;
   fp_out_s06_suffix_part = fopen(file_path.c_str(), "w");
@@ -959,7 +961,6 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     return false;
   }
   printf("fp_out_s07_normalized_full:%s\n", file_path.c_str());
-  iOutputTokenListNormalized = file_path;
 
   // Start converting.
   iNormText.resize(32);
@@ -1046,9 +1047,8 @@ bool CXdbFilter::MergeToFuzzyTokens()
     return false;
   }
   printf("fp_fuzzy:%s\n", file_path.c_str());
-  iOutputTokenListFuzzy = file_path;
 
-  file_path = GetOutputTokenList();
+  file_path = GetOutputPath() + GetOutputTokenList();
   fp_tokenList = fopen(file_path.c_str(), "r");
   if(NULL == fp_tokenList)
   {
@@ -1057,7 +1057,7 @@ bool CXdbFilter::MergeToFuzzyTokens()
   }
   printf("fp_tokenList:%s\n", file_path.c_str());
 
-  file_path = GetOutputTokenListNormalized();
+  file_path = GetOutputPath() + GetOutputTokenListNormalized();
   fp_tokenListNorm = fopen(file_path.c_str(), "r");
   if(NULL == fp_tokenListNorm)
   {

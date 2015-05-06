@@ -101,7 +101,7 @@ bool CXdbGenerator::Run()
   printf("fp_log_repeat :%s\n", file_path.c_str());
 #endif
 
-  file_path = GetOutputXdbPath();
+  file_path = GetOutputPath() + GetOutputXdb();
   fp_xdb = fopen(file_path.c_str(), "wb");
   if(NULL == fp_xdb)
   {
@@ -270,7 +270,7 @@ bool CXdbGenerator::Run()
     std::sort(nodes[prime_index].begin(), nodes[prime_index].end(), compare_node);
   }
 
-  printf("\n\nWriting XDB to %s  ...............................\n", GetOutputXdbPath().c_str());
+  printf("\n\nWriting XDB to %s  ...............................\n", (GetOutputPath()+GetOutputXdb()).c_str());
   memset(&xdb_h, 0 , sizeof(struct xdb_header));
   memcpy(&xdb_h.tag, XDB_TAGNAME, 3);
   xdb_h.ver = XDB_VERSION;
@@ -336,9 +336,9 @@ void CXdbGenerator::SetOutputXdb(std::string aOutputXdb)
   iOutputXdb = aOutputXdb;
 }
 
-std::string CXdbGenerator::GetOutputXdbPath()
+std::string CXdbGenerator::GetOutputXdb()
 {
-  return iOutputPath + iOutputXdb;
+  return iOutputXdb;
 }
 
 int CXdbGenerator::_get_hash_index(unsigned char* key, int hash_base, int hash_prime )

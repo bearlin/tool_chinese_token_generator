@@ -15,6 +15,7 @@ public:
 
   virtual void SetInputPath(std::string aInputPath);
   virtual void SetOutputPath(std::string aOutputPath);
+  virtual std::string GetOutputPath();
   virtual void SetLogPath(std::string aLogPath);
 
 protected:
