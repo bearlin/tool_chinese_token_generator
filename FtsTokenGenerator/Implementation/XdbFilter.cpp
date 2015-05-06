@@ -83,7 +83,47 @@ bool CXdbFilter::Run()
     return false;
   }
 
+  if (!MergeToFuzzyTokens())
+  {
+    return false;
+  }
+
   return true;
+}
+
+void CXdbFilter::SetInputDataDir(std::string aDataDir)
+{
+  iDataDir = aDataDir;
+}
+
+void CXdbFilter::SetInputScwsXdb(std::string aInputScwsXdb)
+{
+  iInputScwsXdb = aInputScwsXdb;
+}
+
+void CXdbFilter::SetInputScwsRule(std::string aInputScwsRule)
+{
+  iInputScwsRule = aInputScwsRule;
+}
+
+void CXdbFilter::SetInputSourceData(std::string aInputSourceData)
+{
+  iInputSourceData = aInputSourceData;
+}
+
+std::string CXdbFilter::GetOutputTokenList()
+{
+  return iOutputTokenList;
+}
+
+std::string CXdbFilter::GetOutputTokenListNormalized()
+{
+  return iOutputTokenListNormalized;
+}
+
+std::string CXdbFilter::GetOutputTokenListFuzzy()
+{
+  return iOutputTokenListFuzzy;
 }
 
 bool CXdbFilter::Init()
@@ -99,7 +139,7 @@ bool CXdbFilter::Init()
   }
 
   // Log suffix_token_map.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S00_SUFFIX_TOK_MAP;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = suffix_token_map.begin(); it != suffix_token_map.end(); ++it)
@@ -131,7 +171,7 @@ bool CXdbFilter::CollectTokens()
   char line_text[MAX_LINE_SIZE];//,*first_semicolon;
   int text_size;
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S01_NOT_CH;
   fp_s01_not_ch = fopen(file_path.c_str(), "w");
   if (NULL == fp_s01_not_ch)
@@ -141,7 +181,7 @@ bool CXdbFilter::CollectTokens()
   }
   printf("fp_s01_not_ch:%s\n", file_path.c_str());
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S01_DUPLICATE;
   fp_s01_duplicate = fopen(file_path.c_str(), "w");
   if (NULL == fp_s01_duplicate)
@@ -158,16 +198,16 @@ bool CXdbFilter::CollectTokens()
 
   scws_set_charset(s, "utf8");
 
-  file_path = iInputPath+DATA_DIR;
-  file_path += SCWS_XDB_PATH;
+  file_path = iInputPath+iDataDir;
+  file_path += iInputScwsXdb;
   ret = scws_set_dict(s, file_path.c_str(), SCWS_XDICT_XDB);
 
-  file_path = iInputPath+DATA_DIR;
-  file_path += SCWS_RULE_PATH;
+  file_path = iInputPath+iDataDir;
+  file_path += iInputScwsRule;
   scws_set_rule(s, file_path.c_str() );
 
-  file_path = iInputPath+DATA_DIR;
-  file_path += IN_PATH_S01_SRC;
+  file_path = iInputPath+iDataDir;
+  file_path += iInputSourceData;
   printf("input src:%s\n", file_path.c_str());
   fp_s01_raw = fopen(file_path.c_str(), "r");
   if (NULL == fp_s01_raw)
@@ -238,7 +278,7 @@ bool CXdbFilter::CollectTokens()
   printf("Total Parsing Line(%d)....\n", line_no );
 
   // Log token_map.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S01_MAP_RAW;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map.begin(); it != token_map.end(); ++it)
@@ -254,7 +294,7 @@ bool CXdbFilter::CollectTokens()
   printf("Stage 1: Collect token list from \"saved token_map log file\" to token_map.\n");
   
   // Re-load token list from token_map log file.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S01_MAP_RAW;
   printf("Re-load token list from token_map log file:%s\n", file_path.c_str() );
 
@@ -285,7 +325,7 @@ bool CXdbFilter::CollectTokens()
   ifs.close();
 
   // Log reloaded token_map.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S01_MAP_RELOAD;
   printf("Re-load token list:%s\n", file_path.c_str() );
   ofs.open(file_path.c_str(), std::ofstream::out);
@@ -319,7 +359,7 @@ bool CXdbFilter::AddExtraTokens()
   }
 
   // Log  token_map with missing tokens in table _ignored_suffix_table_{tc|sc}_utf8.txt.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S02_MAP_SUFFIX;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map.begin(); it != token_map.end(); ++it)
@@ -337,7 +377,7 @@ bool CXdbFilter::AddExtraTokens()
   printf("Stage 2.1: Add \"AreaName tokens\" from {TC|SC}\\input\\areas\\05_all_area_map02.txt to token_map.\n");
 
   // Load area name token list from file to all_area_map.
-  file_path = iInputPath+DATA_DIR;
+  file_path = iInputPath+iDataDir;
   file_path += IN_PATH_S02_AREA_NAME_FILE;
 
   ifs.open(file_path.c_str(), std::ifstream::in);
@@ -361,7 +401,7 @@ bool CXdbFilter::AddExtraTokens()
   ifs.close();
 
   // Log all_area_map.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S02_LOG_AREA_NAME_FILE;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = all_area_map.begin(); it != all_area_map.end(); ++it)
@@ -383,7 +423,7 @@ bool CXdbFilter::AddExtraTokens()
   }
 
   // Log  token_map with missing tokens in {TC|SC}\input\areas\05_all_area_map02.txt.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S02_LOG_MAP_PLUS_AREA_NAME;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map.begin(); it != token_map.end(); ++it)
@@ -409,7 +449,7 @@ bool CXdbFilter::RemoveUnwantTokens()
     std::map<std::string,int>::iterator unwant_tokens_iter;
     
     // Load unwant token list from file to unwant_tokens_map.
-    file_path = iInputPath+DATA_DIR;
+    file_path = iInputPath+iDataDir;
     file_path += IN_PATH_S02_REMOVE_TOK_FILE;
   
     ifs.open(file_path.c_str(), std::ifstream::in);
@@ -439,7 +479,7 @@ bool CXdbFilter::RemoveUnwantTokens()
     ifs.close();
   
     // Log unwant_tokens_map.
-    file_path = iOutputPath+DATA_DIR;
+    file_path = iOutputPath+iDataDir;
     file_path += OUT_PATH_S02_LOG_REMOVE_TOK_FILE;
     ofs.open(file_path.c_str(), std::ofstream::out);
     for (std::map<std::string,int>::iterator it = unwant_tokens_map.begin(); it != unwant_tokens_map.end(); ++it)
@@ -459,7 +499,7 @@ bool CXdbFilter::RemoveUnwantTokens()
     }
   
     // Log  token_map with missing tokens in {TC|SC}\input\areas\05_unwant_tokens_map02.txt.
-    file_path = iOutputPath+DATA_DIR;
+    file_path = iOutputPath+iDataDir;
     file_path += OUT_PATH_S02_LOG_MAP_AFTER_REMOVE_TOK;
     ofs.open(file_path.c_str(), std::ofstream::out);
     for (std::map<std::string,int>::iterator it = token_map.begin(); it != token_map.end(); ++it)
@@ -486,7 +526,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
   // Add one word tokens from original tokens.
   char tmpWord[6];
   int wordIdx;
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S03_CH_ONE_WORD;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map.begin(); it != token_map.end(); ++it)
@@ -509,7 +549,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
   ofs.close();
 
   // Log token_map_with_one_word.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S03_MAP_WITH_ONE_WORDS;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map_with_one_word.begin(); it != token_map_with_one_word.end(); ++it)
@@ -527,7 +567,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
   FILE *fp_s04_ch_part;
   FILE *fp_s04_ch_not_found;
   
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S04_CH_FULL;
   fp_s04_ch_full = fopen(file_path.c_str(), "w");
   if (NULL == fp_s04_ch_full)
@@ -537,7 +577,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
   }
   printf("fp_s04_ch_full:%s\n", file_path.c_str());
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S04_CH_PART;
   fp_s04_ch_part = fopen(file_path.c_str(), "w");
   if (NULL == fp_s04_ch_part)
@@ -547,7 +587,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
   }
   printf("fp_s04_ch_part:%s\n", file_path.c_str());
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S04_CH_NOT_FOUND;
   fp_s04_ch_not_found = fopen(file_path.c_str(), "w");
   if (NULL == fp_s04_ch_not_found)
@@ -558,8 +598,8 @@ bool CXdbFilter::AddMissingOneWordTokens()
   printf("fp_s04_ch_not_found:%s\n", file_path.c_str());
   
   // get xdb header
-  file_path = iInputPath+DATA_DIR;
-  file_path += SCWS_XDB_PATH;
+  file_path = iInputPath+iDataDir;
+  file_path += iInputScwsXdb;
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
   if (NULL == fp_xdb)
@@ -620,7 +660,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
 #ifdef REMOVE_FULL_TOKENS_WITH_SPECIAL_END
   FILE *fp_out_log_removed_special_end_tok;
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S05_REMOVED_SPECIAL_END_TOKENS;
   fp_out_log_removed_special_end_tok = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_log_removed_special_end_tok)
@@ -631,7 +671,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
   printf("fp_out_log_removed_special_end_tok:%s\n", file_path.c_str());
 #endif
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S05_ADDED_REMOVED_SUFFIX;
   fp_out_ch_parse2_suffix_log = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_ch_parse2_suffix_log)
@@ -643,7 +683,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
   
   MaxSuffixTokenLength = MaxSuffixTokenLengthGet(suffix_token_map);
   
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S05_FOUND_SUFFIX;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map_with_one_word.begin(); it != token_map_with_one_word.end(); ++it)
@@ -744,7 +784,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
   ofs.close();
 
   // Log optimized token_map_opt.
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S05_MAP_OPTIMIZED;
   ofs.open(file_path.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = token_map_opt.begin(); it != token_map_opt.end(); ++it)
@@ -772,15 +812,15 @@ bool CXdbFilter::RetrieveTokenInfo()
   FILE *fp_out_s06_suffix_not_found;
 
    // get xdb header
-  file_path = iInputPath+DATA_DIR;
-  file_path += SCWS_XDB_PATH;
+  file_path = iInputPath+iDataDir;
+  file_path += iInputScwsXdb;
   fp_xdb = fopen(file_path.c_str(), "rb");
   if( NULL == fp_xdb )
     return false;
   readSize = fread( &header, 1, sizeof(xdb_header), fp_xdb);
   if (readSize != sizeof(xdb_header)*1) {fputs("Reading error 14", stderr); exit(EXIT_FAILURE);}
   
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S06_SUFFIX_FULL;
   fp_out_s06_suffix_full = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_s06_suffix_full)
@@ -789,8 +829,9 @@ bool CXdbFilter::RetrieveTokenInfo()
     return false;
   }
   printf("fp_out_s06_suffix_full:%s\n", file_path.c_str());
+  iOutputTokenList = file_path;
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S06_SUFFIX_PART;
   fp_out_s06_suffix_part = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_s06_suffix_part)
@@ -800,7 +841,7 @@ bool CXdbFilter::RetrieveTokenInfo()
   }
   printf("fp_out_s06_suffix_part:%s\n", file_path.c_str());
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S06_SUFFIX_NOT_FOUND;
   fp_out_s06_suffix_not_found = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_s06_suffix_not_found)
@@ -922,7 +963,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   int iEnableHPNormalize = 0;
   std::string iNormText;
 
-  file_path = iInputPath+DATA_DIR;
+  file_path = iInputPath+iDataDir;
   file_path += IN_PATH_S07_NORM_MAP;
   if (!CHomophoneNormalizer_Init(file_path.c_str()))
   {
@@ -935,7 +976,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     iEnableHPNormalize = 1;
   }
   
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S06_SUFFIX_FULL;
   fp_in_s07_optimized_full = fopen(file_path.c_str(), "r");
   if (NULL == fp_in_s07_optimized_full)
@@ -945,7 +986,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   }
   printf("fp_in_s07_optimized_full:%s\n", file_path.c_str());
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = iOutputPath+iDataDir;
   file_path += OUT_PATH_S07_SUFFIX_FULL_NOR;
   fp_out_s07_normalized_full = fopen(file_path.c_str(), "w");
   if (NULL == fp_out_s07_normalized_full)
@@ -954,6 +995,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     return false;
   }
   printf("fp_out_s07_normalized_full:%s\n", file_path.c_str());
+  iOutputTokenListNormalized = file_path;
 
   // Start converting.
   iNormText.resize(32);
@@ -1016,10 +1058,67 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   fclose(fp_out_s07_normalized_full);
 #endif
   //------------------------------------------------------------------------------------------------
+
 #endif //_CONVERT_NORMALIZE_
   return true;
 }
 
+bool CXdbFilter::MergeToFuzzyTokens()
+{
+  std::cout << "MergeToFuzzyTokens" << std::endl;
+#ifdef _CONVERT_NORMALIZE_
+  // Stage 8: Merge TokenList and TokenListNormalized as TokenListFuzzy
+  //------------------------------------------------------------------------------------------------
+  FILE *fp_fuzzy=NULL;
+  FILE *fp_tokenList=NULL;
+  FILE *fp_tokenListNorm=NULL;
+  std::string file_path;
+
+  file_path = iOutputPath+iDataDir;
+  file_path += OUT_PATH_S08_SUFFIX_FULL_FUZZY;
+  fp_fuzzy = fopen(file_path.c_str(), "w");
+  if (NULL == fp_fuzzy)
+  {
+    printf("fp_fuzzy err:%s\n", file_path.c_str());
+    return false;
+  }
+  printf("fp_fuzzy:%s\n", file_path.c_str());
+  iOutputTokenListFuzzy = file_path;
+
+  file_path = GetOutputTokenList();
+  fp_tokenList = fopen(file_path.c_str(), "r");
+  if(NULL == fp_tokenList)
+  {
+    printf("Error open fp_tokenList: %s\n", file_path.c_str());
+    return false;
+  }
+  printf("fp_tokenList:%s\n", file_path.c_str());
+
+  file_path = GetOutputTokenListNormalized();
+  fp_tokenListNorm = fopen(file_path.c_str(), "r");
+  if(NULL == fp_tokenListNorm)
+  {
+    printf("Error open fp_tokenListNorm: %s\n", file_path.c_str());
+    return false;
+  }
+  printf("fp_tokenListNorm:%s\n", file_path.c_str());
+
+  while( NULL != fgets(tmp_buf1, sizeof(tmp_buf1), fp_tokenList) ) 
+  {
+    fputs(tmp_buf1, fp_fuzzy);
+  }
+  fclose(fp_tokenList);
+
+  while( NULL != fgets(tmp_buf1, sizeof(tmp_buf1), fp_tokenListNorm) ) 
+  {
+    fputs(tmp_buf1, fp_fuzzy);
+  }
+  fclose(fp_tokenListNorm);
+  fclose(fp_fuzzy);
+  //------------------------------------------------------------------------------------------------
+#endif //_CONVERT_NORMALIZE_
+  return true;
+}
 ////////////////////// Search Node /////////////////////////////////////
 int CXdbFilter::_get_hash_index(unsigned char* key, int hash_base, int hash_prime )
 {
@@ -1327,7 +1426,7 @@ int CXdbFilter::SuffixTokenMapInit(std::map<std::string,int> &suffix_token_map)
   int line_no = 0;
   int tok_no = 0;
   
-  file_path = iInputPath+DATA_DIR;
+  file_path = iInputPath+iDataDir;
   file_path += IN_PATH_S00_SUFFIX_TABLE;
   fp_table = fopen(file_path.c_str(), "r");
   if(NULL == fp_table)

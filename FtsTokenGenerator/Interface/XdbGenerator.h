@@ -51,36 +51,6 @@
 #endif
 #endif
 
-
-#define ENABLE_LOG
-
-/* constant var define */
-#define  SCWS_WORD_FULL    0x01  // 多字: 整词
-#define  SCWS_WORD_PART    0x02  // 多字: 前词段
-#define  SCWS_WORD_USED    0x04  // 多字: 已使用
-#define  SCWS_WORD_RULE    0x08  // 多字: 自动识别的
-#define  SCWS_WORD_LONG    0x10  // 多字: 短词组成的长词
-
-#define  SCWS_WORD_MALLOCED  0x80  // xdict_query 结果必须调用 free
-
-#define  SCWS_ZFLAG_PUT    0x02  // 单字: 已使用
-#define  SCWS_ZFLAG_N2    0x04  // 单字: 双字名词头
-#define  SCWS_ZFLAG_NR2    0x08  // 单字: 词头且为双字人名
-#define  SCWS_ZFLAG_WHEAD  0x10  // 单字: 词头
-#define  SCWS_ZFLAG_WPART  0x20  // 单字: 词尾或词中
-#define  SCWS_ZFLAG_ENGLISH  0x40  // 单字: 夹在中间的英文
-#define SCWS_ZFLAG_SYMBOL   0x80    // 单字: 符号系列
-#ifndef _GET_PRIME_ 
-#define  SCWS_XDICT_PRIME  0x3ffd  // 词典结构树数：16381
-#else
-#define  SCWS_XDICT_PRIME  30000  // 词典结构树数：30000
-#define CHK_MIN_PRIME 18000//16381
-#define CHK_MAX_PRIME 30000
-#endif
-
-//#define MAX_NODE_COUNT    63
-#define MAX_NODE_COUNT    127
-
 #define ENABLE_LOG
 
 /* constant var define */

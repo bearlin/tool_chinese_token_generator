@@ -55,23 +55,12 @@
 
 ////////////////////// FILE PATH /////////////////////////////////////
 #ifdef USE_TC
-#define DATA_DIR "TC/"
-#define SCWS_XDB_PATH "input/xdb/dict_cht.utf8.xdb"
-#define SCWS_RULE_PATH "input/xdb/fts-tc-r.tok"
-#else //USE_TC
-#define DATA_DIR "SC/"
-#define SCWS_XDB_PATH "input/xdb/dict.utf8.xdb"
-#define SCWS_RULE_PATH "input/xdb/fts-sc-r.tok"
-#endif //USE_TC
-
-#ifdef USE_TC
 #define IN_PATH_S00_SUFFIX_TABLE "input/_ignored_suffix_table_tc_utf8.txt"
 #else //USE_TC
 #define IN_PATH_S00_SUFFIX_TABLE "input/_ignored_suffix_table_sc_utf8.txt"
 #endif //USE_TC
 #define OUT_PATH_S00_SUFFIX_TOK_MAP "output_ALL/s00_log_map_suffix_tokens.txt"
 
-#define IN_PATH_S01_SRC "input/ALL.txt"//"input/ALL.txt"
 #define OUT_PATH_S01_NOT_CH "output_ALL/s01_log_tokens_not_ch.txt"
 #define OUT_PATH_S01_DUPLICATE "output_ALL/s01_log_tokens_duplicate.txt"
 #define OUT_PATH_S01_MAP_RAW "output_ALL/s01_log_map_raw.txt" //This is also the input file after disabled MAP_INIT.
@@ -115,6 +104,7 @@
 #define IN_PATH_S07_NORM_MAP     "input/xdb/fts-sc-n.tok"
 #endif //USE_TC
 #define OUT_PATH_S07_SUFFIX_FULL_NOR "output_ALL/s07_log_tokens_full_normalized.txt"
+#define OUT_PATH_S08_SUFFIX_FULL_FUZZY "output_ALL/s08_log_tokens_full_fuzzy.txt"
 #endif //_CONVERT_NORMALIZE_
 ////////////////////// FILE PATH /////////////////////////////////////
 
@@ -125,6 +115,21 @@ public:
   ~CXdbFilter();
 
   bool Run();
+
+  std::string iDataDir;
+  std::string iInputScwsXdb;
+  std::string iInputScwsRule;
+  std::string iInputSourceData;
+  std::string iOutputTokenList;
+  std::string iOutputTokenListNormalized;
+  std::string iOutputTokenListFuzzy;
+  void SetInputDataDir(std::string aDataDir);
+  void SetInputScwsXdb(std::string aInputScwsXdb);
+  void SetInputScwsRule(std::string aInputScwsRule);
+  void SetInputSourceData(std::string aInputSourceData);
+  std::string GetOutputTokenList();
+  std::string GetOutputTokenListNormalized();
+  std::string GetOutputTokenListFuzzy();
 
 private:
   char tmp_buf1[MAX_LINE_SIZE];
@@ -250,6 +255,7 @@ private:
   bool RemoveSpecialSuffixTokens();
   bool RetrieveTokenInfo();
   bool ConvertToNormalizedTokens();
+  bool MergeToFuzzyTokens();
 };
 
 #endif // __XDB_FILTER_H__
