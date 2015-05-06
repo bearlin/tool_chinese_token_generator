@@ -48,6 +48,7 @@ bool CXdbDumper::Run()
   unsigned int f_offset;
   unsigned int d_offset;
   unsigned int d_length;
+  size_t readSize = 0;
 
 #ifdef _DETAIL_EXPORT_
   file_path = iOutputPath+DATA_DIR;
@@ -156,7 +157,8 @@ bool CXdbDumper::Run()
 #endif //_CONVERT_NORMALIZE_
 
   printf("XDB header size=%ld\n", sizeof(struct xdb_header) );
-  fread(&xdb_header, sizeof(struct xdb_header),1,fd);
+  readSize = fread(&xdb_header, 1, sizeof(struct xdb_header), fd);
+  if (readSize != sizeof(struct xdb_header)*1) {fputs("Reading error 01", stderr); exit(EXIT_FAILURE);}
 
   //printf("unsigned int size=%d\n", sizeof(unsigned int) );
   printf("unsigned base=%d\n", xdb_header.base );
@@ -175,8 +177,10 @@ bool CXdbDumper::Run()
   {
     f_offset = trav_index*8+32;
     fseek(fd, f_offset, SEEK_SET);
-    fread(&d_offset, sizeof(unsigned int), 1, fd );
-    fread(&d_length, sizeof(unsigned int), 1, fd );
+    readSize = fread(&d_offset, 1, sizeof(unsigned int), fd );
+    if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 02", stderr); exit(EXIT_FAILURE);}
+    readSize = fread(&d_length, 1, sizeof(unsigned int), fd );
+    if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 03", stderr); exit(EXIT_FAILURE);}
 
     if( 0 != d_length ) 
     {
@@ -291,26 +295,36 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
   unsigned char key_name[256];
   unsigned char attr[4];
   node_content ct;
+  size_t readSize = 0;
 
   fseek(fd, off, SEEK_SET);
   //r_len = XDB_MAXKLEN+17;
   //if(r_len > len) r_len = len;
-  //fread(buff, r_len, 1, fd);  
+  //readSize = fread(buff, 1, r_len, fd);  
+  //if (readSize != r_len*1) {fputs("Reading error 04", stderr); exit(EXIT_FAILURE);}
 
-  fread(&l_offset, sizeof(unsigned int), 1, fd );
-  fread(&l_len, sizeof(unsigned int), 1, fd );
-  fread(&r_offset, sizeof(unsigned int), 1, fd );
-  fread(&r_len, sizeof(unsigned int), 1, fd );
-  fread(&k_len, sizeof(unsigned char), 1, fd );
+  readSize = fread(&l_offset, 1, sizeof(unsigned int), fd );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 05", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&l_len, 1, sizeof(unsigned int), fd );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 06", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&r_offset, 1, sizeof(unsigned int), fd );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 07", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&r_len, 1, sizeof(unsigned int), fd );
+  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 08", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&k_len, 1, sizeof(unsigned char), fd );
+  if (readSize != sizeof(unsigned char)*1) {fputs("Reading error 09", stderr); exit(EXIT_FAILURE);}
 
   memset(key_name,0, sizeof(key_name));
   //key_name[0] = '\"';
-  //fread(&key_name[0], sizeof(unsigned char), k_len, fd );
-  fread(key_name, sizeof(unsigned char), k_len, fd );
+  //readSize = fread(&key_name[0], sizeof(unsigned char), k_len, fd );
+  //if (readSize != sizeof(unsigned char)*k_len) {fputs("Reading error 10", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(key_name, sizeof(unsigned char), k_len, fd );
+  if (readSize != sizeof(unsigned char)*k_len) {fputs("Reading error 11", stderr); exit(EXIT_FAILURE);}
   //key_name[k_len+1] = '\"';
   //key_name[k_len+2] = '\n';
   //fputs((const char*)key_name, gLog);
-  fread(&ct, sizeof(node_content), 1, fd );
+  readSize = fread(&ct, 1, sizeof(node_content), fd );
+  if (readSize != sizeof(node_content)*1) {fputs("Reading error 12", stderr); exit(EXIT_FAILURE);}
 
   if( (l_offset > 0 ) && (l_len > 0) ) {
     get_record(fd, l_offset, l_len, 1,level+1,(char*)key_name );

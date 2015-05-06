@@ -23,7 +23,7 @@
 //#define _DETAIL_EXPORT_
 
 //_CONVERT_NORMALIZE_ + _XDB_GEN_TOOL_EXPORT_ will output all nodes to normal_export.txt, and its key will be normalized with char_pinyin_normalize_utf8.txt.
-#define _CONVERT_NORMALIZE_
+//#define _CONVERT_NORMALIZE_
 
 //[Normalization procedures]
 //[Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
