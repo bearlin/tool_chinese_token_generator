@@ -25,7 +25,7 @@
 
 #if 1 // traditional Chinese
 #define DATA_DIR "TC/"
-#if 0 //step 2: use xdb_gen tool to generate a updated xdb from this updated simple_export file.
+#if 1 //step 2: use xdb_gen tool to generate a updated xdb from this updated simple_export file.
 #define SRC_PATH "Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/s06_log_tokens_full.txt" 
 #define LOG_PATH "Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/log(s06_log_tokens_full.txt).txt" 
 #define XDB_PATH "Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/xdb(s06_log_tokens_full.txt).xdb" 

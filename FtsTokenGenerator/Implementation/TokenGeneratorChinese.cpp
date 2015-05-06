@@ -34,7 +34,7 @@ bool CTokenGeneratorChinese::Run()
     return false;
 #endif
 
-#if 1
+#if 0
   CXdbGenerator xdbGenerator;
   xdbGenerator.SetInputPath("../config/XdbGenerator/");
   xdbGenerator.SetOutputPath("../config/XdbGenerator/");
@@ -44,7 +44,7 @@ bool CTokenGeneratorChinese::Run()
     return false;
 #endif
 
-#if 0
+#if 1
   CXdbDumper xdbDumper;
   xdbDumper.SetInputPath("../config/XdbDumper/");
   xdbDumper.SetOutputPath("../config/XdbDumper/");
