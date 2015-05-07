@@ -25,12 +25,13 @@ bool CTokenGeneratorChinese::Run()
 
   // Run XdbFilter, XdbGenerator and XdbDumper...
 #if 1
+  // Set In/Out/Log path
   CXdbFilter xdbFilter;
   xdbFilter.SetInputPath("../config/XdbFilter/TC/input/");
   xdbFilter.SetOutputPath("../config/XdbFilter/TC/output_ALL/");
   xdbFilter.SetLogPath("../config/XdbFilter/TC/output_ALL/");
 
-  // Set I/O path...
+  // Set I/O path
   xdbFilter.SetInputScwsXdb("xdb/dict_cht.utf8.xdb");
   //xdbFilter.SetInputScwsXdb("xdb/dict.utf8.xdb");
   xdbFilter.SetInputScwsRule("xdb/fts-tc-r.tok");
@@ -48,37 +49,38 @@ bool CTokenGeneratorChinese::Run()
   if (false == runSuccess)
     return false;
 
+  // Output results token list path
   std::cout << "xdbFilter OutputTokenList path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenList()<< std::endl;
   std::cout << "xdbFilter OutputTokenListNormalized path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListNormalized()<< std::endl;
   std::cout << "xdbFilter OutputTokenListFuzzy path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListFuzzy()<< std::endl;
 #endif
 
 #if 1
-  // Generate non-fuzzy xdb
+  // Set In/Out/Log path
   CXdbGenerator xdbGenerator;
   xdbGenerator.SetInputPath(xdbFilter.GetOutputPath());
   //xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
   xdbGenerator.SetOutputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
   xdbGenerator.SetLogPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
 
-  // Set I/O path...
-  xdbGenerator.SetInputTokenList(xdbFilter.GetOutputTokenList());
-  xdbGenerator.SetOutputXdb("xdb_non_fuzzy.xdb");
-  //xdbGenerator.SetInputTokenList("s06_log_tokens_full.txt");
-  //xdbGenerator.SetOutputXdb("xdb(s06_log_tokens_full.txt).xdb");
-
-  runSuccess = xdbGenerator.Run();
-  if (false == runSuccess)
-    return false;
-
-  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
-
-  // Generate fuzzy xdb
+  // Set I/O path of fuzzy xdb
   xdbGenerator.SetInputTokenList(xdbFilter.GetOutputTokenListFuzzy());
   xdbGenerator.SetOutputXdb("xdb_fuzzy.xdb");
+  //xdbGenerator.SetInputTokenList("s06_log_tokens_full.txt");
+  //xdbGenerator.SetOutputXdb("xdb(s06_log_tokens_full.txt).xdb");
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
     return false;
+  // Output results xdb path
+  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
+
+  // Set I/O path of non-fuzzy xdb
+  xdbGenerator.SetInputTokenList(xdbFilter.GetOutputTokenList());
+  xdbGenerator.SetOutputXdb("xdb_non_fuzzy.xdb");
+  runSuccess = xdbGenerator.Run();
+  if (false == runSuccess)
+    return false;
+  // Output results xdb path
   std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
 #endif
 
