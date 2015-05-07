@@ -56,6 +56,7 @@ bool CTokenGeneratorChinese::Run()
 #endif
 
 #if 1
+  #if 1
   // Set In/Out/Log path
   CXdbGenerator xdbGenerator;
   xdbGenerator.SetInputPath(xdbFilter.GetOutputPath());
@@ -82,6 +83,23 @@ bool CTokenGeneratorChinese::Run()
     return false;
   // Output results xdb path
   std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
+  #else
+  // Test original manually merged fuzzy token list
+  // Set In/Out/Log path
+  CXdbGenerator xdbGenerator;
+  xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
+  xdbGenerator.SetOutputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
+  xdbGenerator.SetLogPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
+
+  // Set I/O path of original manually merged fuzzy token list
+  xdbGenerator.SetInputTokenList("merge_export(SILK31).txt");
+  xdbGenerator.SetOutputXdb("xdb(merge_export(SILK31).txt).xdb");
+  runSuccess = xdbGenerator.Run();
+  if (false == runSuccess)
+    return false;
+  // Output results xdb path
+  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
+  #endif
 #endif
 
 #if 0
