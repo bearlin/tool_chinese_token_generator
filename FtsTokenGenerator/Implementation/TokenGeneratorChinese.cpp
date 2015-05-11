@@ -104,12 +104,21 @@ bool CTokenGeneratorChinese::Run()
 #ifdef ENABLE_XDBDUMPER
   // ============================ CXdbDumper ===========================
   CXdbDumper xdbDumper;
-  xdbDumper.GetConfig().SetInputPath("../config/XdbDumper/");
-  xdbDumper.GetConfig().SetOutputPath("../config/XdbDumper/");
-  xdbDumper.GetConfig().SetLogPath("../config/XdbDumper/");
+  xdbDumper.GetConfig().SetInputPath("../config/XdbDumper/TC/Normalization_20131017_v01_xdb_filter_optimized/");
+  xdbDumper.GetConfig().SetOutputPath("../config/XdbDumper/TC/Normalization_20131017_v01_xdb_filter_optimized/");
+  xdbDumper.GetConfig().SetLogPath("../config/XdbDumper/TC/Normalization_20131017_v01_xdb_filter_optimized/");
+
+  xdbDumper.GetConfig().SetInputScwsXdb("xdb(s06_log_tokens_full.txt).xdb");
+  //xdbDumper.GetConfig().SetInputScwsXdb("xdb/dict.utf8.xdb");
+  xdbDumper.GetConfig().SetInputNormalizeMap("fts-tc-n.tok");
+  //xdbDumper.GetConfig().SetInputNormalizeMap("fts-sc-n.tok");
+
   runSuccess = xdbDumper.Run();
   if (false == runSuccess)
     return false;
+
+  // Output results token list path
+  std::cout << "xdbDumper OutputTokenList path:" << xdbDumper.GetConfig().GetOutputPath() + xdbDumper.GetConfig().GetOutputDumpText()<< std::endl;
   // ===================================================================
 #endif // ENABLE_XDBDUMPER
 

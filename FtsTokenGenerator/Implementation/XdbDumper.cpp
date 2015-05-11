@@ -51,8 +51,7 @@ bool CXdbDumper::Run()
   size_t readSize = 0;
 
 #ifdef _DETAIL_EXPORT_
-  file_path = GetConfig().iOutputPath+DATA_DIR;
-  file_path += DETAIL_EXP_FILE;
+  file_path = GetConfig().iLogPath + DETAIL_EXP_FILE;
   gLogDetail = fopen(file_path.c_str(), "w");
   if (NULL == gLogDetail)
   {
@@ -62,8 +61,8 @@ bool CXdbDumper::Run()
   printf("gLogDetail :%s\n", file_path.c_str());
 #endif
 #ifdef _XDB_GEN_TOOL_EXPORT_
-  file_path = GetConfig().iOutputPath+DATA_DIR;
-  file_path += SIMPLE_EXP_FILE;
+  GetConfig().iOutputDumpText = SIMPLE_EXP_FILE;
+  file_path = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
   gLog = fopen(file_path.c_str(), "w");
   if (NULL == gLog)
   {
@@ -73,8 +72,7 @@ bool CXdbDumper::Run()
   printf("gLog :%s\n", file_path.c_str());
 #endif
 
-  file_path = GetConfig().iInputPath+DATA_DIR;
-  file_path += SRC_XDB_FILE;
+  file_path = GetConfig().iInputPath + GetConfig().iInputScwsXdb;
   fd = fopen(file_path.c_str(),"rb");
   if (NULL == fd)
   {
@@ -90,8 +88,8 @@ bool CXdbDumper::Run()
   int token_idx,szLine_Len;
   char szSrc[4], szDst[4];
 
-  file_path = GetConfig().iOutputPath+DATA_DIR;
-  file_path += NORMAL_EXP_FILE;
+  GetConfig().iOutputDumpText = NORMAL_EXP_FILE;
+  file_path = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
   gNormalizeLog = fopen(file_path.c_str(), "w" ); 
   if (NULL == gNormalizeLog)
   {
@@ -100,8 +98,7 @@ bool CXdbDumper::Run()
   }
   printf("gNormalizeLog :%s\n", file_path.c_str());
 
-  file_path = GetConfig().iInputPath+DATA_DIR;
-  file_path += NORMAL_MAP_FILE;
+  file_path = GetConfig().iInputPath + GetConfig().iInputNormalizeMap;
   normalize_fd = fopen(file_path.c_str(), "r" );
   if (NULL == normalize_fd)
   {
@@ -114,8 +111,7 @@ bool CXdbDumper::Run()
   nor_map.clear();
   nor_repeat_vector.clear();
 
-  file_path = GetConfig().iOutputPath+DATA_DIR;
-  file_path += NORMAL_EXP_REPEAT;
+  file_path = GetConfig().iLogPath + NORMAL_EXP_REPEAT;
   gNormalizeRepeatLog = fopen(file_path.c_str(), "w");
   if (NULL == gNormalizeRepeatLog)
   {

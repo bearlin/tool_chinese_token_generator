@@ -34,39 +34,16 @@
 //step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
 // TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
 
-// TC
-#if 1
-  #define DATA_DIR "TC/"
-  #define SRC_XDB_FILE "Normalization_20131017_v01_xdb_filter_optimized/xdb(s06_log_tokens_full.txt).xdb"
   #ifdef _DETAIL_EXPORT_
-    #define DETAIL_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/detail_export.txt"  // detail export file
+    #define DETAIL_EXP_FILE "detail_export.txt"  // detail export file
   #endif
   #ifdef _XDB_GEN_TOOL_EXPORT_
-    #define SIMPLE_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/simple_export.txt"  // simple export file
+    #define SIMPLE_EXP_FILE "simple_export.txt"  // simple export file
   #endif
   #ifdef _CONVERT_NORMALIZE_
-    //#define NORMAL_MAP_FILE "../char_pinyin_normalize_utf8.txt"  // normalize mapping file
-    #define NORMAL_MAP_FILE "Normalization_20131017_v01_xdb_filter_optimized/fts-tc-n.tok"  // normalize mapping file
-    #define NORMAL_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/normal_export.txt"  // normalize export file
-    #define NORMAL_EXP_REPEAT "Normalization_20131017_v01_xdb_filter_optimized/normal_export_repeat.txt"  // normalize export repeat file
+    #define NORMAL_EXP_FILE "normal_export.txt"  // normalize export file
+    #define NORMAL_EXP_REPEAT "normal_export_repeat.txt"  // normalize export repeat file
   #endif
-#else
-//SC
-  #define DATA_DIR "SC/"
-  #define SRC_XDB_FILE "Normalization_20131017_v01_xdb_filter_optimized/xdb(s06_log_tokens_full.txt).xdb"
-  #ifdef _DETAIL_EXPORT_
-    #define DETAIL_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/detail_export.txt"  // detail export file
-  #endif
-  #ifdef _XDB_GEN_TOOL_EXPORT_
-    #define SIMPLE_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/simple_export.txt"  // simple export file
-  #endif
-  #ifdef _CONVERT_NORMALIZE_
-    //#define NORMAL_MAP_FILE "../char_pinyin_normalize_utf8.txt"  // normalize mapping file
-    #define NORMAL_MAP_FILE "Normalization_20131017_v01_xdb_filter_optimized/fts-sc-n.tok"  // normalize mapping file
-    #define NORMAL_EXP_FILE "Normalization_20131017_v01_xdb_filter_optimized/normal_export.txt"  // normalize export file
-    #define NORMAL_EXP_REPEAT "Normalization_20131017_v01_xdb_filter_optimized/normal_export_repeat.txt"  // normalize export repeat file
-  #endif
-#endif
 
 class CXdbDumper
 {

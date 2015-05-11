@@ -13,6 +13,14 @@ public:
   CXdbDumperConfig();
   ~CXdbDumperConfig();
 
+  void SetInputScwsXdb(std::string aInputScwsXdb);
+  void SetInputNormalizeMap(std::string aInputNormalizeMap);
+  std::string GetOutputDumpText();
+
+  std::string iInputScwsXdb;
+  std::string iInputNormalizeMap;
+  std::string iOutputDumpText;
+
 };
 
 #endif // __XDB_DUMPER_CONFIG_H__
