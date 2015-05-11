@@ -18,22 +18,22 @@ CTokenGeneratorChineseConfig::~CTokenGeneratorChineseConfig()
   //std::cout << "~CTokenGeneratorChineseConfig" << std::endl;
 }
 
-void CTokenGeneratorChineseConfig::SetInputPath(std::string aInputPath)
+void CTokenGeneratorChineseConfig::SetInputPath(const std::string& aInputPath)
 {
   iInputPath = aInputPath;
 }
 
-void CTokenGeneratorChineseConfig::SetOutputPath(std::string aOutputPath)
+void CTokenGeneratorChineseConfig::SetOutputPath(const std::string& aOutputPath)
 {
   iOutputPath = aOutputPath;
 }
 
-std::string CTokenGeneratorChineseConfig::GetOutputPath()
+const std::string& CTokenGeneratorChineseConfig::GetOutputPath() const
 {
   return iOutputPath;
 }
 
-void CTokenGeneratorChineseConfig::SetLogPath(std::string aLogPath)
+void CTokenGeneratorChineseConfig::SetLogPath(const std::string& aLogPath)
 {
   iLogPath = aLogPath;
 }

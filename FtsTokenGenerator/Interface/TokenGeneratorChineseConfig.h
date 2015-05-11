@@ -13,16 +13,15 @@ public:
   CTokenGeneratorChineseConfig();
   virtual ~CTokenGeneratorChineseConfig();
 
-  virtual void SetInputPath(std::string aInputPath);
-  virtual void SetOutputPath(std::string aOutputPath);
-  virtual std::string GetOutputPath();
-  virtual void SetLogPath(std::string aLogPath);
+  virtual void SetInputPath(const std::string& aInputPath);
+  virtual void SetOutputPath(const std::string& aOutputPath);
+  virtual const std::string& GetOutputPath() const;
+  virtual void SetLogPath(const std::string& aLogPath);
 
 protected:
   std::string iInputPath;
   std::string iOutputPath;
   std::string iLogPath;
-
 };
 
 #endif // __TOKEN_GENERATOR_CHINESE_CONFIG_H__
