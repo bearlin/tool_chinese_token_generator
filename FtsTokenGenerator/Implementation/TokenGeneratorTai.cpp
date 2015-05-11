@@ -21,6 +21,7 @@ bool CTokenGeneratorTai::Run()
 
   // run tai tokenizer engine...
   // TODO.
+  std::cout << "CTokenGeneratorTai not support yet!!!" << std::endl;
 
   return true;
 }

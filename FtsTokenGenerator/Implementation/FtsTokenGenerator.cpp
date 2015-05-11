@@ -20,18 +20,15 @@ CFtsTokenGenerator::~CFtsTokenGenerator()
 
 void CFtsTokenGenerator::SetLanguageType(TLanguageType aType)
 {
-  //std::cout << "SetLanguageType:" << aType << std::endl;
   iLanguageType = aType;
 }
 
 TLanguageType CFtsTokenGenerator::GetLanguageType()
 {
-  //std::cout << "GetLanguageType:" << iLanguageType << std::endl;
   return iLanguageType;
 }
 bool CFtsTokenGenerator::Run()
 {
-  //std::cout << "Run with language type=" << iLanguageType << std::endl;
   if (EChinese == iLanguageType)
   {
     CTokenGeneratorChinese chineseTokenGenerator;

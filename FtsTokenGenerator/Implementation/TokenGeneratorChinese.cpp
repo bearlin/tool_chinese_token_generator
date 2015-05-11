@@ -20,12 +20,10 @@ CTokenGeneratorChinese::~CTokenGeneratorChinese()
 
 bool CTokenGeneratorChinese::Run()
 {
-  //std::cout << "Running CTokenGeneratorChinese" << std::endl;
   bool runSuccess = false;
 
-  // Run XdbFilter, XdbGenerator and XdbDumper...
-#if 1
-  // Set In/Out/Log path
+  // ============================ CXdbFilter ============================
+  // Set CXdbFilter In/Out/Log path
   CXdbFilter xdbFilter;
   xdbFilter.SetInputPath("../config/XdbFilter/TC/input/");
   xdbFilter.SetOutputPath("../config/XdbFilter/TC/output_ALL/");
@@ -43,21 +41,23 @@ bool CTokenGeneratorChinese::Run()
   xdbFilter.SetInputAreaName("areas/05_all_area_map02.txt");
   xdbFilter.SetInputRemoveToken("_removed_tokens_table.txt");
   //xdbFilter.SetInputSourceData("ALL.txt");
-  xdbFilter.SetInputSourceData("test.txt");
+  xdbFilter.SetInputSourceData("ALL.txt");
 
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
+  {
+    std::cout << "xdbFilter.Run() error!!!" << std::endl;
     return false;
+  }
 
   // Output results token list path
   std::cout << "xdbFilter OutputTokenList path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenList()<< std::endl;
   std::cout << "xdbFilter OutputTokenListNormalized path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListNormalized()<< std::endl;
   std::cout << "xdbFilter OutputTokenListFuzzy path:" << xdbFilter.GetOutputPath() + xdbFilter.GetOutputTokenListFuzzy()<< std::endl;
-#endif
+  // ====================================================================
 
-#if 1
-  #if 1
-  // Set In/Out/Log path
+  // ============================ CXdbGenerator ============================
+  // Set CXdbGenerator In/Out/Log path
   CXdbGenerator xdbGenerator;
   xdbGenerator.SetInputPath(xdbFilter.GetOutputPath());
   //xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
@@ -71,46 +71,27 @@ bool CTokenGeneratorChinese::Run()
   //xdbGenerator.SetOutputXdb("xdb(s06_log_tokens_full.txt).xdb");
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
+  {
+    std::cout << "xdbGenerator.Run() for fuzzy xdb error!!!" << std::endl;
     return false;
+  }
+
   // Output results xdb path
-  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
+  std::cout << "xdbGenerator fuzzy xdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
 
   // Set I/O path of non-fuzzy xdb
   xdbGenerator.SetInputTokenList(xdbFilter.GetOutputTokenList());
   xdbGenerator.SetOutputXdb("xdb_non_fuzzy.xdb");
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
+  {
+    std::cout << "xdbGenerator.Run() for non-fuzzy xdb error!!!" << std::endl;
     return false;
-  // Output results xdb path
-  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
-  #else
-  // Test original manually merged fuzzy token list
-  // Set In/Out/Log path
-  CXdbGenerator xdbGenerator;
-  xdbGenerator.SetInputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
-  xdbGenerator.SetOutputPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
-  xdbGenerator.SetLogPath("../config/XdbGenerator/TC/Normalization_20131017_v01_xdb_filter_optimized/2_merge_gen/");
+  }
 
-  // Set I/O path of original manually merged fuzzy token list
-  xdbGenerator.SetInputTokenList("merge_export(SILK31).txt");
-  xdbGenerator.SetOutputXdb("xdb(merge_export(SILK31).txt).xdb");
-  runSuccess = xdbGenerator.Run();
-  if (false == runSuccess)
-    return false;
   // Output results xdb path
-  std::cout << "xdbGenerator OutputXdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
-  #endif
-#endif
-
-#if 0
-  CXdbDumper xdbDumper;
-  xdbDumper.SetInputPath("../config/XdbDumper/");
-  xdbDumper.SetOutputPath("../config/XdbDumper/");
-  xdbDumper.SetLogPath("../config/XdbDumper/");
-  runSuccess = xdbDumper.Run();
-  if (false == runSuccess)
-    return false;
-#endif
+  std::cout << "xdbGenerator non-fuzzy xdb path:" <<xdbGenerator.GetOutputPath() + xdbGenerator.GetOutputXdb() << std::endl;
+  // =============================================================
 
   return true;
 }
