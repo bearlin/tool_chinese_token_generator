@@ -2,8 +2,8 @@
 // This file contains the Chinese token generator interface
 //
 
-#ifndef __XDB_GENERATOR_H__
-#define __XDB_GENERATOR_H__
+#ifndef XDB_GENERATOR_H
+#define XDB_GENERATOR_H
 
 #include "XdbGeneratorConfig.h"
 
@@ -29,31 +29,79 @@
 #define ENABLE_LOG
 
 /* constant var define */
-#define  SCWS_WORD_FULL    0x01  // 多字: 整词
-#define  SCWS_WORD_PART    0x02  // 多字: 前词段
-#define  SCWS_WORD_USED    0x04  // 多字: 已使用
-#define  SCWS_WORD_RULE    0x08  // 多字: 自动识别的
-#define  SCWS_WORD_LONG    0x10  // 多字: 短词组成的长词
+#define SCWS_WORD_FULL 0x01
+#define SCWS_WORD_PART 0x02
+#define SCWS_WORD_USED 0x04
+#define SCWS_WORD_RULE 0x08
+#define SCWS_WORD_LONG 0x10
 
-#define  SCWS_WORD_MALLOCED  0x80  // xdict_query 结果必须调用 free
+#define SCWS_WORD_MALLOCED 0x80
 
-#define  SCWS_ZFLAG_PUT    0x02  // 单字: 已使用
-#define  SCWS_ZFLAG_N2    0x04  // 单字: 双字名词头
-#define  SCWS_ZFLAG_NR2    0x08  // 单字: 词头且为双字人名
-#define  SCWS_ZFLAG_WHEAD  0x10  // 单字: 词头
-#define  SCWS_ZFLAG_WPART  0x20  // 单字: 词尾或词中
-#define  SCWS_ZFLAG_ENGLISH  0x40  // 单字: 夹在中间的英文
-#define SCWS_ZFLAG_SYMBOL   0x80    // 单字: 符号系列
-#ifndef _GET_PRIME_ 
-#define  SCWS_XDICT_PRIME  0x3ffd  // 词典结构树数：16381
+#define SCWS_ZFLAG_PUT 0x02
+#define SCWS_ZFLAG_N2 0x04
+#define SCWS_ZFLAG_NR2 0x08
+#define SCWS_ZFLAG_WHEAD 0x10
+#define SCWS_ZFLAG_WPART 0x20
+#define SCWS_ZFLAG_ENGLISH 0x40
+#define SCWS_ZFLAG_SYMBOL 0x80
+
+#ifndef GET_PRIME
+  #define SCWS_XDICT_PRIME 0x3ffd
 #else
-#define  SCWS_XDICT_PRIME  30000  // 词典结构树数：30000
-#define CHK_MIN_PRIME 18000//16381
-#define CHK_MAX_PRIME 30000
-#endif
+  #define SCWS_XDICT_PRIME 30000
+  #define CHK_MIN_PRIME 18000
+  #define CHK_MAX_PRIME 30000
+#endif //GET_PRIME
 
 //#define MAX_NODE_COUNT    63
 #define MAX_NODE_COUNT    127
+
+
+/* constant var define */
+#define XDB_FLOAT_CHECK (3.14)
+#define XDB_TAGNAME "XDB"
+#define XDB_MAXKLEN 0xf0
+#define XDB_VERSION 34      /* version: 3bit+5bit */
+#define XDB_BASE 0xf422f
+//#define XDB_BASE 0xf4232
+
+
+#define NO_FATHER -1
+#define DIR_LEFT 0
+#define DIR_RIGHT 1
+
+/* header struct */
+typedef struct TXdb_header
+{
+  char tag[3];
+  unsigned char ver;
+  int base;
+  int prime;
+  unsigned int fsize;
+  float check;
+  char unused[12];
+}TXdb_header;
+
+typedef struct TNodeInfo
+{
+  int prime_index;
+  int level;
+  int father;
+
+  unsigned int offset;
+  unsigned int length;
+  unsigned int l_offset;
+  unsigned int l_length;
+  unsigned int r_offset;
+  unsigned int r_length;
+  unsigned char k_length;
+  unsigned char k_data[300];
+
+  float tf;
+  float idf;
+  unsigned char flag;
+  char attr[3];
+} TNodeInfo;
 
 class CXdbGenerator
 {
@@ -67,59 +115,15 @@ public:
 private:
   CXdbGeneratorConfig iConfig;
 
-  typedef struct _node_info_
-  {
-    int prime_index;
-    int level;
-    int father;
+  // Length of multibyte character from first byte of Utf8
+  const unsigned char iUTF8MultibyteLengthTable[256];
 
-    unsigned int offset;
-    unsigned int length;
-    unsigned int l_offset;
-    unsigned int l_length;
-    unsigned int r_offset;
-    unsigned int r_length;
-    unsigned char k_length;
-    unsigned char k_data[300];
+  int getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const;
+  static bool compareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2);
+  void generateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir);
 
-    float tf;
-    float idf;
-    unsigned char flag;
-    char attr[3];
-  } node_info;
-
-  /* constant var define */
-  #define  XDB_FLOAT_CHECK    (3.14)
-  #define  XDB_TAGNAME      "XDB"
-  #define  XDB_MAXKLEN      0xf0
-  #define  XDB_VERSION      34      /* version: 3bit+5bit */
-  #define XDB_BASE 0xf422f
-  //#define XDB_BASE 0xf4232
-
-  /* header struct */
-  struct xdb_header
-  {
-    char tag[3];
-    unsigned char ver;
-    int base;
-    int prime;
-    unsigned int fsize;
-    float check;
-    char unused[12];
-  };
-
-  #define NO_FATHER      -1
-  #define DIR_LEFT  0
-  #define DIR_RIGHT 1
-
-  const unsigned char _mblen_table_utf8[256];
-  std::string file_path;
-
-  int _get_hash_index(unsigned char* key, int hash_base, int hash_prime );
-  static bool compare_node(const node_info s1,const node_info s2);
-  void gen_btree_node_index(int start, int end, int father, int level, std::vector<node_info>::iterator iter, int dir );
-  void write_sort_data_to_xdb(int start, int end, unsigned int node_offset, unsigned int father_offset, int prime, std::vector<node_info>::iterator iter, FILE *fp_xdb );
+  void writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb);
 
 };
 
-#endif // __XDB_GENERATOR_H__
+#endif // XDB_GENERATOR_H

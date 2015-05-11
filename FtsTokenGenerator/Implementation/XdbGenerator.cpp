@@ -6,7 +6,7 @@
 #include <iostream>
 
 CXdbGenerator::CXdbGenerator() :
-  _mblen_table_utf8 {
+  iUTF8MultibyteLengthTable {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -39,94 +39,91 @@ bool CXdbGenerator::Run()
   std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
   std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
-  FILE *fp;
-  node_info one_node;
-  std::vector<node_info> nodes[SCWS_XDICT_PRIME];
-  char buf[512];
-  char part[512];
-  char *ptr,*str;
-  const char *delim = " \t\r\n";
-  int c;
-  int found;
-  int line_count = 0;
-  int prime_index = 0;
-  int total_len;
-  int total_terms=0;
-
-  std::string LineOri;
-#ifdef ENABLE_LOG
-  // log usage
-  FILE *fp_log;
-  FILE *fp_log_repeat;
-  char szDbg[1024];
-#endif
-
-  // xdb usage
-  FILE *fp_xdb;
+  TNodeInfo one_node;
+  std::vector<TNodeInfo> nodes[SCWS_XDICT_PRIME];
 
   // XDB related
-  struct xdb_header xdb_h;
+  TXdb_header xdb_h;
   unsigned char *pMem;
   long fPos,fTmpPos;
   //fpos_t fPos,fTmpPos;
 
-  file_path = GetConfig().iInputPath + GetConfig().iInputTokenList;
-  fp = fopen(file_path.c_str(), "r");
-  if( NULL == fp )
+  std::string filePath;
+  filePath =  GetConfig().iInputPath + GetConfig().iInputTokenList;
+
+  FILE *inputTokenListFile = fopen(filePath.c_str(), "r");
+
+  if (inputTokenListFile == NULL)
   {
-    printf("fp err:%s\n", file_path.c_str());
+    printf("[ERROR] Unable to open input token list file :%s to read.\n", filePath.c_str());
     return false;
   }
-  printf("fp :%s\n", file_path.c_str());
+
+  printf("Input token list file :%s is opened.\n", filePath.c_str());
 
 #ifdef ENABLE_LOG
-  file_path = GetConfig().iLogPath + LOG_PATH;
-  fp_log = fopen(file_path.c_str(), "w");
-  if(NULL == fp_log)
+  filePath = GetConfig().iLogPath + LOG_PATH;
+  FILE *logFile = fopen(filePath.c_str(), "w");
+  if (logFile == NULL)
   {
-    fclose(fp);
-    printf("fp_log err:%s\n", file_path.c_str());
+    fclose(inputTokenListFile);
+    printf("[ERROR] Unable to create log file :%s\n", filePath.c_str());
     return false;
   }
-  printf("fp_log :%s\n", file_path.c_str());
+  printf("Log file :%s is created.\n", filePath.c_str());
 
-  file_path = GetConfig().iLogPath + LOG_REPEAT_PATH;
-  fp_log_repeat= fopen(file_path.c_str(), "w");
-  if(NULL == fp_log_repeat)
+  filePath = GetConfig().iLogPath + LOG_REPEAT_PATH;
+  FILE *logRepeatPathFile = fopen(filePath.c_str(), "w");
+
+  if (logRepeatPathFile == NULL)
   {
-    fclose(fp);
-    printf("fp_log_repeat err:%s\n", file_path.c_str());
+    fclose(inputTokenListFile);
+    fclose(logFile);
+    printf("[ERROR]Unable to create log repeat path file :%s\n", filePath.c_str());
     return false;
   }
-  printf("fp_log_repeat :%s\n", file_path.c_str());
+  printf("Log repeat path file :%s is created.\n", filePath.c_str());
 #endif
 
-  file_path = GetConfig().GetOutputPath() + GetConfig().GetOutputXdb();
-  fp_xdb = fopen(file_path.c_str(), "wb");
-  if(NULL == fp_xdb)
+  filePath = GetConfig().GetOutputPath() + GetConfig().GetOutputXdb();
+  // xdb usage
+  FILE *xdbFile = fopen(filePath.c_str(), "wb");
+  if (xdbFile == NULL)
   {
-    fclose(fp);
-#ifdef ENABLE_LOG
-    fclose(fp_log);
-#endif
-    printf("fp_xdb err:%s\n", file_path.c_str());
+    fclose(inputTokenListFile);
+
+    #ifdef ENABLE_LOG
+      fclose(logFile);
+      fclose(logRepeatPathFile);
+    #endif
+
+    printf("[ERROR]Unable to create xdb file :%s\n", filePath.c_str());
     return false;
   }
-  printf("fp_xdb :%s\n", file_path.c_str());
+  printf("xdb file :%s is create\n", filePath.c_str());
 
-  while (fgets(buf, sizeof(buf)-1, fp) != NULL)
+
+  int lineCount = 0;
+  int primeIndex = 0;
+
+  char buf[512];
+  while (fgets(buf, sizeof(buf)-1, inputTokenListFile) != NULL)
   {
-    printf("Read line %d\n", line_count++);
-    LineOri = buf;
-    memset(&one_node,0, sizeof(node_info) );
+    printf("Read line %d\n", lineCount++);
+    std::string line(buf);
+
+    memset(&one_node,0, sizeof(TNodeInfo));
 
     // <word>\t<tf>\t<idf>\t<attr>\n
-    if (buf[0] == ';' || buf[0] == '#')
+    if ((buf[0] == ';') || (buf[0] == '#'))
+    {
       continue;
+    }
 
-    str = strtok(buf, delim);
+    const char* delim = " \t\r\n";
+    char* str = strtok(buf, delim);
     if (str == NULL) continue;
-    c = strlen(str);
+    int length = strlen(str);
     
     // init the word
     do
@@ -137,7 +134,7 @@ bool CXdbGenerator::Run()
       //one_node.attr[0] = '@';
       //one_node.attr[1] = '\0';
 
-
+      char* ptr = NULL;
       if (!(ptr = strtok(NULL, delim))) break;
       one_node.tf = (float) atof(ptr);
 
@@ -160,216 +157,224 @@ bool CXdbGenerator::Run()
     //Skip partial tokens from the raw input file..
     if (!(one_node.flag & SCWS_WORD_FULL))
     {
-      printf("skip_part:%s", LineOri.c_str());
+      printf("skip_part:%s", line.c_str());
       continue;
     }
     
     // save the word
-    prime_index = _get_hash_index((unsigned char*)str, XDB_BASE, SCWS_XDICT_PRIME  );
+    primeIndex = getHashIndex((unsigned char*)str, XDB_BASE, SCWS_XDICT_PRIME  );
 
-    found = 0;
-    for (std::vector<node_info>::iterator iter = nodes[prime_index].begin(); (iter != nodes[prime_index].end()) && (0 == found) ; ++iter) 
+    int found = 0;
+    for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); (iter != nodes[primeIndex].end()) && (found == 0) ; ++iter)
     {
-      if( 0 == strcmp(str, (const char*)iter->k_data) ) 
+      if (strcmp(str, (const char*)iter->k_data) == 0)
       {
         found = 1;
-      #if 1
-        #ifdef ENABLE_LOG
-        fprintf(fp_log_repeat, "found existed node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
-        fprintf(fp_log_repeat, "new node[%s\t%f\t%f\t%d\t%s]\n",str, one_node.tf, one_node.idf, one_node.flag, one_node.attr);
-        #endif
+        #if 1
+          #ifdef ENABLE_LOG
+            fprintf(logRepeatPathFile, "found existed node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
+            fprintf(logRepeatPathFile, "new node[%s\t%f\t%f\t%d\t%s]\n",str, one_node.tf, one_node.idf, one_node.flag, one_node.attr);
+          #endif
       
-        // Update as max(tf, idf).
-        if (one_node.tf > iter->tf)
+          // Update as max(tf, idf).
+          if (one_node.tf > iter->tf)
+            iter->tf = one_node.tf;
+          if (one_node.idf > iter->idf)
+            iter->idf = one_node.idf;
+
+          iter->flag |= SCWS_WORD_FULL;
+
+          // Use last attr[].
+          strcpy(iter->attr, one_node.attr);
+          #ifdef ENABLE_LOG
+            fprintf(logRepeatPathFile, "updated node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
+          #endif
+        #else //#if 1
           iter->tf = one_node.tf;
-        if (one_node.idf > iter->idf)
           iter->idf = one_node.idf;
-
-        iter->flag |= SCWS_WORD_FULL;
-
-        // Use last attr[].
-        strcpy(iter->attr, one_node.attr);
-        #ifdef ENABLE_LOG
-        fprintf(fp_log_repeat, "updated node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
-        #endif
-      #else //#if 1
-        iter->tf = one_node.tf;
-        iter->idf = one_node.idf;
-        iter->flag |= SCWS_WORD_FULL;
-        strcpy(iter->attr, one_node.attr);
-      #endif //#if 1
+          iter->flag |= SCWS_WORD_FULL;
+          strcpy(iter->attr, one_node.attr);
+        #endif //#if 1
       }
     }
 
-    if( 0 == found ) 
+    if (found ==0)
     {
-      one_node.prime_index = prime_index;
-      one_node.k_length = c;
+      one_node.prime_index = primeIndex;
+      one_node.k_length = length;
       strcpy((char*)one_node.k_data, str);
-      nodes[prime_index].push_back(one_node);
+      nodes[primeIndex].push_back(one_node);
     }
 
-#if 1
     // Generate partial tokens for this raw token.
     /* parse the part */    
-    total_len = _mblen_table_utf8[(unsigned char)(str[0])];
+    int totalLength = iUTF8MultibyteLengthTable[(unsigned char)(str[0])];
     while (1)
     {
-      total_len += _mblen_table_utf8[(unsigned char)(str[total_len])];
-      if (total_len >= c)
+      totalLength += iUTF8MultibyteLengthTable[(unsigned char)(str[totalLength])];
+      if (totalLength >= length)
+      {
         break;
+      }
 
-      memset(part,0,sizeof(part));
-      strncpy(part, str, total_len);
-      prime_index = _get_hash_index((unsigned char*)part, XDB_BASE, SCWS_XDICT_PRIME  );
+      char part[512] = {0};
+      strncpy(part, str, totalLength);
+      primeIndex = getHashIndex((unsigned char*)part, XDB_BASE, SCWS_XDICT_PRIME  );
 
       found = 0;
-      for (std::vector<node_info>::iterator iter = nodes[prime_index].begin(); (iter != nodes[prime_index].end()) && (0 == found) ; ++iter) {
-        if( 0 == strcmp(part, (const char*)iter->k_data) ) {
+      for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); (iter != nodes[primeIndex].end()) && (0 == found) ; ++iter)
+      {
+        if (strcmp(part, (const char*)iter->k_data) == 0)
+        {
           found = 1;
           iter->flag |= SCWS_WORD_PART;
         }
       }
 
-      if( 0 == found ) {
+      if (found == 0)
+      {
         memset(&one_node,0,sizeof(one_node));
-        one_node.prime_index = prime_index;
-        one_node.k_length = total_len;
+        one_node.prime_index = primeIndex;
+        one_node.k_length = totalLength;
         one_node.flag = SCWS_WORD_PART;
         //one_node.flag = SCWS_WORD_FULL;
         strcpy((char*)one_node.k_data, part);
-        nodes[prime_index].push_back(one_node);
+        nodes[primeIndex].push_back(one_node);
       }
     }
-#endif
   }
 
   printf("Validation checking(Phase1).................................................\n");
 
-  for(prime_index=0; prime_index < SCWS_XDICT_PRIME; prime_index++ ) {
-    if( nodes[prime_index].size() > MAX_NODE_COUNT ) {
-        printf("PRIME[%d] illegal!!!  Count=%ld.\n", prime_index, nodes[prime_index].size() );
+  for (primeIndex=0; primeIndex < SCWS_XDICT_PRIME; primeIndex++)
+  {
+    if( nodes[primeIndex].size() > MAX_NODE_COUNT )
+    {
+        printf("PRIME[%d] illegal!!!  Count=%ld.\n", primeIndex, nodes[primeIndex].size());
     }
   }
 
   printf("Validation checking.................................................\n");
 
-  for(prime_index=0; prime_index < SCWS_XDICT_PRIME; prime_index++ ) {
-    if( nodes[prime_index].size() > MAX_NODE_COUNT ) {
-      fclose(fp_xdb);
-      fclose(fp);
-        printf("PRIME[%d] illegal!!!  Count=%ld.\n", prime_index, nodes[prime_index].size() );
+  for (primeIndex = 0; primeIndex < SCWS_XDICT_PRIME; primeIndex++)
+  {
+    if (nodes[primeIndex].size() > MAX_NODE_COUNT)
+    {
+      fclose(xdbFile);
+      fclose(inputTokenListFile);
+      printf("PRIME[%d] illegal!!!  Count=%ld.\n", primeIndex, nodes[primeIndex].size());
       return -1;
     }
   }
 
-
   printf("Sorting.................................................\n");
 
-  for(prime_index=0; prime_index < SCWS_XDICT_PRIME; prime_index++ ) {
-    std::sort(nodes[prime_index].begin(), nodes[prime_index].end(), compare_node);
+  for(primeIndex = 0; primeIndex < SCWS_XDICT_PRIME; primeIndex++ )
+  {
+    std::sort(nodes[primeIndex].begin(), nodes[primeIndex].end(), compareNode);
   }
 
   printf("\n\nWriting XDB to %s  ...............................\n", (GetConfig().GetOutputPath()+GetConfig().GetOutputXdb()).c_str());
-  memset(&xdb_h, 0 , sizeof(struct xdb_header));
+  memset(&xdb_h, 0 , sizeof(TXdb_header));
   memcpy(&xdb_h.tag, XDB_TAGNAME, 3);
   xdb_h.ver = XDB_VERSION;
   xdb_h.prime = SCWS_XDICT_PRIME;
   xdb_h.base = XDB_BASE;
-  xdb_h.fsize = sizeof(struct xdb_header)+xdb_h.prime*8;
+  xdb_h.fsize = sizeof(TXdb_header)+xdb_h.prime*8;
   xdb_h.check = (float)XDB_FLOAT_CHECK;
 
-  fseek(fp_xdb, 0, SEEK_SET);
-  fwrite( &xdb_h, sizeof(xdb_h), 1, fp_xdb );
+  fseek(xdbFile, 0, SEEK_SET);
+  fwrite(&xdb_h, sizeof(xdb_h), 1, xdbFile);
 
   pMem = (unsigned char*)malloc(xdb_h.prime*8);
   memset(pMem, 0 , xdb_h.prime*8);
-  fwrite( pMem, sizeof(unsigned char), xdb_h.prime*8, fp_xdb );
+  fwrite(pMem, sizeof(unsigned char), xdb_h.prime*8, xdbFile);
   free(pMem);
 
-  for(prime_index=0; prime_index < SCWS_XDICT_PRIME; prime_index++ ) {
+  for (primeIndex = 0; primeIndex < SCWS_XDICT_PRIME; primeIndex++ )
+  {
     // if no element in the list, move to next one.
-    if( 0 == nodes[prime_index].size() )
+    if (nodes[primeIndex].size() == 0)
+    {
       continue;
+    }
 
 #ifdef ENABLE_LOG
     int iter_index = 0;
     //if( 0 == nodes[prime_index].size() % 2 ) //print tree only with odd node size.
     {
-      fprintf(fp_log, "===========================\n");
-      for (std::vector<node_info>::iterator iter = nodes[prime_index].begin(); (iter != nodes[prime_index].end()); ++iter)
-        fprintf(fp_log, "SORT[Prime:%d][%d]%s\n", prime_index, iter_index++, iter->k_data);
+      fprintf(logFile, "===========================\n");
+      for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); (iter != nodes[primeIndex].end()); ++iter)
+      {
+        fprintf(logFile, "SORT[Prime:%d][%d]%s\n", primeIndex, iter_index++, iter->k_data);
+      }
     }
 #endif
 
-    //fgetpos(fp_xdb , &fPos);  // save current position
-    fPos=ftell(fp_xdb);// save current position
-    write_sort_data_to_xdb(0, nodes[prime_index].size()-1, fPos, NO_FATHER, prime_index, nodes[prime_index].begin(), fp_xdb );
+    fPos=ftell(xdbFile);// save current position
+    writeSortedDataToXdb(0, nodes[primeIndex].size()-1, fPos, NO_FATHER, primeIndex, nodes[primeIndex].begin(), xdbFile);
   }
 
   // update size
-  fseek(fp_xdb, 0L, SEEK_END);
-  xdb_h.fsize = ftell(fp_xdb);
-  fseek(fp_xdb, 0, SEEK_SET);
-  fwrite( &xdb_h, sizeof(xdb_h), 1, fp_xdb );
+  fseek(xdbFile, 0L, SEEK_END);
+  xdb_h.fsize = ftell(xdbFile);
+  fseek(xdbFile, 0, SEEK_SET);
+  fwrite(&xdb_h, sizeof(xdb_h), 1, xdbFile);
 
 #ifdef ENABLE_LOG
-  sprintf(szDbg, "Total_Amount=%d \n", total_terms );
-  fputs(szDbg,fp_log);
-  fclose(fp_log);
-  fclose(fp_log_repeat);
+  fclose(logFile);
+  fclose(logRepeatPathFile);
 #endif
 
-  fclose(fp_xdb);
-  fclose(fp);
+  fclose(xdbFile);
+  fclose(inputTokenListFile);
 
   return true;
 }
 
 CXdbGeneratorConfig& CXdbGenerator::GetConfig()
-{ 
+{
   return iConfig;
 }
 
-int CXdbGenerator::_get_hash_index(unsigned char* key, int hash_base, int hash_prime )
+ int CXdbGenerator::getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const
 {
-  int l = strlen((char*)key);
-  int h = hash_base;
-  while (l--)
+  int length = strlen((char*)aKey);
+
+  while (length--)
   {
-    h += (int)(h << 5);
-    h ^= key[l];
-    h &= 0x7fffffff;
+    aHashBase += (int)(aHashBase << 5);
+    aHashBase ^= aKey[length];
+    aHashBase &= 0x7fffffff;
   }
 
-  return (h % hash_prime);
+  return (aHashBase % aHashPrime);
 }
-
-bool CXdbGenerator::compare_node(const node_info s1,const node_info s2)
+bool CXdbGenerator::compareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2)
 {
-   int ret = strcmp( (const char*)s1.k_data, (const char*)s2.k_data );
+   int ret = strcmp((const char*)aNodeInfo1.k_data, (const char*)aNodeInfo2.k_data);
    return ( ret < 0);
 }
 
-void CXdbGenerator::gen_btree_node_index(int start, int end, int father, int level, std::vector<node_info>::iterator iter, int dir )
+void CXdbGenerator::generateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir)
 {
-  int diff = end-start;
+  int diff = aEnd - aStart;
   int avg = diff/2;
-  int mid_index = start+avg;
+  int mid_index = aStart + avg;
 
   // Leaf node
-  if( start == end ) {
-    iter[mid_index-1].level = level;
-    iter[mid_index-1].father = father;
+  if( aStart == aEnd ) {
+    aIter[mid_index-1].level = aLevel;
+    aIter[mid_index-1].father = aFather;
 
     // update father node
-    if( father > 0 ) {
-      if( DIR_LEFT == dir ) {
-        iter[father-1].l_offset = iter[start-1].offset;
-        iter[father-1].l_length = iter[start-1].length;
+    if( aFather > 0 ) {
+      if( DIR_LEFT == aDir ) {
+        aIter[aFather-1].l_offset = aIter[aStart-1].offset;
+        aIter[aFather-1].l_length = aIter[aStart-1].length;
       } else {
-        iter[father-1].r_offset = iter[start-1].offset;
-        iter[father-1].r_length = iter[start-1].length;
+        aIter[aFather-1].r_offset = aIter[aStart-1].offset;
+        aIter[aFather-1].r_length = aIter[aStart-1].length;
       }
     }
     return;
@@ -377,127 +382,126 @@ void CXdbGenerator::gen_btree_node_index(int start, int end, int father, int lev
 
   if( 1 == diff )  // even
   {
-    if( NO_FATHER != father ) {
+    if( NO_FATHER != aFather ) {
       // update father node
-      if( DIR_LEFT == dir ) {
-        iter[father-1].l_offset = iter[start-1].offset;
-        iter[father-1].l_length = iter[start-1].length;
+      if( DIR_LEFT == aDir ) {
+        aIter[aFather-1].l_offset = aIter[aStart-1].offset;
+        aIter[aFather-1].l_length = aIter[aStart-1].length;
       } else {
-        iter[father-1].r_offset = iter[start-1].offset;
-        iter[father-1].r_length = iter[start-1].length;
+        aIter[aFather-1].r_offset = aIter[aStart-1].offset;
+        aIter[aFather-1].r_length = aIter[aStart-1].length;
       }
     }
 
-    iter[start-1].level = level;
-    iter[start-1].father = father;
+    aIter[aStart-1].level = aLevel;
+    aIter[aStart-1].father = aFather;
     
-    return gen_btree_node_index( end, end, start, level+1,iter, DIR_RIGHT );
+    return generateBtreeNodeIndex( aEnd, aEnd, aStart, aLevel+1, aIter, DIR_RIGHT );
   } else {
      // printf("Level[%d] Index=%d father=%d Dir=%c\n", level, mid_index, father, (DIR_LEFT == dir) ? 'L':'R' );
     // Node
-    iter[mid_index-1].level = level;
-    iter[mid_index-1].father = father;
+    aIter[mid_index-1].level = aLevel;
+    aIter[mid_index-1].father = aFather;
 
-    if( NO_FATHER != father ) {
-      if( DIR_LEFT == dir ) {
-        iter[father-1].l_offset = iter[mid_index-1].offset;
-        iter[father-1].l_length = iter[mid_index-1].length;
+    if( NO_FATHER != aFather ) {
+      if( DIR_LEFT == aDir ) {
+        aIter[aFather-1].l_offset = aIter[mid_index-1].offset;
+        aIter[aFather-1].l_length = aIter[mid_index-1].length;
       } else {
-        iter[father-1].r_offset = iter[mid_index-1].offset;
-        iter[father-1].r_length = iter[mid_index-1].length;
+        aIter[aFather-1].r_offset = aIter[mid_index-1].offset;
+        aIter[aFather-1].r_length = aIter[mid_index-1].length;
       }
     }
   }
 
   // travel left
-  gen_btree_node_index( start, mid_index-1, mid_index, level+1,iter, DIR_LEFT );
+  generateBtreeNodeIndex( aStart, mid_index-1, mid_index, aLevel+1, aIter, DIR_LEFT );
 
   // travel left+1
-  gen_btree_node_index( mid_index+1, end, mid_index, level+1,iter, DIR_RIGHT );
+  generateBtreeNodeIndex( mid_index+1, aEnd, mid_index, aLevel+1, aIter, DIR_RIGHT );
 }
 
-void CXdbGenerator::write_sort_data_to_xdb(int start, int end, unsigned int node_offset, unsigned int father_offset, int prime, std::vector<node_info>::iterator iter, FILE *fp_xdb )
+void CXdbGenerator::writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb)
 {
-  int count;
-  int mid; 
   unsigned int tmpItemSize;
   //fpos_t fPos,fTmpPos;
-  long fPos,fTmpPos;
-  int newEnd, newStart, newMid;
+  long fPos;
+  long fTmpPos;
+  int newEnd;
+  int newStart;
+  int newMid;
+  int count = aEnd - aStart + 1;
+  int mid = aStart + (count+1)/2-1;
 
-  count = (end-start)+1;
+  aIter[mid].offset = aNodeOffset;
+  aIter[mid].length = 17+aIter[mid].k_length+12;
 
-  /*if( (2 == count) && (NO_FATHER == father_offset) )
-    mid = start+1;
-  else*/
-    mid = start+(count+1)/2-1;
-
-  iter[mid].offset = node_offset;
-  iter[mid].length = 17+iter[mid].k_length+12;
-
-  if( NO_FATHER == father_offset ) {
-    fTmpPos = 32+8*prime;
+  if (NO_FATHER == aFatherOffset)
+  {
+    fTmpPos = 32 + 8 * aPrime;
     //fsetpos(fp_xdb , &fTmpPos );  // move to prime info
-    fseek(fp_xdb, fTmpPos, SEEK_SET);// move to prime info
-    fwrite( &iter[mid].offset, sizeof(unsigned int), 1, fp_xdb);
-    fwrite( &iter[mid].length, sizeof(unsigned int), 1, fp_xdb);    
+    fseek(aFileXdb, fTmpPos, SEEK_SET);// move to prime info
+    fwrite( &aIter[mid].offset, sizeof(unsigned int), 1, aFileXdb);
+    fwrite( &aIter[mid].length, sizeof(unsigned int), 1, aFileXdb);
   }
 
-  fTmpPos = node_offset;
-  //fsetpos(fp_xdb , &fTmpPos );  // move to node start offset
-  fseek(fp_xdb, fTmpPos, SEEK_SET);// move to node start offset
-  fwrite( &iter[mid].l_offset, sizeof(unsigned int), 1, fp_xdb);
-  fwrite( &iter[mid].l_length, sizeof(unsigned int), 1, fp_xdb);
-  fwrite( &iter[mid].r_offset, sizeof(unsigned int), 1, fp_xdb);
-  fwrite( &iter[mid].r_length, sizeof(unsigned int), 1, fp_xdb);
-  fwrite( &iter[mid].k_length, sizeof(unsigned char), 1, fp_xdb);
-  fwrite( &iter[mid].k_data, sizeof(unsigned char), iter[mid].k_length, fp_xdb);
-  fwrite( &iter[mid].tf, sizeof(float), 1, fp_xdb);
-  fwrite( &iter[mid].idf, sizeof(float), 1, fp_xdb);
-  fwrite( &iter[mid].flag, sizeof(unsigned char), 1, fp_xdb);
-  fwrite( &iter[mid].attr, sizeof(char), 3, fp_xdb);
+  fTmpPos = aNodeOffset;
+  //fsetpos(aFileXdb , &fTmpPos );  // move to node start offset
+  fseek(aFileXdb, fTmpPos, SEEK_SET);// move to node start offset
+  fwrite( &aIter[mid].l_offset, sizeof(unsigned int), 1, aFileXdb);
+  fwrite( &aIter[mid].l_length, sizeof(unsigned int), 1, aFileXdb);
+  fwrite( &aIter[mid].r_offset, sizeof(unsigned int), 1, aFileXdb);
+  fwrite( &aIter[mid].r_length, sizeof(unsigned int), 1, aFileXdb);
+  fwrite( &aIter[mid].k_length, sizeof(unsigned char), 1, aFileXdb);
+  fwrite( &aIter[mid].k_data, sizeof(unsigned char), aIter[mid].k_length, aFileXdb);
+  fwrite( &aIter[mid].tf, sizeof(float), 1, aFileXdb);
+  fwrite( &aIter[mid].idf, sizeof(float), 1, aFileXdb);
+  fwrite( &aIter[mid].flag, sizeof(unsigned char), 1, aFileXdb);
+  fwrite( &aIter[mid].attr, sizeof(char), 3, aFileXdb);
 
   // travel from left tree, if necessary
   //fgetpos(fp_xdb , &fPos);  // save current position
-  fPos=ftell(fp_xdb);// save current position
+  fPos=ftell(aFileXdb);// save current position
 
-  if( start <= (mid-1) ) {
-    newEnd = (mid-1);
-    count = (newEnd-start)+1;
-    newMid = start+(count+1)/2-1;
+  if (aStart <= (mid-1))
+  {
+    newEnd = mid - 1;
+    count = newEnd - aStart + 1;
+    newMid = aStart + (count+1)/2 - 1;
 
-    fTmpPos = node_offset;
+    fTmpPos = aNodeOffset;
     //fsetpos(fp_xdb , &fTmpPos );  // move to node start offset
-    fseek(fp_xdb, fTmpPos, SEEK_SET);// move to node start offset
-    fwrite( &fPos, sizeof(unsigned int), 1, fp_xdb);
-    tmpItemSize = 17+iter[newMid].k_length+12;
-    fwrite( &tmpItemSize, sizeof(unsigned int), 1, fp_xdb);
+    fseek(aFileXdb, fTmpPos, SEEK_SET);// move to node start offset
+    fwrite( &fPos, sizeof(unsigned int), 1, aFileXdb);
+    tmpItemSize = 17 + aIter[newMid].k_length + 12;
+    fwrite( &tmpItemSize, sizeof(unsigned int), 1, aFileXdb);
     //fsetpos(fp_xdb , &fPos );
-    fseek(fp_xdb, fPos, SEEK_SET);
+    fseek(aFileXdb, fPos, SEEK_SET);
 
     // write left node info.
-    write_sort_data_to_xdb(start, newEnd, fPos, node_offset, prime, iter, fp_xdb );
+    writeSortedDataToXdb(aStart, newEnd, fPos, aNodeOffset, aPrime, aIter, aFileXdb);
   }
 
   // Right node first
-  //fgetpos(fp_xdb , &fPos);  // save current position
-  fPos=ftell(fp_xdb);// save current position
+  //fgetpos(aFileXdb , &fPos);  // save current position
+  fPos=ftell(aFileXdb);// save current position
 
-  if( end >= (mid+1) ) {
-    newStart = (mid+1);
-    count = (end-newStart)+1;
-    newMid = newStart+(count+1)/2-1;
+  if (aEnd >= (mid+1))
+  {
+    newStart = mid + 1;
+    count = aEnd - newStart + 1;
+    newMid = newStart + (count + 1)/2 - 1;
 
-    fTmpPos = node_offset+8;
-    //fsetpos(fp_xdb , &fTmpPos );  // move to node start offset
-    fseek(fp_xdb, fTmpPos, SEEK_SET);// move to node start offset
-    fwrite( &fPos, sizeof(unsigned int), 1, fp_xdb);
-    tmpItemSize = 17+iter[newMid].k_length+12;
-    fwrite( &tmpItemSize, sizeof(unsigned int), 1, fp_xdb);
-    //fsetpos(fp_xdb , &fPos );
-    fseek(fp_xdb, fPos, SEEK_SET);
+    fTmpPos = aNodeOffset + 8;
+    //fsetpos(aFileXdb , &fTmpPos );  // move to node start offset
+    fseek(aFileXdb, fTmpPos, SEEK_SET);// move to node start offset
+    fwrite( &fPos, sizeof(unsigned int), 1, aFileXdb);
+    tmpItemSize = 17 + aIter[newMid].k_length + 12;
+    fwrite( &tmpItemSize, sizeof(unsigned int), 1, aFileXdb);
+    //fsetpos(aFileXdb , &fPos );
+    fseek(aFileXdb, fPos, SEEK_SET);
 
-    write_sort_data_to_xdb(newStart, end, fPos, node_offset, prime, iter, fp_xdb );
+    writeSortedDataToXdb(newStart, aEnd, fPos, aNodeOffset, aPrime, aIter, aFileXdb);
   }
 }
 
