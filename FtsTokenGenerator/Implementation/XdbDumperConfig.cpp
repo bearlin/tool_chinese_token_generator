@@ -15,17 +15,17 @@ CXdbDumperConfig::~CXdbDumperConfig()
   std::cout << "~CXdbDumperConfig" << std::endl;
 }
 
-void CXdbDumperConfig::SetInputScwsXdb(std::string aInputScwsXdb)
+void CXdbDumperConfig::SetInputScwsXdb(const std::string& aInputScwsXdb)
 {
   iInputScwsXdb = aInputScwsXdb;
 }
 
-void CXdbDumperConfig::SetInputNormalizeMap(std::string aInputNormalizeMap)
+void CXdbDumperConfig::SetInputNormalizeMap(const std::string& aInputNormalizeMap)
 {
   iInputNormalizeMap = aInputNormalizeMap;
 }
 
-std::string CXdbDumperConfig::GetOutputDumpText()
+const std::string CXdbDumperConfig::GetOutputDumpText() const
 {
   return iOutputDumpText;
 }

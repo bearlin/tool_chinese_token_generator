@@ -14,8 +14,8 @@ public:
   CFtsTokenGenerator();
   virtual ~CFtsTokenGenerator();
 
-  void SetLanguageType(TLanguageType aType);
-  TLanguageType GetLanguageType();
+  void SetLanguageType(const TLanguageType aType);
+  const TLanguageType GetLanguageType() const;
   virtual bool Run();
 
 private:

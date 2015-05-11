@@ -17,17 +17,17 @@ CXdbGeneratorConfig::~CXdbGeneratorConfig()
   std::cout << "~CXdbGeneratorConfig" << std::endl;
 }
 
-void CXdbGeneratorConfig::SetInputTokenList(std::string aInputTokenList)
+void CXdbGeneratorConfig::SetInputTokenList(const std::string& aInputTokenList)
 {
   iInputTokenList = aInputTokenList;
 }
 
-void CXdbGeneratorConfig::SetOutputXdb(std::string aOutputXdb)
+void CXdbGeneratorConfig::SetOutputXdb(const std::string& aOutputXdb)
 {
   iOutputXdb = aOutputXdb;
 }
 
-std::string CXdbGeneratorConfig::GetOutputXdb()
+const std::string CXdbGeneratorConfig::GetOutputXdb() const
 {
   return iOutputXdb;
 }

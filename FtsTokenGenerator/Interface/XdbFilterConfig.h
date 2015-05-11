@@ -13,16 +13,16 @@ public:
   CXdbFilterConfig();
   ~CXdbFilterConfig();
 
-  void SetInputScwsXdb(std::string aInputScwsXdb);
-  void SetInputScwsRule(std::string aInputScwsRule);
-  void SetInputSourceData(std::string aInputSourceData);
-  void SetInputNormalizeMap(std::string aInputNormalizeMap);
-  void SetInputSpecialSuffixTable(std::string aInputSpecialSuffixTable);
-  void SetInputAreaName(std::string aInputAreaName);
-  void SetInputRemoveToken(std::string aInputRemoveToken);
-  std::string GetOutputTokenList();
-  std::string GetOutputTokenListNormalized();
-  std::string GetOutputTokenListFuzzy();
+  void SetInputScwsXdb(const std::string& aInputScwsXdb);
+  void SetInputScwsRule(const std::string& aInputScwsRule);
+  void SetInputSourceData(const std::string& aInputSourceData);
+  void SetInputNormalizeMap(const std::string& aInputNormalizeMap);
+  void SetInputSpecialSuffixTable(const std::string& aInputSpecialSuffixTable);
+  void SetInputAreaName(const std::string& aInputAreaName);
+  void SetInputRemoveToken(const std::string& aInputRemoveToken);
+  const std::string GetOutputTokenList() const;
+  const std::string GetOutputTokenListNormalized() const;
+  const std::string GetOutputTokenListFuzzy() const;
 
   std::string iInputScwsXdb;
   std::string iInputScwsRule;

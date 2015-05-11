@@ -17,8 +17,8 @@ enum TLanguageType
 class IFtsTokenGenerator
 {
 public:
-  virtual void SetLanguageType(TLanguageType aType) = 0;
-  virtual TLanguageType GetLanguageType() = 0;
+  virtual void SetLanguageType(const TLanguageType aType) = 0;
+  virtual const TLanguageType GetLanguageType() const = 0;
   virtual bool Run() = 0;
 };
 

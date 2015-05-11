@@ -25,52 +25,52 @@ CXdbFilterConfig::~CXdbFilterConfig()
   std::cout << "~CXdbFilterConfig" << std::endl;
 }
 
-void CXdbFilterConfig::SetInputScwsXdb(std::string aInputScwsXdb)
+void CXdbFilterConfig::SetInputScwsXdb(const std::string& aInputScwsXdb)
 {
   iInputScwsXdb = aInputScwsXdb;
 }
 
-void CXdbFilterConfig::SetInputScwsRule(std::string aInputScwsRule)
+void CXdbFilterConfig::SetInputScwsRule(const std::string& aInputScwsRule)
 {
   iInputScwsRule = aInputScwsRule;
 }
 
-void CXdbFilterConfig::SetInputSourceData(std::string aInputSourceData)
+void CXdbFilterConfig::SetInputSourceData(const std::string& aInputSourceData)
 {
   iInputSourceData = aInputSourceData;
 }
 
-void CXdbFilterConfig::SetInputNormalizeMap(std::string aInputNormalizeMap)
+void CXdbFilterConfig::SetInputNormalizeMap(const std::string& aInputNormalizeMap)
 {
   iInputNormalizeMap = aInputNormalizeMap;
 }
 
-void CXdbFilterConfig::SetInputSpecialSuffixTable(std::string aInputSpecialSuffixTable)
+void CXdbFilterConfig::SetInputSpecialSuffixTable(const std::string& aInputSpecialSuffixTable)
 {
   iInputSpecialSuffixTable = aInputSpecialSuffixTable;
 }
 
-void CXdbFilterConfig::SetInputAreaName(std::string aInputAreaName)
+void CXdbFilterConfig::SetInputAreaName(const std::string& aInputAreaName)
 {
   iInputAreaName = aInputAreaName;
 }
 
-void CXdbFilterConfig::SetInputRemoveToken(std::string aInputRemoveToken)
+void CXdbFilterConfig::SetInputRemoveToken(const std::string& aInputRemoveToken)
 {
   iInputRemoveToken= aInputRemoveToken;
 }
 
-std::string CXdbFilterConfig::GetOutputTokenList()
+const std::string CXdbFilterConfig::GetOutputTokenList() const
 {
   return iOutputTokenList;
 }
 
-std::string CXdbFilterConfig::GetOutputTokenListNormalized()
+const std::string CXdbFilterConfig::GetOutputTokenListNormalized() const
 {
   return iOutputTokenListNormalized;
 }
 
-std::string CXdbFilterConfig::GetOutputTokenListFuzzy()
+const std::string CXdbFilterConfig::GetOutputTokenListFuzzy() const
 {
   return iOutputTokenListFuzzy;
 }

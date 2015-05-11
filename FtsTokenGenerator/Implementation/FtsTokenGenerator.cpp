@@ -18,12 +18,12 @@ CFtsTokenGenerator::~CFtsTokenGenerator()
   //std::cout << "~CFtsTokenGenerator" << std::endl;
 }
 
-void CFtsTokenGenerator::SetLanguageType(TLanguageType aType)
+void CFtsTokenGenerator::SetLanguageType(const TLanguageType aType)
 {
   iLanguageType = aType;
 }
 
-TLanguageType CFtsTokenGenerator::GetLanguageType()
+const TLanguageType CFtsTokenGenerator::GetLanguageType() const
 {
   return iLanguageType;
 }

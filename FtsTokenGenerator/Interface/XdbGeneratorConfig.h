@@ -13,9 +13,9 @@ public:
   CXdbGeneratorConfig();
   ~CXdbGeneratorConfig();
 
-  void SetInputTokenList(std::string aInputTokenList);
-  void SetOutputXdb(std::string aOutputXdb);
-  std::string GetOutputXdb();
+  void SetInputTokenList(const std::string& aInputTokenList);
+  void SetOutputXdb(const std::string& aOutputXdb);
+  const std::string GetOutputXdb() const;
 
   std::string iInputTokenList;
   std::string iOutputXdb;
