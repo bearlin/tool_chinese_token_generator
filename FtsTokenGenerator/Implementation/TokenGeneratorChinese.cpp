@@ -45,8 +45,8 @@ bool CTokenGeneratorChinese::Run()
   //xdbFilter.GetConfig().SetInputSpecialSuffixTable("_ignored_suffix_table_sc_utf8.txt");
   xdbFilter.GetConfig().SetInputAreaName("areas/05_all_area_map02.txt");
   xdbFilter.GetConfig().SetInputRemoveToken("_removed_tokens_table.txt");
-  //xdbFilter.GetConfig().SetInputSourceData("ALL.txt");
-  xdbFilter.GetConfig().SetInputSourceData("test.txt");
+  xdbFilter.GetConfig().SetInputSourceData("ALL.txt");
+  //xdbFilter.GetConfig().SetInputSourceData("test.txt");
 
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
