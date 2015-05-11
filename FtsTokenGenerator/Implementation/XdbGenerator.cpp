@@ -35,9 +35,9 @@ CXdbGenerator::~CXdbGenerator()
 bool CXdbGenerator::Run()
 {
   std::cout << "Running CXdbGenerator" << std::endl;
-  std::cout << "iInputPath:" << iInputPath << std::endl;
-  std::cout << "iOutputPath:" << iOutputPath<< std::endl;
-  std::cout << "iLogPath:" << iLogPath<< std::endl;
+  std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
+  std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
+  std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
   FILE *fp;
   node_info one_node;
@@ -70,7 +70,7 @@ bool CXdbGenerator::Run()
   long fPos,fTmpPos;
   //fpos_t fPos,fTmpPos;
 
-  file_path = iInputPath + iInputTokenList;
+  file_path = GetConfig().iInputPath + GetConfig().iInputTokenList;
   fp = fopen(file_path.c_str(), "r");
   if( NULL == fp )
   {
@@ -80,7 +80,7 @@ bool CXdbGenerator::Run()
   printf("fp :%s\n", file_path.c_str());
 
 #ifdef ENABLE_LOG
-  file_path = iLogPath + LOG_PATH;
+  file_path = GetConfig().iLogPath + LOG_PATH;
   fp_log = fopen(file_path.c_str(), "w");
   if(NULL == fp_log)
   {
@@ -90,7 +90,7 @@ bool CXdbGenerator::Run()
   }
   printf("fp_log :%s\n", file_path.c_str());
 
-  file_path = iLogPath + LOG_REPEAT_PATH;
+  file_path = GetConfig().iLogPath + LOG_REPEAT_PATH;
   fp_log_repeat= fopen(file_path.c_str(), "w");
   if(NULL == fp_log_repeat)
   {
@@ -101,7 +101,7 @@ bool CXdbGenerator::Run()
   printf("fp_log_repeat :%s\n", file_path.c_str());
 #endif
 
-  file_path = GetOutputPath() + GetOutputXdb();
+  file_path = GetConfig().GetOutputPath() + GetConfig().GetOutputXdb();
   fp_xdb = fopen(file_path.c_str(), "wb");
   if(NULL == fp_xdb)
   {
@@ -270,7 +270,7 @@ bool CXdbGenerator::Run()
     std::sort(nodes[prime_index].begin(), nodes[prime_index].end(), compare_node);
   }
 
-  printf("\n\nWriting XDB to %s  ...............................\n", (GetOutputPath()+GetOutputXdb()).c_str());
+  printf("\n\nWriting XDB to %s  ...............................\n", (GetConfig().GetOutputPath()+GetConfig().GetOutputXdb()).c_str());
   memset(&xdb_h, 0 , sizeof(struct xdb_header));
   memcpy(&xdb_h.tag, XDB_TAGNAME, 3);
   xdb_h.ver = XDB_VERSION;
@@ -326,19 +326,9 @@ bool CXdbGenerator::Run()
   return true;
 }
 
-void CXdbGenerator::SetInputTokenList(std::string aInputTokenList)
-{
-  iInputTokenList = aInputTokenList;
-}
-
-void CXdbGenerator::SetOutputXdb(std::string aOutputXdb)
-{
-  iOutputXdb = aOutputXdb;
-}
-
-std::string CXdbGenerator::GetOutputXdb()
-{
-  return iOutputXdb;
+CXdbGeneratorConfig& CXdbGenerator::GetConfig()
+{ 
+  return iConfig;
 }
 
 int CXdbGenerator::_get_hash_index(unsigned char* key, int hash_base, int hash_prime )

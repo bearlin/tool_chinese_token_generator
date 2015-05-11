@@ -18,7 +18,6 @@ public:
   virtual const std::string& GetOutputPath() const;
   virtual void SetLogPath(const std::string& aLogPath);
 
-protected:
   std::string iInputPath;
   std::string iOutputPath;
   std::string iLogPath;

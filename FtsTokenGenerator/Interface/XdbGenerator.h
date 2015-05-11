@@ -5,7 +5,7 @@
 #ifndef __XDB_GENERATOR_H__
 #define __XDB_GENERATOR_H__
 
-#include "TokenGeneratorChineseConfig.h"
+#include "XdbGeneratorConfig.h"
 
 #include <cstdio>
 #include <cstring>
@@ -55,21 +55,17 @@
 //#define MAX_NODE_COUNT    63
 #define MAX_NODE_COUNT    127
 
-class CXdbGenerator : public CTokenGeneratorChineseConfig
+class CXdbGenerator
 {
 public:
   CXdbGenerator();
   ~CXdbGenerator();
 
   bool Run();
-
-  void SetInputTokenList(std::string aInputTokenList);
-  void SetOutputXdb(std::string aOutputXdb);
-  std::string GetOutputXdb();
+  CXdbGeneratorConfig& GetConfig();
 
 private:
-  std::string iInputTokenList;
-  std::string iOutputXdb;
+  CXdbGeneratorConfig iConfig;
 
   typedef struct _node_info_
   {

@@ -5,7 +5,7 @@
 #ifndef __XDB_FILTER_H__
 #define __XDB_FILTER_H__
 
-#include "TokenGeneratorChineseConfig.h"
+#include "XdbFilterConfig.h"
 
 #include <iostream>
 #include <string>
@@ -86,36 +86,17 @@
 #endif //_CONVERT_NORMALIZE_
 ////////////////////// FILE PATH /////////////////////////////////////
 
-class CXdbFilter : public CTokenGeneratorChineseConfig
+class CXdbFilter
 {
 public:
   CXdbFilter();
   ~CXdbFilter();
 
   bool Run();
-
-  void SetInputScwsXdb(std::string aInputScwsXdb);
-  void SetInputScwsRule(std::string aInputScwsRule);
-  void SetInputSourceData(std::string aInputSourceData);
-  void SetInputNormalizeMap(std::string aInputNormalizeMap);
-  void SetInputSpecialSuffixTable(std::string aInputSpecialSuffixTable);
-  void SetInputAreaName(std::string aInputAreaName);
-  void SetInputRemoveToken(std::string aInputRemoveToken);
-  std::string GetOutputTokenList();
-  std::string GetOutputTokenListNormalized();
-  std::string GetOutputTokenListFuzzy();
+  CXdbFilterConfig& GetConfig();
 
 private:
-  std::string iInputScwsXdb;
-  std::string iInputScwsRule;
-  std::string iInputNormalizeMap;
-  std::string iInputSpecialSuffixTable;
-  std::string iInputAreaName;
-  std::string iInputRemoveToken;
-  std::string iInputSourceData;
-  std::string iOutputTokenList;
-  std::string iOutputTokenListNormalized;
-  std::string iOutputTokenListFuzzy;
+  CXdbFilterConfig iConfig;
 
   char tmp_buf1[MAX_LINE_SIZE];
 

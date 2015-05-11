@@ -38,9 +38,9 @@ CXdbDumper::~CXdbDumper()
 bool CXdbDumper::Run()
 {
   std::cout << "Running CXdbDumper" << std::endl;
-  std::cout << "iInputPath:" << iInputPath << std::endl;
-  std::cout << "iOutputPath:" << iOutputPath<< std::endl;
-  std::cout << "iLogPath:" << iLogPath<< std::endl;
+  std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
+  std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
+  std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
   FILE *fd;
   struct xdb_header xdb_header;
@@ -51,7 +51,7 @@ bool CXdbDumper::Run()
   size_t readSize = 0;
 
 #ifdef _DETAIL_EXPORT_
-  file_path = iOutputPath+DATA_DIR;
+  file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += DETAIL_EXP_FILE;
   gLogDetail = fopen(file_path.c_str(), "w" );
   if(NULL == gLogDetail)
@@ -62,7 +62,7 @@ bool CXdbDumper::Run()
   printf("gLogDetail :%s\n", file_path.c_str());
 #endif
 #ifdef _XDB_GEN_TOOL_EXPORT_
-  file_path = iOutputPath+DATA_DIR;
+  file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += SIMPLE_EXP_FILE;
   gLog = fopen(file_path.c_str(), "w" );
   if(NULL == gLog)
@@ -73,7 +73,7 @@ bool CXdbDumper::Run()
   printf("gLog :%s\n", file_path.c_str());
 #endif
 
-  file_path = iInputPath+DATA_DIR;
+  file_path = GetConfig().iInputPath+DATA_DIR;
   file_path += SRC_XDB_FILE;
   fd= fopen(file_path.c_str(),"rb");
   if(NULL == fd)
@@ -90,7 +90,7 @@ bool CXdbDumper::Run()
   int token_idx,szLine_Len;
   char szSrc[4], szDst[4];
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += NORMAL_EXP_FILE;
   gNormalizeLog = fopen(file_path.c_str(), "w" ); 
   if(NULL == gNormalizeLog)
@@ -100,7 +100,7 @@ bool CXdbDumper::Run()
   }
   printf("gNormalizeLog :%s\n", file_path.c_str());
 
-  file_path = iInputPath+DATA_DIR;
+  file_path = GetConfig().iInputPath+DATA_DIR;
   file_path += NORMAL_MAP_FILE;
   normalize_fd = fopen(file_path.c_str(), "r" );
   if(NULL == normalize_fd)
@@ -114,7 +114,7 @@ bool CXdbDumper::Run()
   nor_map.clear();
   nor_repeat_vector.clear();
 
-  file_path = iOutputPath+DATA_DIR;
+  file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += NORMAL_EXP_REPEAT;
   gNormalizeRepeatLog = fopen(file_path.c_str(), "w" );
   if(NULL == gNormalizeRepeatLog)
@@ -272,6 +272,11 @@ bool CXdbDumper::Run()
 #endif
 
   return true;
+}
+
+CXdbDumperConfig& CXdbDumper::GetConfig()
+{
+  return iConfig;
 }
 
 int CXdbDumper::_get_index(unsigned char* key, int hash_base, int hash_prime )

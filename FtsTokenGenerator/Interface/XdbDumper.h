@@ -5,7 +5,7 @@
 #ifndef __XDB_DUMPER_H__
 #define __XDB_DUMPER_H__
 
-#include "TokenGeneratorChineseConfig.h"
+#include "XdbDumperConfig.h"
 
 #include <cstdio>
 #include <cstring>
@@ -68,15 +68,18 @@
   #endif
 #endif
 
-class CXdbDumper : public CTokenGeneratorChineseConfig
+class CXdbDumper
 {
 public:
   CXdbDumper();
   ~CXdbDumper();
 
   bool Run();
+  CXdbDumperConfig& GetConfig();
 
 private:
+  CXdbDumperConfig iConfig;
+
   /* header struct */
   struct xdb_header
   {
