@@ -53,8 +53,8 @@ bool CXdbDumper::Run()
 #ifdef _DETAIL_EXPORT_
   file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += DETAIL_EXP_FILE;
-  gLogDetail = fopen(file_path.c_str(), "w" );
-  if(NULL == gLogDetail)
+  gLogDetail = fopen(file_path.c_str(), "w");
+  if (NULL == gLogDetail)
   {
     printf("gLogDetail err:%s\n", file_path.c_str());
     return false;
@@ -64,8 +64,8 @@ bool CXdbDumper::Run()
 #ifdef _XDB_GEN_TOOL_EXPORT_
   file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += SIMPLE_EXP_FILE;
-  gLog = fopen(file_path.c_str(), "w" );
-  if(NULL == gLog)
+  gLog = fopen(file_path.c_str(), "w");
+  if (NULL == gLog)
   {
     printf("gLog err:%s\n", file_path.c_str());
     return false;
@@ -75,8 +75,8 @@ bool CXdbDumper::Run()
 
   file_path = GetConfig().iInputPath+DATA_DIR;
   file_path += SRC_XDB_FILE;
-  fd= fopen(file_path.c_str(),"rb");
-  if(NULL == fd)
+  fd = fopen(file_path.c_str(),"rb");
+  if (NULL == fd)
   {
     printf("fd err:%s\n", file_path.c_str());
     return false;
@@ -93,7 +93,7 @@ bool CXdbDumper::Run()
   file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += NORMAL_EXP_FILE;
   gNormalizeLog = fopen(file_path.c_str(), "w" ); 
-  if(NULL == gNormalizeLog)
+  if (NULL == gNormalizeLog)
   {
     printf("gNormalizeLog err:%s\n", file_path.c_str());
     return false;
@@ -103,7 +103,7 @@ bool CXdbDumper::Run()
   file_path = GetConfig().iInputPath+DATA_DIR;
   file_path += NORMAL_MAP_FILE;
   normalize_fd = fopen(file_path.c_str(), "r" );
-  if(NULL == normalize_fd)
+  if (NULL == normalize_fd)
   {
     printf("normalize_fd err:%s\n", file_path.c_str());
     return false;
@@ -116,34 +116,36 @@ bool CXdbDumper::Run()
 
   file_path = GetConfig().iOutputPath+DATA_DIR;
   file_path += NORMAL_EXP_REPEAT;
-  gNormalizeRepeatLog = fopen(file_path.c_str(), "w" );
-  if(NULL == gNormalizeRepeatLog)
+  gNormalizeRepeatLog = fopen(file_path.c_str(), "w");
+  if (NULL == gNormalizeRepeatLog)
   {
     printf("gNormalizeRepeatLog err:%s\n", file_path.c_str());
     return false;
   }
   printf("gNormalizeRepeatLog :%s\n", file_path.c_str());
   
-  while( fgets(szLine,sizeof(szLine), normalize_fd )) 
+  while (fgets(szLine, sizeof(szLine), normalize_fd)) 
   {
     szLine_Len = strlen(szLine);
     szLine_Len--;
 
-    while( ('\r' == szLine[szLine_Len]) || ('\n' == szLine[szLine_Len]) )
+    while ( ('\r' == szLine[szLine_Len]) || ('\n' == szLine[szLine_Len]) )
+    {
       szLine_Len--;
+    }
 
     szLine[szLine_Len+1] = 0;
 
     token_idx = 0;
     pFind = strtok(szLine, ",");
-    while( pFind ) 
+    while (pFind) 
     {
-      if(1 == token_idx ) 
+      if (1 == token_idx) 
       {
         memset(szSrc,0,sizeof(szSrc));
         strcpy(szSrc, pFind);
       } 
-      else if(2 == token_idx ) 
+      else if (2 == token_idx)
       {
         memset(szDst,0,sizeof(szDst));
         strcpy(szDst, pFind);
@@ -156,14 +158,18 @@ bool CXdbDumper::Run()
   fclose(normalize_fd);
 #endif //_CONVERT_NORMALIZE_
 
-  printf("XDB header size=%ld\n", sizeof(struct xdb_header) );
+  printf("XDB header size=%ld\n", sizeof(struct xdb_header));
   readSize = fread(&xdb_header, 1, sizeof(struct xdb_header), fd);
-  if (readSize != sizeof(struct xdb_header)*1) {fputs("Reading error 01", stderr); exit(EXIT_FAILURE);}
+  if (readSize != sizeof(struct xdb_header)*1)
+  {
+    fputs("Reading error 01", stderr);
+    exit(EXIT_FAILURE);
+  }
 
   //printf("unsigned int size=%d\n", sizeof(unsigned int) );
-  printf("unsigned base=%d\n", xdb_header.base );
-  printf("unsigned size=%d\n", xdb_header.fsize );
-  printf("unsigned prime=%d\n", xdb_header.prime );
+  printf("unsigned base=%d\n", xdb_header.base);
+  printf("unsigned size=%d\n", xdb_header.fsize);
+  printf("unsigned prime=%d\n", xdb_header.prime);
 
   gPrime = xdb_header.prime;
   gHashBase = xdb_header.base;
@@ -177,22 +183,31 @@ bool CXdbDumper::Run()
   {
     f_offset = trav_index*8+32;
     fseek(fd, f_offset, SEEK_SET);
-    readSize = fread(&d_offset, 1, sizeof(unsigned int), fd );
-    if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 02", stderr); exit(EXIT_FAILURE);}
-    readSize = fread(&d_length, 1, sizeof(unsigned int), fd );
-    if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 03", stderr); exit(EXIT_FAILURE);}
+    readSize = fread(&d_offset, 1, sizeof(unsigned int), fd);
+    if (readSize != sizeof(unsigned int)*1)
+    {
+      fputs("Reading error 02", stderr);
+      exit(EXIT_FAILURE);
+    }
+
+    readSize = fread(&d_length, 1, sizeof(unsigned int), fd);
+    if (readSize != sizeof(unsigned int)*1)
+    {
+      fputs("Reading error 03", stderr);
+      exit(EXIT_FAILURE);
+    }
 
     if( 0 != d_length ) 
     {
-      printf("trav_index=%d d_offset=%d d_length=%d\n", trav_index, d_offset, d_length );
-      get_record(fd, d_offset, d_length,0,0, "");
+      printf("trav_index=%d d_offset=%d d_length=%d\n", trav_index, d_offset, d_length);
+      get_record(fd, d_offset, d_length, 0, 0, "");
       word_count = 0;
 
       //sprintf(szLog, "+++++++++++++++++++Prime_index=%d\n", trav_index );
       //fputs(szLog, gLog );
     }
     trav_index++;
-  } while( trav_index < xdb_header.prime );
+  } while ( trav_index < xdb_header.prime );
 
 #ifdef _CONVERT_NORMALIZE_
   char *pFindPrev;
@@ -212,7 +227,7 @@ bool CXdbDumper::Run()
   for (std::vector<std::string>::iterator nor_repeat_vector_it = nor_repeat_vector.begin() ; nor_repeat_vector_it != nor_repeat_vector.end(); ++nor_repeat_vector_it)
   {
     // Collect statistic informations.
-  //----------------------------------------
+    //----------------------------------------
     //printf("repeatCnt(%d)\n", repeatCnt);
     if (nor_repeat_vector_it == nor_repeat_vector.begin())
     {
@@ -293,7 +308,7 @@ int CXdbDumper::_get_index(unsigned char* key, int hash_base, int hash_prime )
   return (h % hash_prime);
 }
 
-void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int direction, int level, const char* father ) {
+void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int direction, int level, const char* father) {
   unsigned int l_offset, l_len;
   unsigned int r_offset, r_len;
   char k_len;
@@ -308,34 +323,68 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
   //readSize = fread(buff, 1, r_len, fd);  
   //if (readSize != r_len*1) {fputs("Reading error 04", stderr); exit(EXIT_FAILURE);}
 
-  readSize = fread(&l_offset, 1, sizeof(unsigned int), fd );
-  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 05", stderr); exit(EXIT_FAILURE);}
-  readSize = fread(&l_len, 1, sizeof(unsigned int), fd );
-  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 06", stderr); exit(EXIT_FAILURE);}
-  readSize = fread(&r_offset, 1, sizeof(unsigned int), fd );
-  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 07", stderr); exit(EXIT_FAILURE);}
-  readSize = fread(&r_len, 1, sizeof(unsigned int), fd );
-  if (readSize != sizeof(unsigned int)*1) {fputs("Reading error 08", stderr); exit(EXIT_FAILURE);}
-  readSize = fread(&k_len, 1, sizeof(unsigned char), fd );
-  if (readSize != sizeof(unsigned char)*1) {fputs("Reading error 09", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(&l_offset, 1, sizeof(unsigned int), fd);
+  if (readSize != sizeof(unsigned int)*1)
+  {
+    fputs("Reading error 05", stderr);
+    exit(EXIT_FAILURE);
+  }
 
-  memset(key_name,0, sizeof(key_name));
+  readSize = fread(&l_len, 1, sizeof(unsigned int), fd);
+  if (readSize != sizeof(unsigned int)*1)
+  {
+    fputs("Reading error 06", stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  readSize = fread(&r_offset, 1, sizeof(unsigned int), fd);
+  if (readSize != sizeof(unsigned int)*1)
+  {
+    fputs("Reading error 07", stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  readSize = fread(&r_len, 1, sizeof(unsigned int), fd);
+  if (readSize != sizeof(unsigned int)*1)
+  {
+    fputs("Reading error 08", stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  readSize = fread(&k_len, 1, sizeof(unsigned char), fd);
+  if (readSize != sizeof(unsigned char)*1)
+  {
+    fputs("Reading error 09", stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  memset(key_name, 0, sizeof(key_name));
   //key_name[0] = '\"';
   //readSize = fread(&key_name[0], sizeof(unsigned char), k_len, fd );
   //if (readSize != sizeof(unsigned char)*k_len) {fputs("Reading error 10", stderr); exit(EXIT_FAILURE);}
-  readSize = fread(key_name, sizeof(unsigned char), k_len, fd );
-  if (readSize != sizeof(unsigned char)*k_len) {fputs("Reading error 11", stderr); exit(EXIT_FAILURE);}
+  readSize = fread(key_name, sizeof(unsigned char), k_len, fd);
+  if (readSize != sizeof(unsigned char)*k_len)
+  {
+    fputs("Reading error 11", stderr);
+    exit(EXIT_FAILURE);
+  }
   //key_name[k_len+1] = '\"';
   //key_name[k_len+2] = '\n';
   //fputs((const char*)key_name, gLog);
-  readSize = fread(&ct, 1, sizeof(node_content), fd );
-  if (readSize != sizeof(node_content)*1) {fputs("Reading error 12", stderr); exit(EXIT_FAILURE);}
-
-  if( (l_offset > 0 ) && (l_len > 0) ) {
-    get_record(fd, l_offset, l_len, 1,level+1,(char*)key_name );
+  readSize = fread(&ct, 1, sizeof(node_content), fd);
+  if (readSize != sizeof(node_content)*1)
+  {
+    fputs("Reading error 12", stderr);
+    exit(EXIT_FAILURE);
   }
 
-  if( (r_offset > 0 ) && (r_len > 0) ) {
+  if ((l_offset > 0) && (l_len > 0))
+  {
+    get_record(fd, l_offset, l_len, 1, level+1,(char*)key_name);
+  }
+
+  if ((r_offset > 0) && (r_len > 0))
+  {
     get_record(fd, r_offset, r_len, 2, level+1,(char*)key_name);
   }
 
@@ -353,22 +402,22 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
   sprintf(szLog, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
     level, (0 == direction) ? 'N': (1 == direction) ?'L':'R', word_count, l_offset, l_len, r_offset, r_len, k_len, father, 
     ct.tf, ct.idf, ct.flag, 
-    ( 0 == ct.attr[0]) ? 0x01:ct.attr[0],
-    ( 0 == ct.attr[1]) ? 0x01:ct.attr[1],
-    ( 0 == ct.attr[2]) ? 0x01:ct.attr[2],
+    (0 == ct.attr[0]) ? 0x01:ct.attr[0],
+    (0 == ct.attr[1]) ? 0x01:ct.attr[1],
+    (0 == ct.attr[2]) ? 0x01:ct.attr[2],
     key_name,
-    _get_index(key_name,gHashBase, gPrime )
+    _get_index(key_name,gHashBase, gPrime)
     );
-    fputs(szLog, gLogDetail );
+    fputs(szLog, gLogDetail);
   // Detail log
 #endif
 
-  memset(attr,0,4);
+  memset(attr, 0, 4);
 #ifdef _XDB_GEN_TOOL_EXPORT_
   // OWN toolsusage
   memcpy(attr, ct.attr, 3);
-  sprintf(szLog, "%s\t%f\t%f\t%d\t%s\n",key_name, ct.tf, ct.idf, ct.flag, attr);
-  fputs(szLog, gLog );
+  sprintf(szLog, "%s\t%f\t%f\t%d\t%s\n", key_name, ct.tf, ct.idf, ct.flag, attr);
+  fputs(szLog, gLog);
   // PHP usage
 #endif
 
@@ -381,35 +430,35 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
   std::map<std::string, std::string> ::const_iterator findIter;
 
   // convert by normalize hash
-  memset(normal_key_name,0,sizeof(normal_key_name));
+  memset(normal_key_name, 0, sizeof(normal_key_name));
 
   key_len = strlen((char*)key_name);
 
-  for(int z =0; z < key_len; )
+  for (int z =0; z < key_len; )
   {
     char_utf8_len = _mblen_table_utf8[key_name[z]];
 
-    if( 3 != char_utf8_len ) 
+    if (3 != char_utf8_len) 
     {
-      memcpy(&normal_key_name[z], &key_name[z], char_utf8_len );
+      memcpy(&normal_key_name[z], &key_name[z], char_utf8_len);
     } 
     else 
     {
-      memset(cht_utf8,0,sizeof(cht_utf8));
-      memcpy(cht_utf8, &key_name[z], char_utf8_len );
+      memset(cht_utf8, 0, sizeof(cht_utf8));
+      memcpy(cht_utf8, &key_name[z], char_utf8_len);
 
       char_utf8.clear();
       char_utf8 += (char*)cht_utf8;
 
       findIter = g_normalize_hash.find(char_utf8);
-      if( findIter == g_normalize_hash.end() ) 
+      if (findIter == g_normalize_hash.end()) 
       {
         printf("NOT Found  [%x][%x][%x]...................\n", cht_utf8[0], cht_utf8[1], cht_utf8[2]);
-        memcpy(&normal_key_name[z], &key_name[z], char_utf8_len );
+        memcpy(&normal_key_name[z], &key_name[z], char_utf8_len);
       } 
       else 
       {
-        memcpy(&normal_key_name[z], g_normalize_hash[char_utf8].c_str(), char_utf8_len );
+        memcpy(&normal_key_name[z], g_normalize_hash[char_utf8].c_str(), char_utf8_len);
       }
     }
 
@@ -435,7 +484,8 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
       //printf("[%s<=%s\t%f\t%f\t%d\t%s]\n",normal_key_name, key_name, ct.tf, ct.idf, ct.flag, ct.attr);
 
       // get original one info.
-      sprintf(szLog, "%s<=%s\t%f\t%f\t%d\t%s\n",nor_str.c_str(), first_nor_to_ori_map[nor_str].c_str(), nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
+      sprintf(szLog, "%s<=%s\t%f\t%f\t%d\t%s\n",nor_str.c_str(), first_nor_to_ori_map[nor_str].c_str(), 
+              nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
       
       // is original one info in vector?
       nor_repeat_vector_it = std::find(nor_repeat_vector.begin(), nor_repeat_vector.end(), szLog);
@@ -469,8 +519,8 @@ void CXdbDumper::get_record(FILE *fd, unsigned int off, unsigned int len, int di
   //-----------------------------------------------------------------
   
   memcpy(attr, ct.attr, 3);
-  sprintf(szLog, "%s\t%f\t%f\t%d\t%s\n",normal_key_name, ct.tf, ct.idf, ct.flag, attr);
-  fputs(szLog, gNormalizeLog );
+  sprintf(szLog, "%s\t%f\t%f\t%d\t%s\n", normal_key_name, ct.tf, ct.idf, ct.flag, attr);
+  fputs(szLog, gNormalizeLog);
 #endif //_CONVERT_NORMALIZE_
 }
 
