@@ -1,9 +1,23 @@
 //
 // This file contains the CXdbGenerator implementation 
-//
+// [Normalization procedures]
+// [Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
+// [Abandon] step 1: Add/Delete/Update tokens in the original simple_export file and save to another updated simple_export file.
+// step 1: use xdb_filter tool to filter, optimize and generate tt_tokens_list according to TomTom Addresses/POIs.
+// step 2: use xdb_gen tool to generate a xdb(non-fuzzy) from this tt_tokens_list file.
+// step 3: use xdb_dump tool to generate the non-normalized/normalized token files from this non-fuzzy xdb(with the latest fts-{tc|sc}-n.tok file), then merge them to a merge_export file.
+// step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
+// TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
+
 
 #include "XdbGenerator.h"
+#include "xdict.h"
+#include "xdb.h"
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
+#include <string>
+#include <algorithm>
 
 CXdbGenerator::CXdbGenerator() :
   iUTF8MultibyteLengthTable {
@@ -22,7 +36,13 @@ CXdbGenerator::CXdbGenerator() :
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 }
+  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 },
+#ifdef ENABLE_LOG
+  iLogFile(NULL),
+  iLogRepeatPathFile(NULL),
+#endif //ENABLE_LOG
+  iInputTokenListFile(NULL),
+  iXdbFile(NULL)
 {
 }
 
@@ -37,48 +57,10 @@ bool CXdbGenerator::Run()
   std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
   std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
-  std::string tempFilePath = GetConfig().iInputPath + GetConfig().iInputTokenList;
-  FILE* inputTokenListFile = fopen(tempFilePath.c_str(), "r");
-
-  if (inputTokenListFile == NULL)
+  if (!openFile())
   {
-    std::cout << "[ERROR] Unable to open input token list file:" << tempFilePath << " to read." << std::endl;
     return false;
   }
-
-  tempFilePath = GetConfig().GetOutputPath() + GetConfig().GetOutputXdb();
-  // xdb usage
-  FILE* xdbFile = fopen(tempFilePath.c_str(), "wb");
-  if (xdbFile == NULL)
-  {
-    fclose(inputTokenListFile);
-    std::cout << "[ERROR] Unable to create xdb file :" << tempFilePath << std::endl;
-    return false;
-  }
-
-#ifdef ENABLE_LOG
-  tempFilePath = GetConfig().iLogPath + LOG_PATH;
-  FILE* logFile = fopen(tempFilePath.c_str(), "w");
-  if (logFile == NULL)
-  {
-    fclose(inputTokenListFile);
-    fclose(xdbFile);
-    std::cout << "[ERROR] Unable to create log file :" << tempFilePath << std::endl;
-    return false;
-  }
-
-  tempFilePath = GetConfig().iLogPath + LOG_REPEAT_PATH;
-  FILE* logRepeatPathFile = fopen(tempFilePath.c_str(), "w");
-
-  if (logRepeatPathFile == NULL)
-  {
-    fclose(inputTokenListFile);
-    fclose(xdbFile);
-    fclose(logFile);
-    std::cout << "[ERROR] Unable to create log repeat path file :" << tempFilePath << std::endl;
-    return false;
-  }
-#endif //ENABLE_LOG
 
   TNodeInfo nodeInfo;
   std::vector<TNodeInfo> nodes[SCWS_XDICT_PRIME];
@@ -86,7 +68,7 @@ bool CXdbGenerator::Run()
   int primeIndex = 0;
   char buf[512] = {'\0'};
 
-  while (fgets(buf, sizeof(buf)-1, inputTokenListFile) != NULL)
+  while (fgets(buf, sizeof(buf)-1, iInputTokenListFile) != NULL)
   {
     lineCount++;
     std::string line(buf);
@@ -152,7 +134,7 @@ bool CXdbGenerator::Run()
     }
     
     // save the word
-    primeIndex = getHashIndex((const unsigned char*)str, XDB_BASE, SCWS_XDICT_PRIME);
+    primeIndex = getHashIndex((const unsigned char*)str, XDB_HASH_BASE, SCWS_XDICT_PRIME);
 
     int found = 0;
     for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); ((iter != nodes[primeIndex].end()) && (found == 0)); ++iter)
@@ -162,8 +144,8 @@ bool CXdbGenerator::Run()
         found = 1;
 
       #ifdef ENABLE_LOG
-        fprintf(logRepeatPathFile, "found existed node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
-        fprintf(logRepeatPathFile, "new node[%s\t%f\t%f\t%d\t%s]\n",str, nodeInfo.tf, nodeInfo.idf, nodeInfo.flag, nodeInfo.attr);
+        fprintf(iLogRepeatPathFile, "found existed node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
+        fprintf(iLogRepeatPathFile, "new node[%s\t%f\t%f\t%d\t%s]\n",str, nodeInfo.tf, nodeInfo.idf, nodeInfo.flag, nodeInfo.attr);
       #endif //ENABLE_LOG
       
         // Update as max(tf, idf).
@@ -183,7 +165,7 @@ bool CXdbGenerator::Run()
         strcpy(iter->attr, nodeInfo.attr);
 
       #ifdef ENABLE_LOG
-        fprintf(logRepeatPathFile, "updated node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
+        fprintf(iLogRepeatPathFile, "updated node[%s\t%f\t%f\t%d\t%s]\n",iter->k_data, iter->tf, iter->idf, iter->flag, iter->attr);
       #endif //ENABLE_LOG
       }
     }
@@ -210,7 +192,7 @@ bool CXdbGenerator::Run()
 
       char part[512] = {0};
       strncpy(part, str, totalLength);
-      primeIndex = getHashIndex((const unsigned char*)part, XDB_BASE, SCWS_XDICT_PRIME);
+      primeIndex = getHashIndex((const unsigned char*)part, XDB_HASH_BASE, SCWS_XDICT_PRIME);
 
       found = 0;
       for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); ((iter != nodes[primeIndex].end()) && (0 == found)); ++iter)
@@ -240,14 +222,7 @@ bool CXdbGenerator::Run()
   {
     if (nodes[index].size() > MAX_NODE_COUNT)
     {
-      fclose(xdbFile);
-      fclose(inputTokenListFile);
-
-    #ifdef ENABLE_LOG
-      fclose(logFile);
-      fclose(logRepeatPathFile);
-    #endif //ENABLE_LOG
-
+      closeFile();
       std::cout << "PRIME[ " << index << " ] illegal!!!  Count = " << nodes[index].size() << std::endl;
       return false;
     }
@@ -266,17 +241,17 @@ bool CXdbGenerator::Run()
   memcpy(&xdbHeader.tag, XDB_TAGNAME, 3);
   xdbHeader.ver = XDB_VERSION;
   xdbHeader.prime = SCWS_XDICT_PRIME;
-  xdbHeader.base = XDB_BASE;
+  xdbHeader.base = XDB_HASH_BASE;
   xdbHeader.fsize = sizeof(TXdb_header) + (xdbHeader.prime * 8);
   xdbHeader.check = (float)XDB_FLOAT_CHECK;
 
-  fseek(xdbFile, 0L, SEEK_SET);
-  fwrite(&xdbHeader, sizeof(TXdb_header), 1, xdbFile);
+  fseek(iXdbFile, 0L, SEEK_SET);
+  fwrite(&xdbHeader, sizeof(TXdb_header), 1, iXdbFile);
 
-  unsigned char* pMem = (unsigned char*)malloc(xdbHeader.prime * 8);
+  unsigned char* pMem = new unsigned char [xdbHeader.prime * 8];
   memset(pMem, 0, xdbHeader.prime * 8);
-  fwrite(pMem, sizeof(unsigned char), xdbHeader.prime * 8, xdbFile);
-  free(pMem);
+  fwrite(pMem, sizeof(unsigned char), xdbHeader.prime * 8, iXdbFile);
+  delete [] pMem;
 
   for (int index = 0; index < SCWS_XDICT_PRIME; index++)
   {
@@ -289,32 +264,26 @@ bool CXdbGenerator::Run()
   #ifdef ENABLE_LOG
     //if( 0 == nodes[prime_index].size() % 2 ) //print tree only with odd node size.
     {
-      fprintf(logFile, "===========================\n");
+      fprintf(iLogFile, "===========================\n");
       int iterIndex = 0;
       for (std::vector<TNodeInfo>::iterator iter = nodes[index].begin(); (iter != nodes[index].end()); ++iter)
       {
-        fprintf(logFile, "SORT[Prime:%d][%d]%s\n", index, iterIndex++, iter->k_data);
+        fprintf(iLogFile, "SORT[Prime:%d][%d]%s\n", index, iterIndex++, iter->k_data);
       }
     }
   #endif //ENABLE_LOG
 
-    long filePosistion = ftell(xdbFile);// save current position
-    writeSortedDataToXdb(0, nodes[index].size()-1, filePosistion, NO_FATHER, index, nodes[index].begin(), xdbFile);
+    long filePosistion = ftell(iXdbFile);// save current position
+    writeSortedDataToXdb(0, nodes[index].size()-1, filePosistion, NO_FATHER, index, nodes[index].begin(), iXdbFile);
   }
 
   // update size
-  fseek(xdbFile, 0L, SEEK_END);
-  xdbHeader.fsize = ftell(xdbFile);
-  fseek(xdbFile, 0L, SEEK_SET);
-  fwrite(&xdbHeader, sizeof(TXdb_header), 1, xdbFile);
+  fseek(iXdbFile, 0L, SEEK_END);
+  xdbHeader.fsize = ftell(iXdbFile);
+  fseek(iXdbFile, 0L, SEEK_SET);
+  fwrite(&xdbHeader, sizeof(TXdb_header), 1, iXdbFile);
 
-#ifdef ENABLE_LOG
-  fclose(logFile);
-  fclose(logRepeatPathFile);
-#endif //ENABLE_LOG
-
-  fclose(xdbFile);
-  fclose(inputTokenListFile);
+  closeFile();
 
   return true;
 }
@@ -342,6 +311,79 @@ bool CXdbGenerator::compareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aN
 {
    int ret = strcmp((const char*)aNodeInfo1.k_data, (const char*)aNodeInfo2.k_data);
    return (ret < 0);
+}
+
+bool CXdbGenerator::openFile()
+{
+  std::string tempFilePath = GetConfig().iInputPath + GetConfig().iInputTokenList;
+  iInputTokenListFile = fopen(tempFilePath.c_str(), "r");
+
+  if (iInputTokenListFile == NULL)
+  {
+    std::cout << "[ERROR] Unable to open input token list file:" << tempFilePath << " to read." << std::endl;
+    return false;
+  }
+
+  tempFilePath = GetConfig().GetOutputPath() + GetConfig().GetOutputXdb();
+  // xdb usage
+  iXdbFile = fopen(tempFilePath.c_str(), "wb");
+  if (iXdbFile == NULL)
+  {
+    closeFile();
+    std::cout << "[ERROR] Unable to create xdb file :" << tempFilePath << std::endl;
+    return false;
+  }
+
+#ifdef ENABLE_LOG
+  tempFilePath = GetConfig().iLogPath + LOG_FILE_NAME;
+  iLogFile = fopen(tempFilePath.c_str(), "w");
+  if (iLogFile == NULL)
+  {
+    closeFile();
+    std::cout << "[ERROR] Unable to create log file :" << tempFilePath << std::endl;
+    return false;
+  }
+
+  tempFilePath = GetConfig().iLogPath + LOG_REPEAT_FILE_NAME;
+  iLogRepeatPathFile = fopen(tempFilePath.c_str(), "w");
+
+  if (iLogRepeatPathFile == NULL)
+  {
+    closeFile();
+    std::cout << "[ERROR] Unable to create log repeat path file :" << tempFilePath << std::endl;
+    return false;
+  }
+#endif //ENABLE_LOG
+  return true;
+}
+
+void CXdbGenerator::closeFile()
+{
+  if (iInputTokenListFile != NULL)
+  {
+    fclose(iInputTokenListFile);
+    iInputTokenListFile = NULL;
+  }
+
+  if (iXdbFile != NULL)
+  {
+    fclose(iXdbFile);
+    iXdbFile = NULL;
+  }
+
+#ifdef ENABLE_LOG
+  if (iLogFile != NULL)
+  {
+    fclose(iLogFile);
+    iLogFile = NULL;
+  }
+  if (iLogRepeatPathFile != NULL)
+  {
+    fclose(iLogRepeatPathFile);
+    iLogRepeatPathFile = NULL;
+  }
+#endif //ENABLE_LOG
+
 }
 
 void CXdbGenerator::generateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir)
