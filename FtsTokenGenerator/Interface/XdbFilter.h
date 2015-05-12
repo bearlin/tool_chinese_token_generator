@@ -2,8 +2,8 @@
 // This file contains the Chinese token filter interface
 //
 
-#ifndef __XDB_FILTER_H__
-#define __XDB_FILTER_H__
+#ifndef XDB_FILTER_H
+#define XDB_FILTER_H
 
 #include "XdbFilterConfig.h"
 
@@ -98,74 +98,59 @@ public:
 private:
   CXdbFilterConfig iConfig;
 
-  char tmp_buf1[MAX_LINE_SIZE];
+  char iBuffer[MAX_LINE_SIZE];
 
   ////////////////////// Search Node /////////////////////////////////////
   /* header struct */
-  typedef struct _node_info_header_
+  typedef struct TNodeInfoHeader
   {
     unsigned int l_offset;
     unsigned int l_length;
     unsigned int r_offset;
     unsigned int r_length;
     unsigned char k_length;
-  } node_info_header;
+  } TNodeInfoHeader;
 
-  typedef struct _node_info_attr_
+  typedef struct TNodeInfoAttr
   {
     float tf;
     float idf;
     unsigned char flag;
     char attr[3];
-  } node_info_attr;
+  } TNodeInfoAttr;
 
-  typedef struct _node_info_
-  {
-    unsigned int l_offset;
-    unsigned int l_length;
-    unsigned int r_offset;
-    unsigned int r_length;
-    unsigned char k_length;
-    unsigned char k_data[300];
-
-    float tf;
-    float idf;
-    unsigned char flag;
-    char attr[3];
-  } node_info;
-
-  typedef struct _prime_node_
+  typedef struct TPrimeNode
   {
     int offset;
     int length;
-  } prime_node;
+  } TPrimeNode;
 
-  #define SEARCH_TOKEN_INFO_FOUND       (0)
-  #define SEARCH_TOKEN_INFO_NOT_FOUND   (-1)
+  #define SEARCH_TOKEN_INFO_FOUND (0)
+  #define SEARCH_TOKEN_INFO_NOT_FOUND (-1)
 
-  int _get_hash_index(unsigned char* key, int hash_base, int hash_prime );
-  int searchTokenInfo( char *token_content, long node_offset, long node_length, int hash_base, int hash_prime, node_info_attr *attr, FILE* fp_xdb  );
+  int getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime) const;
+  int searchTokenInfo(const char* aTokenContent, long aNodeOffset, long aNodeLength, int aHashBase, int aHashPrime, TNodeInfoAttr* aAttribute, FILE* aFileXdb);
   ////////////////////// Search Node /////////////////////////////////////
 
-  #define UTF8_CHAR_KIND_NONE    (0)
-  #define UTF8_CHAR_KIND_1    (1)  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_2    (2)  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_3    (3)  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
-  #define UTF8_CHAR_KIND_4    (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
-  int getUTF8CharKind(unsigned char x);
-  int convUTF8ToUTF16(unsigned char* utf8_code_data, unsigned int* data, int data_length);
-  int isAllChineseToken(char* token_content, int token_len);
-  int isValidChineseToken(scws_res_t cur, char* token_content);
-  int TokenTotalChineseWordCountGet(const char* str);
-  int NthChineseWordByteOffsetGet(const char* str, int NthChineseWord);
+  #define UTF8_CHAR_KIND_NONE (0)
+  #define UTF8_CHAR_KIND_1 (1)  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_2 (2)  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_3 (3)  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
+  #define UTF8_CHAR_KIND_4 (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
+  int getUTF8CharKind(unsigned char aChar);
+  int convUTF8ToUTF16(unsigned char* aUtf8CodeData, unsigned int* aData, int aDataLength);
+  int isAllChineseToken(const char* aTokenContent, int aTokenLen);
+  int isValidChineseToken(scws_res_t aCur, const char* aTokenContent);
+  int tokenTotalChineseWordCountGet(const char* aString);
+  int getNthChineseWordByteOffset(const char* aString, int aNthChineseWord);
 
   ////////////////////// SuffixTokenMap /////////////////////////////////////
   int SuffixTokenMapInit(std::map<std::string,int> &suffix_token_map);
   int MaxSuffixTokenLengthGet(std::map<std::string,int> &suffix_token_map);
   ////////////////////// SuffixTokenMap /////////////////////////////////////
 
-  int isTokenEndWithIgnoredSuffix(const char* str, int* pSuffixOff, char* tmp_buf, int MaxSuffixTokenLength, std::map<std::string,int> &suffix_token_map);
-  int TokenGetOneWord(const char* str, char* tmp_buf, size_t aBufferLength, int wordIdx);
+  int isTokenEndWithIgnoredSuffix(const char* aString, int* pSuffixOff, char* tmp_buf, int MaxSuffixTokenLength, std::map<std::string,int> &suffix_token_map);
+  int TokenGetOneWord(const char* aString, char* tmp_buf, size_t aBufferLength, int wordIdx);
 
   #ifdef _CONVERT_NORMALIZE_
   // Length of multibyte character from first byte of Utf8
@@ -182,9 +167,9 @@ private:
   #endif //_CONVERT_NORMALIZE_
 
   std::string file_path;
-  FILE *fp_xdb;
+  FILE* aFileXdb;
   xdb_header header;
-  node_info_attr node_ia;
+  TNodeInfoAttr node_ia;
   
   char tmp_buf[MAX_LINE_SIZE];
 
@@ -224,4 +209,4 @@ private:
   bool MergeToFuzzyTokens();
 };
 
-#endif // __XDB_FILTER_H__
+#endif // XDB_FILTER_H_
