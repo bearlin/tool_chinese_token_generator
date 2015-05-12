@@ -24,7 +24,7 @@
 // 1. Dump all Addresses/POIs from TomTom map(Taiwan or China).
 // 2. Use xdb_filter tool, xdb_filter will send these Addresses/POIs to SCWS to get basic TomTom tokens list, 
 //    before using SCWS, the .xdb and .ini files used by SCWS need to be adjusted as we want(ex: remove all prefix/suffix in the .ini file).
-// 3. Add one word tokens according to TomTom tokens(see codes around TokenGetOneWord()).
+// 3. Add one word tokens according to TomTom tokens(see codes around GetOneWordInToken()).
 // 4. Remove/Add TomTom tokens from list according to specific rules(ex: We may remove tokens with '縣','市','鎮','村','鄉','區','特區','園區','新村' suffix), 
 //    and user interactive remove/add tokens can be enabled(see ENABLE_USER_INTERACTIVE_CONTROL).
 // 5. Generate new fuzzy .xdb(by using xdb_gen and xdb_dump tools) and fuzzy map(by using MTC asia branch) for testing.
@@ -40,7 +40,6 @@
 
 #define MAP_INIT  // To allow xdb_filter starting from reload existent raw map.
 //#define ENABLE_USER_INTERACTIVE_CONTROL // To allow user interactive remove/add tokens.
-#define USE_TC
 
 // Enable this macro will remove all tokens end with "路".
 #define REMOVE_FULL_TOKENS_WITH_SPECIAL_END  //"路"
@@ -79,11 +78,8 @@
 #define OUT_PATH_S06_SUFFIX_PART "s06_log_tokens_part.txt"
 #define OUT_PATH_S06_SUFFIX_FULL "s06_log_tokens_full.txt"
 
-#define _CONVERT_NORMALIZE_
-#ifdef _CONVERT_NORMALIZE_
 #define OUT_PATH_S07_SUFFIX_FULL_NOR "s07_log_tokens_full_normalized.txt"
 #define OUT_PATH_S08_SUFFIX_FULL_FUZZY "s08_log_tokens_full_fuzzy.txt"
-#endif //_CONVERT_NORMALIZE_
 ////////////////////// FILE PATH /////////////////////////////////////
 
 class CXdbFilter
@@ -128,8 +124,16 @@ private:
   #define SEARCH_TOKEN_INFO_FOUND (0)
   #define SEARCH_TOKEN_INFO_NOT_FOUND (-1)
 
-  int getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime) const;
-  int searchTokenInfo(const char* aTokenContent, long aNodeOffset, long aNodeLength, int aHashBase, int aHashPrime, TNodeInfoAttr* aAttribute, FILE* aFileXdb);
+  int GetHashIndex( const unsigned char*  aKey,
+                    int                   aHashBase,
+                    int                   aHashPrime) const;
+  int SearchTokenInfo(const char*     aTokenContent,
+                      long            aNodeOffset,
+                      long            aNodeLength,
+                      int             aHashBase,
+                      int             aHashPrime,
+                      TNodeInfoAttr*  aAttribute,
+                      FILE*           aFileXdb);
   ////////////////////// Search Node /////////////////////////////////////
 
   #define UTF8_CHAR_KIND_NONE (0)
@@ -137,66 +141,61 @@ private:
   #define UTF8_CHAR_KIND_2 (2)  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
   #define UTF8_CHAR_KIND_3 (3)  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
   #define UTF8_CHAR_KIND_4 (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
-  int getUTF8CharKind(unsigned char aChar);
-  int convUTF8ToUTF16(unsigned char* aUtf8CodeData, unsigned int* aData, int aDataLength);
-  int isAllChineseToken(const char* aTokenContent, int aTokenLen);
-  int isValidChineseToken(scws_res_t aCur, const char* aTokenContent);
-  int tokenTotalChineseWordCountGet(const char* aString);
-  int getNthChineseWordByteOffset(const char* aString, int aNthChineseWord);
+  int GetUTF8CharKind(unsigned char aChar);
+  int ConvUTF8ToUTF16(unsigned char* aUtf8CodeData,
+                      unsigned int* aData,
+                      int aDataLength);
+  int IsAllChineseToken(const char* aTokenContent,
+                        int aTokenLen);
+  int IsValidChineseToken(scws_res_t  aScwsCur,
+                          const char* aTokenContent);
+  int GetTokenTotalChineseWordCount(const char* aString);
+  int GetNthChineseWordByteOffset(const char* aString,
+                                  int aNthChineseWord);
 
   ////////////////////// SuffixTokenMap /////////////////////////////////////
-  int SuffixTokenMapInit(std::map<std::string,int> &suffix_token_map);
-  int MaxSuffixTokenLengthGet(std::map<std::string,int> &suffix_token_map);
+  int InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap);
+  int GetMaxSuffixTokenLength(std::map<std::string,int>& aSuffixTokenMap);
   ////////////////////// SuffixTokenMap /////////////////////////////////////
 
-  int isTokenEndWithIgnoredSuffix(const char* aString, int* pSuffixOff, char* tmp_buf, int MaxSuffixTokenLength, std::map<std::string,int> &suffix_token_map);
-  int TokenGetOneWord(const char* aString, char* tmp_buf, size_t aBufferLength, int wordIdx);
+  int IsTokenEndWithIgnoredSuffix(const char* aString,
+                                  int* aSuffixOffset,
+                                  char* aTmpBuffer,
+                                  int aMaxSuffixTokenLength,
+                                  std::map<std::string,int>& aSuffixTokenMap);
+  int GetOneWordInToken(const char* aString,
+                        char* aTmpBuffer,
+                        size_t aBufferLength,
+                        int aWordIdx);
 
-  #ifdef _CONVERT_NORMALIZE_
   // Length of multibyte character from first byte of Utf8
-  const unsigned char g_mblen_table_utf8[256];
+  const unsigned char iUTF8MultibyteLengthTable[256];
 
   const unsigned int KNormBufUnitSize;
   const unsigned int KCJKBytes;
-  std::map<std::string,std::string> iMap;
-  std::map<std::string,std::string>::iterator iMap_it;
+  std::map<std::string,std::string> iNormalizerMap;
 
   int CHomophoneNormalizer_Init(const char* aFile);
   size_t CHomophoneNormalizer_Normalize(const char* aSource, char* aOutput, size_t aLength);
   void CFtsTokenizerExtChinese_ReserveStringCapacity(std::string& aString, size_t aSize, size_t aUnitSize);
-  #endif //_CONVERT_NORMALIZE_
 
-  std::string file_path;
-  FILE* aFileXdb;
-  xdb_header header;
-  TNodeInfoAttr node_ia;
-  
-  char tmp_buf[MAX_LINE_SIZE];
+  std::string iFilePath;
+  FILE* iFileXdb;
+  xdb_header iXdbHeader;
+  TNodeInfoAttr iNodeInfoAttr;
 
-  std::string token_item;
-  //std::vector<std::string> token_items;
+  char iTmpBuffer[MAX_LINE_SIZE];
 
-  std::map<std::string,int> token_map, token_map_with_one_word, token_map_opt;
-  std::map<std::string,int> suffix_token_map;
-  int token_idx;
-  
-  int line_no;
-  char* pline;
+  std::string iTokenItem;
 
-  std::ofstream ofs;
-  std::ifstream ifs;
-  std::string tmp_line;
+  int iTokenIndex;
+  std::map<std::string,int> iTokenMap, iTokenMapWithOneWord, iTokenMapOpt;
+  std::map<std::string,int> iSuffixTokenMap;
+  std::map<std::string,int> iAllAreaMap;
 
-  std::size_t pos;
-  std::string str1;
-  std::string str2;
-  int idx_tmp;
-  int idx_max;
-
-  size_t readSize;
-
-  std::map<std::string,int> all_area_map;
-  std::map<std::string,int>::iterator all_area_iter;
+  std::ofstream iOutputFile;
+  std::ifstream iInputFile;
+  std::string iTmpLine;
 
   bool Init();
   bool CollectTokens();
