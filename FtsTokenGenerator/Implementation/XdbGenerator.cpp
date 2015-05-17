@@ -57,7 +57,7 @@ bool CXdbGenerator::Run()
   std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
   std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
-  if (!openFile())
+  if (!OpenFile())
   {
     return false;
   }
@@ -134,7 +134,7 @@ bool CXdbGenerator::Run()
     }
     
     // save the word
-    primeIndex = getHashIndex((const unsigned char*)str, XDB_HASH_BASE, SCWS_XDICT_PRIME);
+    primeIndex = GetHashIndex((const unsigned char*)str, XDB_HASH_BASE, SCWS_XDICT_PRIME);
 
     int found = 0;
     for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); ((iter != nodes[primeIndex].end()) && (found == 0)); ++iter)
@@ -192,7 +192,7 @@ bool CXdbGenerator::Run()
 
       char part[512] = {0};
       strncpy(part, str, totalLength);
-      primeIndex = getHashIndex((const unsigned char*)part, XDB_HASH_BASE, SCWS_XDICT_PRIME);
+      primeIndex = GetHashIndex((const unsigned char*)part, XDB_HASH_BASE, SCWS_XDICT_PRIME);
 
       found = 0;
       for (std::vector<TNodeInfo>::iterator iter = nodes[primeIndex].begin(); ((iter != nodes[primeIndex].end()) && (0 == found)); ++iter)
@@ -222,7 +222,7 @@ bool CXdbGenerator::Run()
   {
     if (nodes[index].size() > MAX_NODE_COUNT)
     {
-      closeFile();
+      CloseFile();
       std::cout << "PRIME[ " << index << " ] illegal!!!  Count = " << nodes[index].size() << std::endl;
       return false;
     }
@@ -232,7 +232,7 @@ bool CXdbGenerator::Run()
 
   for (int index = 0; index < SCWS_XDICT_PRIME; index++)
   {
-    std::sort(nodes[index].begin(), nodes[index].end(), compareNode);
+    std::sort(nodes[index].begin(), nodes[index].end(), CompareNode);
   }
 
   std::cout << "\n\nWriting XDB to " << (GetConfig().GetOutputPath() + GetConfig().GetOutputXdb()) << std::endl;
@@ -274,7 +274,7 @@ bool CXdbGenerator::Run()
   #endif //ENABLE_LOG
 
     long filePosistion = ftell(iXdbFile);// save current position
-    writeSortedDataToXdb(0, nodes[index].size()-1, filePosistion, NO_FATHER, index, nodes[index].begin(), iXdbFile);
+    WriteSortedDataToXdb(0, nodes[index].size()-1, filePosistion, NO_FATHER, index, nodes[index].begin(), iXdbFile);
   }
 
   // update size
@@ -283,7 +283,7 @@ bool CXdbGenerator::Run()
   fseek(iXdbFile, 0L, SEEK_SET);
   fwrite(&xdbHeader, sizeof(TXdb_header), 1, iXdbFile);
 
-  closeFile();
+  CloseFile();
 
   return true;
 }
@@ -293,7 +293,7 @@ CXdbGeneratorConfig& CXdbGenerator::GetConfig()
   return iConfig;
 }
 
-int CXdbGenerator::getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const
+int CXdbGenerator::GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const
 {
   int length = strlen((char*)aKey);
 
@@ -307,13 +307,13 @@ int CXdbGenerator::getHashIndex(const unsigned char* aKey, int aHashBase, int aH
   return (aHashBase % aHashPrime);
 }
 
-bool CXdbGenerator::compareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2)
+bool CXdbGenerator::CompareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2)
 {
    int ret = strcmp((const char*)aNodeInfo1.k_data, (const char*)aNodeInfo2.k_data);
    return (ret < 0);
 }
 
-bool CXdbGenerator::openFile()
+bool CXdbGenerator::OpenFile()
 {
   std::string tempFilePath = GetConfig().iInputPath + GetConfig().iInputTokenList;
   iInputTokenListFile = fopen(tempFilePath.c_str(), "r");
@@ -329,7 +329,7 @@ bool CXdbGenerator::openFile()
   iXdbFile = fopen(tempFilePath.c_str(), "wb");
   if (iXdbFile == NULL)
   {
-    closeFile();
+    CloseFile();
     std::cout << "[ERROR] Unable to create xdb file :" << tempFilePath << std::endl;
     return false;
   }
@@ -339,7 +339,7 @@ bool CXdbGenerator::openFile()
   iLogFile = fopen(tempFilePath.c_str(), "w");
   if (iLogFile == NULL)
   {
-    closeFile();
+    CloseFile();
     std::cout << "[ERROR] Unable to create log file :" << tempFilePath << std::endl;
     return false;
   }
@@ -349,7 +349,7 @@ bool CXdbGenerator::openFile()
 
   if (iLogRepeatPathFile == NULL)
   {
-    closeFile();
+    CloseFile();
     std::cout << "[ERROR] Unable to create log repeat path file :" << tempFilePath << std::endl;
     return false;
   }
@@ -357,7 +357,7 @@ bool CXdbGenerator::openFile()
   return true;
 }
 
-void CXdbGenerator::closeFile()
+void CXdbGenerator::CloseFile()
 {
   if (iInputTokenListFile != NULL)
   {
@@ -386,7 +386,7 @@ void CXdbGenerator::closeFile()
 
 }
 
-void CXdbGenerator::generateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir)
+void CXdbGenerator::GenerateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir)
 {
   int diff = aEnd - aStart;
   int avg = diff/2;
@@ -435,7 +435,7 @@ void CXdbGenerator::generateBtreeNodeIndex(int aStart, int aEnd, int aFather, in
     aIter[aStart-1].level = aLevel;
     aIter[aStart-1].father = aFather;
     
-    return generateBtreeNodeIndex(aEnd, aEnd, aStart, aLevel + 1, aIter, DIR_RIGHT);
+    return GenerateBtreeNodeIndex(aEnd, aEnd, aStart, aLevel + 1, aIter, DIR_RIGHT);
   }
   else
   {
@@ -458,13 +458,13 @@ void CXdbGenerator::generateBtreeNodeIndex(int aStart, int aEnd, int aFather, in
   }
 
   // travel left
-  generateBtreeNodeIndex(aStart, mid - 1, mid, aLevel + 1, aIter, DIR_LEFT);
+  GenerateBtreeNodeIndex(aStart, mid - 1, mid, aLevel + 1, aIter, DIR_LEFT);
 
   // travel left+1
-  generateBtreeNodeIndex(mid + 1, aEnd, mid, aLevel + 1, aIter, DIR_RIGHT);
+  GenerateBtreeNodeIndex(mid + 1, aEnd, mid, aLevel + 1, aIter, DIR_RIGHT);
 }
 
-void CXdbGenerator::writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb)
+void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb)
 {
   int count = aEnd - aStart + 1;
   int mid = aStart + (count+1)/2 - 1;
@@ -511,7 +511,7 @@ void CXdbGenerator::writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
     fseek(aFileXdb, filePosistion, SEEK_SET);
 
     // write left node info.
-    writeSortedDataToXdb(aStart, newEnd, filePosistion, aNodeOffset, aPrime, aIter, aFileXdb);
+    WriteSortedDataToXdb(aStart, newEnd, filePosistion, aNodeOffset, aPrime, aIter, aFileXdb);
   }
 
   // Right node first
@@ -530,6 +530,6 @@ void CXdbGenerator::writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
     fwrite(&tmpItemSize, sizeof(unsigned int), 1, aFileXdb);
     fseek(aFileXdb, filePosistion, SEEK_SET);
 
-    writeSortedDataToXdb(newStart, aEnd, filePosistion, aNodeOffset, aPrime, aIter, aFileXdb);
+    WriteSortedDataToXdb(newStart, aEnd, filePosistion, aNodeOffset, aPrime, aIter, aFileXdb);
   }
 }

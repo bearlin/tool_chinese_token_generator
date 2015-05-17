@@ -69,12 +69,12 @@ private:
 #endif //ENABLE_LOG
   // Length of multibyte character from first byte of Utf8
   const unsigned char iUTF8MultibyteLengthTable[256];
-  int getHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const;
-  void generateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir);
-  void writeSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb);
-  bool openFile();
-  void closeFile();
-  static bool compareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2);
+  int GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const;
+  void GenerateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir);
+  void WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb);
+  bool OpenFile();
+  void CloseFile();
+  static bool CompareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2);
 };
 
 #endif // XDB_GENERATOR_H
