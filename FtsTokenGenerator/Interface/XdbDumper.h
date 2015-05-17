@@ -45,6 +45,9 @@
     #define NORMAL_EXP_REPEAT "normal_export_repeat.txt"  // normalize export repeat file
   #endif
 
+static const int KSzLogSize = 1024;
+static const int KMblenTableUTF8Size = 256;
+  
 class CXdbDumper
 {
 public:
@@ -77,31 +80,32 @@ private:
     char attr[3];
   } node_content;
 
-  FILE *gLog;
-  FILE *gLogDetail;
+  FILE *iLog;
+  FILE *iLogDetail;
 
   #ifdef _CONVERT_NORMALIZE_
-  std::map<std::string, std::string>  g_normalize_hash;
-  FILE *gNormalizeLog;
+  std::map<std::string, std::string>  iNormalizeHash;
+  FILE *iNormalizeLog;
 
   // For repeat normalized tokens log.
-  std::map<std::string,node_content> nor_map; //this map will save normalized string and it's node_content informations.
-  std::map<std::string,std::string> first_nor_to_ori_map; //we will remember the first original_string -> normalized_string pair.
-  std::vector<std::string> nor_repeat_vector;
-  FILE *gNormalizeRepeatLog;
+  std::map<std::string,node_content> iNormalizeMap; //this map will save normalized string and it's node_content informations.
+  std::map<std::string,std::string> iFirstNormalizeToOriginalMap; //we will remember the first original_string -> normalized_string pair.
+  std::vector<std::string> iNormalizeRepeatVector;
+  FILE *iNormalizeRepeatLog;
 
-  const unsigned char _mblen_table_utf8[256];
+  const unsigned char _mblen_table_utf8[KMblenTableUTF8Size];
   #endif //_CONVERT_NORMALIZE_
 
-  std::string file_path;
+  std::string iFilePath;
 
-  unsigned long word_count;
-  char szLog[1024];
+  unsigned long iWordCount;
+  char iSzLog[KSzLogSize];
   //unsigned int XDB_MAXKLEN = 0xf0;
-  int gPrime,gHashBase;
+  int iPrime;
+  int iHashBase;
 
-  int _get_index(unsigned char* key, int hash_base, int hash_prime );
-  void get_record(FILE *fd, unsigned int off, unsigned int len, int direction, int level, const char* father );
+  int GetIndex(unsigned char* aKey, int aHashBase, int aHashPrime);
+  void GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength, int aDirection, int aLevel, const char* aFather);
 };
 
 #endif // __XDB_DUMPER_H__
