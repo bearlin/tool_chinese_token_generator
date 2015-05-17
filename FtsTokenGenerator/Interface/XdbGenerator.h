@@ -68,7 +68,7 @@ private:
   FILE* iLogRepeatPathFile;
 #endif //ENABLE_LOG
   // Length of multibyte character from first byte of Utf8
-  const unsigned char iUTF8MultibyteLengthTable[256];
+  static const unsigned char iUTF8MultibyteLengthTable[256];
   int GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const;
   void GenerateBtreeNodeIndex(int aStart, int aEnd, int aFather, int aLevel, std::vector<TNodeInfo>::iterator aIter, int aDir);
   void WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNodeOffset, unsigned int aFatherOffset, int aPrime, std::vector<TNodeInfo>::iterator aIter, FILE *aFileXdb);

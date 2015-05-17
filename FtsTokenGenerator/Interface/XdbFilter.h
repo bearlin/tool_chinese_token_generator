@@ -20,6 +20,10 @@
 #include "xdict.h"
 #include "scws.h"
 
+#if defined(WIN32)
+  #define strcasecmp _stricmp
+#endif
+
 // Use xdb_filter tool to filter, optimize and generate tokens list according to TomTom Addresses/POIs, steps: 
 // 1. Dump all Addresses/POIs from TomTom map(Taiwan or China).
 // 2. Use xdb_filter tool, xdb_filter will send these Addresses/POIs to SCWS to get basic TomTom tokens list, 
@@ -169,7 +173,7 @@ private:
                         int aWordIdx);
 
   // Length of multibyte character from first byte of Utf8
-  const unsigned char iUTF8MultibyteLengthTable[256];
+  static const unsigned char iUTF8MultibyteLengthTable[256];
 
   const unsigned int KNormBufUnitSize;
   const unsigned int KCJKBytes;
