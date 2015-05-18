@@ -5,6 +5,20 @@
 #include "XdbDumper.h"
 #include <iostream>
 
+static const int KKeyNameSize = 256;
+static const int KAttributeSize = 4;
+
+#ifdef _CONVERT_NORMALIZE_
+static const int KSzLineSize = 256;
+static const int KSzSourceSize = 4;
+static const int KSzdestinationSize = 4;
+static const int KSzLinePrevSize = 256;
+static const int KSzLineCurrSize = 256;
+static const int KNormalizeKeyNameSize = 256;
+static const int KChtUTF8Size = 4;
+#endif
+
+
 CXdbDumper::CXdbDumper() :
   iWordCount(0)
   ,iPrime(0)
@@ -86,9 +100,9 @@ bool CXdbDumper::Run()
 #ifdef _CONVERT_NORMALIZE_
   // Read mapping into tables
   FILE *normalizeFd;
-  char szLine[256], *pFind;
-  int tokenIndex,szLineLength;
-  char szSrc[4], szDst[4];
+  char szLine[KSzLineSize], *pFind;
+  int tokenIndex, szLineLength;
+  char szSource[KSzSourceSize], szDestination[KSzdestinationSize];
 
   GetConfig().iOutputDumpText = NORMAL_EXP_FILE;
   iFilePath = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
@@ -140,18 +154,18 @@ bool CXdbDumper::Run()
     {
       if (1 == tokenIndex) 
       {
-        memset(szSrc,0,sizeof(szSrc));
-        strcpy(szSrc, pFind);
+        memset(szSource, 0, KSzSourceSize);
+        strcpy(szSource, pFind);
       } 
       else if (2 == tokenIndex)
       {
-        memset(szDst,0,sizeof(szDst));
-        strcpy(szDst, pFind);
+        memset(szDestination, 0, KSzdestinationSize);
+        strcpy(szDestination, pFind);
       }
       pFind = strtok(NULL, ",");
       tokenIndex++;
     }
-    iNormalizeHash[szSrc] = szDst;
+    iNormalizeHash[szSource] = szDestination;
   }
   fclose(normalizeFd);
 #endif //_CONVERT_NORMALIZE_
@@ -182,20 +196,20 @@ bool CXdbDumper::Run()
     forwardOffset = travelIndex * 8 + 32;
     fseek(fd, forwardOffset, SEEK_SET);
     readSize = fread(&destinationOffset, 1, sizeof(unsigned int), fd);
-    if (readSize != sizeof(unsigned int)*1)
+    if (readSize != sizeof(unsigned int))
     {
       fputs("Reading error 02", stderr);
       exit(EXIT_FAILURE);
     }
 
     readSize = fread(&destinationLength, 1, sizeof(unsigned int), fd);
-    if (readSize != sizeof(unsigned int)*1)
+    if (readSize != sizeof(unsigned int))
     {
       fputs("Reading error 03", stderr);
       exit(EXIT_FAILURE);
     }
 
-    if( 0 != destinationLength ) 
+    if (0 != destinationLength) 
     {
       printf("travelIndex=%d destinationOffset=%d destinationLength=%d\n", travelIndex, destinationOffset, destinationLength);
       GetRecord(fd, destinationOffset, destinationLength, 0, 0, "");
@@ -210,7 +224,7 @@ bool CXdbDumper::Run()
 #ifdef _CONVERT_NORMALIZE_
   char *pFindPrev;
   char *pFindCurr;
-  char szLinePrev[256],szLineCurr[256];
+  char szLinePrev[KSzLinePrevSize], szLineCurr[KSzLineCurrSize];
   int repeatCnt;
   int toklen;
   int totalCnt;
@@ -222,14 +236,14 @@ bool CXdbDumper::Run()
   repeatCnt = 0;
   toklen = 0;
   totalCnt = 0;
-  for (std::vector<std::string>::iterator nor_repeat_vector_it = iNormalizeRepeatVector.begin() ; nor_repeat_vector_it != iNormalizeRepeatVector.end(); ++nor_repeat_vector_it)
+  for (std::vector<std::string>::iterator normalizeRepeatVectorIterator = iNormalizeRepeatVector.begin() ; normalizeRepeatVectorIterator != iNormalizeRepeatVector.end(); ++normalizeRepeatVectorIterator)
   {
     // Collect statistic informations.
     //----------------------------------------
     //printf("repeatCnt(%d)\n", repeatCnt);
-    if (nor_repeat_vector_it == iNormalizeRepeatVector.begin())
+    if (normalizeRepeatVectorIterator == iNormalizeRepeatVector.begin())
     {
-      strcpy(szLinePrev, (*nor_repeat_vector_it).c_str());
+      strcpy(szLinePrev, (*normalizeRepeatVectorIterator).c_str());
       //printf("11AA szLinePrev %s", szLinePrev);
       pFindPrev = strtok(szLinePrev, "<");
       //printf("11BB pFindPrev %s\n", pFindPrev);
@@ -238,7 +252,7 @@ bool CXdbDumper::Run()
     }
     else
     {
-      strcpy(szLineCurr, (*nor_repeat_vector_it).c_str());
+      strcpy(szLineCurr, (*normalizeRepeatVectorIterator).c_str());
       //printf("22AA szLineCurr %s", szLineCurr);
       pFindCurr = strtok(szLineCurr, "<");
       //printf("22BB pFindPrev %s\n", pFindPrev);
@@ -263,12 +277,12 @@ bool CXdbDumper::Run()
   //----------------------------------------
     
   // Just log this item.
-    fprintf(iNormalizeRepeatLog, "%s", (*nor_repeat_vector_it).c_str());
+    fprintf(iNormalizeRepeatLog, "%s", (*normalizeRepeatVectorIterator).c_str());
   }
   
   if (repeatCnt)
   {
-    fprintf(iNormalizeRepeatLog, "------------------------ [%d] x (%d) \n", toklen/3, repeatCnt);
+    fprintf(iNormalizeRepeatLog, "------------------------ [%d] x (%d) \n", toklen / 3, repeatCnt);
     totalCnt++;
   }
   if (totalCnt)
@@ -310,8 +324,8 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   unsigned int leftOffset, leftLength;
   unsigned int rightOffset, rightLength;
   char keyLength;
-  unsigned char keyName[256];
-  unsigned char attribute[4];
+  unsigned char keyName[KKeyNameSize];
+  unsigned char attribute[KAttributeSize];
   node_content content;
   size_t readSize = 0;
 
@@ -322,41 +336,41 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   //if (readSize != r_len*1) {fputs("Reading error 04", stderr); exit(EXIT_FAILURE);}
 
   readSize = fread(&leftOffset, 1, sizeof(unsigned int), aFd);
-  if (readSize != sizeof(unsigned int)*1)
+  if (readSize != sizeof(unsigned int))
   {
     fputs("Reading error 05", stderr);
     exit(EXIT_FAILURE);
   }
 
   readSize = fread(&leftLength, 1, sizeof(unsigned int), aFd);
-  if (readSize != sizeof(unsigned int)*1)
+  if (readSize != sizeof(unsigned int))
   {
     fputs("Reading error 06", stderr);
     exit(EXIT_FAILURE);
   }
 
   readSize = fread(&rightOffset, 1, sizeof(unsigned int), aFd);
-  if (readSize != sizeof(unsigned int)*1)
+  if (readSize != sizeof(unsigned int))
   {
     fputs("Reading error 07", stderr);
     exit(EXIT_FAILURE);
   }
 
   readSize = fread(&rightLength, 1, sizeof(unsigned int), aFd);
-  if (readSize != sizeof(unsigned int)*1)
+  if (readSize != sizeof(unsigned int))
   {
     fputs("Reading error 08", stderr);
     exit(EXIT_FAILURE);
   }
 
   readSize = fread(&keyLength, 1, sizeof(unsigned char), aFd);
-  if (readSize != sizeof(unsigned char)*1)
+  if (readSize != sizeof(unsigned char))
   {
     fputs("Reading error 09", stderr);
     exit(EXIT_FAILURE);
   }
 
-  memset(keyName, 0, sizeof(keyName));
+  memset(keyName, 0, KKeyNameSize);
   //key_name[0] = '\"';
   //readSize = fread(&key_name[0], sizeof(unsigned char), k_len, fd );
   //if (readSize != sizeof(unsigned char)*k_len) {fputs("Reading error 10", stderr); exit(EXIT_FAILURE);}
@@ -370,7 +384,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   //key_name[k_len+2] = '\n';
   //fputs((const char*)key_name, iLog);
   readSize = fread(&content, 1, sizeof(node_content), aFd);
-  if (readSize != sizeof(node_content)*1)
+  if (readSize != sizeof(node_content))
   {
     fputs("Reading error 12", stderr);
     exit(EXIT_FAILURE);
@@ -410,7 +424,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   // Detail log
 #endif
 
-  memset(attribute, 0, 4);
+  memset(attribute, 0, KAttributeSize);
 #ifdef _XDB_GEN_TOOL_EXPORT_
   // OWN toolsusage
   memcpy(attribute, content.attr, 3);
@@ -420,30 +434,30 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 #endif
 
 #ifdef _CONVERT_NORMALIZE_
-  unsigned char normalKeyName[256];
-  unsigned char chtUTF8[4];
+  unsigned char normalizeKeyName[KNormalizeKeyNameSize];
+  unsigned char chtUTF8[KChtUTF8Size];
   int keyLength;
   int charUTF8Length;
   std::string charUTF8;
   std::map<std::string, std::string> ::const_iterator findIterator;
 
   // convert by normalize hash
-  memset(normalKeyName, 0, sizeof(normalKeyName));
+  memset(normalizeKeyName, 0, KNormalizeKeyNameSize);
 
   keyLength = strlen((char*)keyName);
 
-  for (int z =0; z < keyLength; )
+  for (int index = 0; index < keyLength; )
   {
-    charUTF8Length = _mblen_table_utf8[keyName[z]];
+    charUTF8Length = _mblen_table_utf8[keyName[index]];
 
     if (3 != charUTF8Length) 
     {
-      memcpy(&normalKeyName[z], &keyName[z], charUTF8Length);
+      memcpy(&normalizeKeyName[index], &keyName[index], charUTF8Length);
     } 
     else 
     {
-      memset(chtUTF8, 0, sizeof(chtUTF8));
-      memcpy(chtUTF8, &keyName[z], charUTF8Length);
+      memset(chtUTF8, 0, KChtUTF8Size);
+      memcpy(chtUTF8, &keyName[index], charUTF8Length);
 
       charUTF8.clear();
       charUTF8 += (char*)chtUTF8;
@@ -452,47 +466,47 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
       if (findIterator == iNormalizeHash.end()) 
       {
         printf("NOT Found  [%x][%x][%x]...................\n", chtUTF8[0], chtUTF8[1], chtUTF8[2]);
-        memcpy(&normalKeyName[z], &keyName[z], charUTF8Length);
+        memcpy(&normalizeKeyName[index], &keyName[index], charUTF8Length);
       } 
       else 
       {
-        memcpy(&normalKeyName[z], iNormalizeHash[charUTF8].c_str(), charUTF8Length);
+        memcpy(&normalizeKeyName[index], iNormalizeHash[charUTF8].c_str(), charUTF8Length);
       }
     }
 
-    z += charUTF8Length;
+    index += charUTF8Length;
   }
 
   // For repeat normalized tokens log.
   //-----------------------------------------------------------------
   if (keyLength > 3)
   {
-    std::string ori_str;
-    std::string nor_str;
-    std::map<std::string,node_content>::iterator nor_map_it;
-    std::vector<std::string>::iterator nor_repeat_vector_it;
+    std::string originalString;
+    std::string normalizeString;
+    std::map<std::string,node_content>::iterator normalizeMapIterator;
+    std::vector<std::string>::iterator normalizeRepeatVectorIterator;
 
-    ori_str = (char*)keyName;
-    nor_str = (char*)normalKeyName;
-    nor_map_it = iNormalizeMap.find(nor_str);
-    if (iNormalizeMap.end() != nor_map_it)
+    originalString = (char*)keyName;
+    normalizeString = (char*)normalizeKeyName;
+    normalizeMapIterator = iNormalizeMap.find(normalizeString);
+    if (iNormalizeMap.end() != normalizeMapIterator)
     {
       // This is repeat string.
       //printf("Repeat: [%s<=%s\t%f\t%f\t%d\t%s] v.s. ",nor_str.c_str(), iFirstNormalizeToOriginalMap[nor_str].c_str(), nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
       //printf("[%s<=%s\t%f\t%f\t%d\t%s]\n",normal_key_name, key_name, ct.tf, ct.idf, ct.flag, ct.attr);
 
       // get original one info.
-      sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n",nor_str.c_str(), iFirstNormalizeToOriginalMap[nor_str].c_str(), 
-              nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
+      sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n", normalizeString.c_str(), iFirstNormalizeToOriginalMap[normalizeString].c_str(), 
+              normalizeMapIterator->second.tf, normalizeMapIterator->second.idf, normalizeMapIterator->second.flag, normalizeMapIterator->second.attr);
       
       // is original one info in vector?
-      nor_repeat_vector_it = std::find(iNormalizeRepeatVector.begin(), iNormalizeRepeatVector.end(), iSzLog);
-      if (iNormalizeRepeatVector.end() != nor_repeat_vector_it)
+      normalizeRepeatVectorIterator = std::find(iNormalizeRepeatVector.begin(), iNormalizeRepeatVector.end(), iSzLog);
+      if (iNormalizeRepeatVector.end() != normalizeRepeatVectorIterator)
       {
         // original one alread log in vector, log just "repeat one".
 
         // repeat one
-        sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n",normalKeyName, keyName, content.tf, content.idf, content.flag, content.attr);
+        sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n", normalizeKeyName, keyName, content.tf, content.idf, content.flag, content.attr);
         iNormalizeRepeatVector.push_back(iSzLog);
       }
       else
@@ -503,21 +517,21 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
         iNormalizeRepeatVector.push_back(iSzLog);
 
         // repeat one
-        sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n",normalKeyName, keyName, content.tf, content.idf, content.flag, content.attr);
+        sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n", normalizeKeyName, keyName, content.tf, content.idf, content.flag, content.attr);
         iNormalizeRepeatVector.push_back(iSzLog);
       }
     }
     else
     {
       // This is first time we get this key, so save infos to iNormalizeMap and iFirstNormalizeToOriginalMap.
-      iNormalizeMap.insert(std::pair<std::string,node_content>(nor_str, content));
-      iFirstNormalizeToOriginalMap.insert(std::pair<std::string,std::string>(nor_str,ori_str));
+      iNormalizeMap.insert(std::pair<std::string,node_content>(normalizeString, content));
+      iFirstNormalizeToOriginalMap.insert(std::pair<std::string,std::string>(normalizeString, originalString));
     }
   }
   //-----------------------------------------------------------------
   
   memcpy(attribute, content.attr, 3);
-  sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", normalKeyName, content.tf, content.idf, content.flag, attribute);
+  sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", normalizeKeyName, content.tf, content.idf, content.flag, attribute);
   fputs(iSzLog, iNormalizeLog);
 #endif //_CONVERT_NORMALIZE_
 }
