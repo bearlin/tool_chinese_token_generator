@@ -11,6 +11,7 @@ static const int KAttributeSize = 4;
 #ifdef DETAIL_EXPORT_FILE
 static const int KNoDirection = 0;
 static const int KLeftDirection = 1;
+static const int KNodeAttributeDefaultValue = 0;
 #endif
 
 #ifdef CONVERT_NORMALIZE
@@ -63,19 +64,26 @@ CXdbDumper::~CXdbDumper()
   if (iLogDetail != NULL)
   {
     fclose(iLogDetail);
+    iLogDetail = NULL;
   }
+
   if (iLog != NULL)
   {
     fclose(iLog);
+    iLog = NULL;
   }
+
   #ifdef CONVERT_NORMALIZE
   if (iNormalizeLog != NULL)
   {
     fclose(iNormalizeLog);
+    iNormalizeLog = NULL;
   }
+
   if (iNormalizeRepeatLog != NULL)
   {
     fclose(iNormalizeRepeatLog);
+    iNormalizeRepeatLog = NULL;
   }
   #endif  
 }
@@ -153,6 +161,7 @@ bool CXdbDumper::Run()
   {
     printf("iNormalizeLog err:%s\n", iFilePath.c_str());
     fclose(fd);
+    fd = NULL;
 #ifdef DETAIL_EXPORT_FILE
     fclose(iLogDetail);
     iLogDetail = NULL;
@@ -173,6 +182,7 @@ bool CXdbDumper::Run()
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
     fclose(fd);	
+    fd = NULL;
 #ifdef DETAIL_EXPORT_FILE
     fclose(iLogDetail);
     iLogDetail = NULL;
@@ -197,7 +207,9 @@ bool CXdbDumper::Run()
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
     fclose(fd);
+    fd = NULL;
     fclose(normalizeFd);
+    normalizeFd = NULL;
 #ifdef DETAIL_EXPORT_FILE
     fclose(iLogDetail);
     iLogDetail = NULL;
@@ -242,6 +254,7 @@ bool CXdbDumper::Run()
     iNormalizeHash[szSource] = szDestination;
   }
   fclose(normalizeFd);
+  normalizeFd = NULL;
 #endif //CONVERT_NORMALIZE
 
   printf("XDB header size=%ld\n", sizeof(TXdbHeader));
@@ -366,10 +379,14 @@ bool CXdbDumper::Run()
 #endif //CONVERT_NORMALIZE
 
   fclose(fd);
-  fclose(iLog); 
+  fd = NULL;
+  fclose(iLog);
+  iLog = NULL;
 #ifdef CONVERT_NORMALIZE
   fclose(iNormalizeLog); 
+  iNormalizeLog = NULL;
   fclose(iNormalizeRepeatLog); 
+  iNormalizeRepeatLog = NULL;
 #endif
 
   return true;
