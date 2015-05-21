@@ -274,7 +274,7 @@ bool CXdbGenerator::Run()
     }
   #endif //ENABLE_LOG
 
-    long filePosistion = ftell(iXdbFile);// save current position
+    long filePosistion = ftell(iXdbFile); // save current position
     WriteSortedDataToXdb(0, nodes[index].size()-1, filePosistion, NO_FATHER, index, nodes[index].begin(), iXdbFile);
   }
 
@@ -294,7 +294,7 @@ CXdbGeneratorConfig& CXdbGenerator::GetConfig()
   return iConfig;
 }
 
-int CXdbGenerator::GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime ) const
+int CXdbGenerator::GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime) const
 {
   int length = strlen((char*)aKey);
 
@@ -476,12 +476,12 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
   if (NO_FATHER == aFatherOffset)
   {
     long fileOffset = 32 + 8 * aPrime;
-    fseek(aFileXdb, fileOffset, SEEK_SET);// move to prime info
+    fseek(aFileXdb, fileOffset, SEEK_SET); // move to prime info
     fwrite(&aIter[mid].offset, sizeof(unsigned int), 1, aFileXdb);
     fwrite(&aIter[mid].length, sizeof(unsigned int), 1, aFileXdb);
   }
 
-  fseek(aFileXdb, aNodeOffset, SEEK_SET);// move to node start offset
+  fseek(aFileXdb, aNodeOffset, SEEK_SET); // move to node start offset
   fwrite(&aIter[mid].l_offset, sizeof(unsigned int), 1, aFileXdb);
   fwrite(&aIter[mid].l_length, sizeof(unsigned int), 1, aFileXdb);
   fwrite(&aIter[mid].r_offset, sizeof(unsigned int), 1, aFileXdb);
@@ -494,7 +494,7 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
   fwrite(&aIter[mid].attr, sizeof(char), 3, aFileXdb);
 
   // travel from left tree, if necessary
-  long filePosistion = ftell(aFileXdb);// save current position
+  long filePosistion = ftell(aFileXdb); // save current position
 
   int newMid;
   unsigned int tmpItemSize;
@@ -504,7 +504,7 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
     count = newEnd - aStart + 1;
     newMid = aStart + (count+1)/2 - 1;
 
-    fseek(aFileXdb, aNodeOffset, SEEK_SET);// move to node start offset
+    fseek(aFileXdb, aNodeOffset, SEEK_SET); // move to node start offset
     fwrite(&filePosistion, sizeof(unsigned int), 1, aFileXdb);
 
     tmpItemSize = 17 + aIter[newMid].k_length + 12;
@@ -516,7 +516,7 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
   }
 
   // Right node first
-  filePosistion = ftell(aFileXdb);// save current position
+  filePosistion = ftell(aFileXdb); // save current position
 
   if (aEnd >= (mid+1))
   {
@@ -524,7 +524,7 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
     count = aEnd - newStart + 1;
     newMid = newStart + (count + 1)/2 - 1;
 
-    fseek(aFileXdb, aNodeOffset + 8, SEEK_SET);// move to node start offset
+    fseek(aFileXdb, aNodeOffset + 8, SEEK_SET); // move to node start offset
     fwrite(&filePosistion, sizeof(unsigned int), 1, aFileXdb);
 
     tmpItemSize = 17 + aIter[newMid].k_length + 12;
