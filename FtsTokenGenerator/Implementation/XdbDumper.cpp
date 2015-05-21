@@ -8,7 +8,7 @@
 static const int KKeyNameSize = 256;
 static const int KAttributeSize = 4;
 
-#ifdef _CONVERT_NORMALIZE_
+#ifdef CONVERT_NORMALIZE_FILENAME
 static const int KSzLineSize = 256;
 static const int KSzSourceSize = 4;
 static const int KSzdestinationSize = 4;
@@ -16,15 +16,10 @@ static const int KSzLinePrevSize = 256;
 static const int KSzLineCurrSize = 256;
 static const int KNormalizeKeyNameSize = 256;
 static const int KChtUTF8Size = 4;
-#endif
+static const int KSourceTokenIndex = 1;
+static const int KDestinationTokenIndex = 2;
 
-
-CXdbDumper::CXdbDumper() :
-  iWordCount(0)
-  ,iPrime(0)
-  ,iHashBase(0)
-  #ifdef _CONVERT_NORMALIZE_
-  , _mblen_table_utf8 {
+const unsigned char CXdbDumper::iMblenTableUTF8[KMblenTableUTF8Size] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -40,8 +35,21 @@ CXdbDumper::CXdbDumper() :
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 }
-  #endif //_CONVERT_NORMALIZE_
+  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 };
+#endif
+
+
+
+CXdbDumper::CXdbDumper() :
+  iWordCount(0)
+  ,iPrime(0)
+  ,iHashBase(0)
+  ,iLogDetail(NULL)
+  ,iLog(NULL)
+#ifdef CONVERT_NORMALIZE_FILENAME
+  ,iNormalizeLog(NULL)
+  ,iNormalizeRepeatLog(NULL)
+#endif  
 {
   std::cout << "CXdbDumper" << std::endl;
 }
@@ -49,6 +57,24 @@ CXdbDumper::CXdbDumper() :
 CXdbDumper::~CXdbDumper()
 {
   std::cout << "~CXdbDumper" << std::endl;
+  if (NULL == iLogDetail)
+  {
+    fclose(iLogDetail);
+  }
+  if (NULL == iLog)
+  {
+    fclose(iLog);
+  }
+  #ifdef CONVERT_NORMALIZE_FILENAME
+  if (NULL == iNormalizeLog)
+  {
+    fclose(iLog);
+  }
+  if (NULL == iNormalizeRepeatLog)
+  {
+    fclose(iLog);
+  }
+  #endif  
 }
 
 bool CXdbDumper::Run()
@@ -66,23 +92,25 @@ bool CXdbDumper::Run()
   unsigned int destinationLength;
   size_t readSize = 0;
 
-#ifdef _DETAIL_EXPORT_
+#ifdef DETAIL_EXPORT_FILENAME
   iFilePath = GetConfig().iLogPath + DETAIL_EXP_FILE;
   iLogDetail = fopen(iFilePath.c_str(), "w");
   if (NULL == iLogDetail)
   {
     printf("iLogDetail err:%s\n", iFilePath.c_str());
+    fclose(iLogDetail);
     return false;
   }
   printf("iLogDetail :%s\n", iFilePath.c_str());
 #endif
-#ifdef _XDB_GEN_TOOL_EXPORT_
+#ifdef XDB_GEN_TOOL_EXPORT_FILENAME
   GetConfig().iOutputDumpText = SIMPLE_EXP_FILE;
   iFilePath = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
   iLog = fopen(iFilePath.c_str(), "w");
   if (NULL == iLog)
   {
     printf("iLog err:%s\n", iFilePath.c_str());
+    fclose(iLog);
     return false;
   }
   printf("iLog :%s\n", iFilePath.c_str());
@@ -93,11 +121,12 @@ bool CXdbDumper::Run()
   if (NULL == fd)
   {
     printf("fd err:%s\n", iFilePath.c_str());
+    fclose(fd);
     return false;
   }
   printf("fd :%s\n", iFilePath.c_str());
 
-#ifdef _CONVERT_NORMALIZE_
+#ifdef CONVERT_NORMALIZE_FILENAME
   // Read mapping into tables
   FILE *normalizeFd;
   char szLine[KSzLineSize], *pFind;
@@ -110,6 +139,7 @@ bool CXdbDumper::Run()
   if (NULL == iNormalizeLog)
   {
     printf("iNormalizeLog err:%s\n", iFilePath.c_str());
+    fclose(iNormalizeLog);
     return false;
   }
   printf("iNormalizeLog :%s\n", iFilePath.c_str());
@@ -119,6 +149,7 @@ bool CXdbDumper::Run()
   if (NULL == normalizeFd)
   {
     printf("normalizeFd err:%s\n", iFilePath.c_str());
+    fclose(normalizeFd);
     return false;
   }
   printf("normalizeFd :%s\n", iFilePath.c_str());
@@ -132,6 +163,7 @@ bool CXdbDumper::Run()
   if (NULL == iNormalizeRepeatLog)
   {
     printf("iNormalizeRepeatLog err:%s\n", iFilePath.c_str());
+    fclose(iNormalizeRepeatLog);
     return false;
   }
   printf("iNormalizeRepeatLog :%s\n", iFilePath.c_str());
@@ -150,14 +182,14 @@ bool CXdbDumper::Run()
 
     tokenIndex = 0;
     pFind = strtok(szLine, ",");
-    while (pFind) 
+    while (pFind != NULL) 
     {
-      if (1 == tokenIndex) 
+      if (KSourceTokenIndex == tokenIndex) 
       {
         memset(szSource, 0, KSzSourceSize);
         strcpy(szSource, pFind);
       } 
-      else if (2 == tokenIndex)
+      else if (KDestinationTokenIndex == tokenIndex)
       {
         memset(szDestination, 0, KSzdestinationSize);
         strcpy(szDestination, pFind);
@@ -168,7 +200,7 @@ bool CXdbDumper::Run()
     iNormalizeHash[szSource] = szDestination;
   }
   fclose(normalizeFd);
-#endif //_CONVERT_NORMALIZE_
+#endif //CONVERT_NORMALIZE_FILENAME
 
   printf("XDB header size=%ld\n", sizeof(struct xdb_header));
   readSize = fread(&xdbHeader, 1, sizeof(struct xdb_header), fd);
@@ -221,7 +253,7 @@ bool CXdbDumper::Run()
     travelIndex++;
   } while (travelIndex < xdbHeader.prime);
 
-#ifdef _CONVERT_NORMALIZE_
+#ifdef CONVERT_NORMALIZE_FILENAME
   char *pFindPrev;
   char *pFindCurr;
   char szLinePrev[KSzLinePrevSize], szLineCurr[KSzLineCurrSize];
@@ -289,11 +321,11 @@ bool CXdbDumper::Run()
   {
     fprintf(iNormalizeRepeatLog, "total_cnt:%d\n", totalCnt);
   }
-#endif //_CONVERT_NORMALIZE_
+#endif //CONVERT_NORMALIZE_FILENAME
 
   fclose(fd);
   fclose(iLog); 
-#ifdef _CONVERT_NORMALIZE_
+#ifdef CONVERT_NORMALIZE_FILENAME
   fclose(iNormalizeLog); 
   fclose(iNormalizeRepeatLog); 
 #endif
@@ -306,7 +338,7 @@ CXdbDumperConfig& CXdbDumper::GetConfig()
   return iConfig;
 }
 
-int CXdbDumper::GetIndex(unsigned char* aKey, int aHashBase, int aHashPrime)
+int CXdbDumper::GetIndex(const unsigned char* aKey, int aHashBase, int aHashPrime)
 {
   int length = strlen((char*)aKey);
   int hashNumber = aHashBase;
@@ -409,7 +441,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   //sprintf(szLog, "%s\n", key_name ); 
 
-#ifdef _DETAIL_EXPORT_
+#ifdef DETAIL_EXPORT_FILENAME
   // Detail log
   sprintf(iSzLog, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
     aLevel, (0 == aDirection) ? 'N': (1 == aDirection) ?'L':'R', iWordCount, leftOffset, leftLength, rightOffset, rightLength, keyLength, aFather, 
@@ -425,7 +457,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 #endif
 
   memset(attribute, 0, KAttributeSize);
-#ifdef _XDB_GEN_TOOL_EXPORT_
+#ifdef XDB_GEN_TOOL_EXPORT_FILENAME
   // OWN toolsusage
   memcpy(attribute, content.attr, 3);
   sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", keyName, content.tf, content.idf, content.flag, attribute);
@@ -433,7 +465,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   // PHP usage
 #endif
 
-#ifdef _CONVERT_NORMALIZE_
+#ifdef CONVERT_NORMALIZE_FILENAME
   unsigned char normalizeKeyName[KNormalizeKeyNameSize];
   unsigned char chtUTF8[KChtUTF8Size];
   int keyLength;
@@ -448,7 +480,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   for (int index = 0; index < keyLength; )
   {
-    charUTF8Length = _mblen_table_utf8[keyName[index]];
+    charUTF8Length = iMblenTableUTF8[keyName[index]];
 
     if (3 != charUTF8Length) 
     {
@@ -533,6 +565,6 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   memcpy(attribute, content.attr, 3);
   sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", normalizeKeyName, content.tf, content.idf, content.flag, attribute);
   fputs(iSzLog, iNormalizeLog);
-#endif //_CONVERT_NORMALIZE_
+#endif //CONVERT_NORMALIZE_FILENAME
 }
 

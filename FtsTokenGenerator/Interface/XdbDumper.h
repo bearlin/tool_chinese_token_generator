@@ -17,13 +17,13 @@
 #include <algorithm>    // std::find std::sort
 
 // Select one of below macro:
-// _XDB_GEN_TOOL_EXPORT_ will use dict_cht.utf8.xdb as input and output all nodes to simple_export.txt.
-// _DETAIL_EXPORT_ will use dict_cht.utf8.xdb as input too, and output detail nodes information to detail_export.txt.
-#define _XDB_GEN_TOOL_EXPORT_
-//#define _DETAIL_EXPORT_
+// XDB_GEN_TOOL_EXPORT_FILENAME will use dict_cht.utf8.xdb as input and output all nodes to simple_export.txt.
+// DETAIL_EXPORT_FILENAME will use dict_cht.utf8.xdb as input too, and output detail nodes information to detail_export.txt.
+#define XDB_GEN_TOOL_EXPORT_FILENAME
+//#define DETAIL_EXPORT_FILENAME
 
-//_CONVERT_NORMALIZE_ + _XDB_GEN_TOOL_EXPORT_ will output all nodes to normal_export.txt, and its key will be normalized with char_pinyin_normalize_utf8.txt.
-//#define _CONVERT_NORMALIZE_
+//CONVERT_NORMALIZE_FILENAME + XDB_GEN_TOOL_EXPORT_FILENAME will output all nodes to normal_export.txt, and its key will be normalized with char_pinyin_normalize_utf8.txt.
+//#define CONVERT_NORMALIZE_FILENAME
 
 //[Normalization procedures]
 //[Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
@@ -34,13 +34,13 @@
 //step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
 // TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
 
-  #ifdef _DETAIL_EXPORT_
+  #ifdef DETAIL_EXPORT_FILENAME
     #define DETAIL_EXP_FILE "detail_export.txt"  // detail export file
   #endif
-  #ifdef _XDB_GEN_TOOL_EXPORT_
+  #ifdef XDB_GEN_TOOL_EXPORT_FILENAME
     #define SIMPLE_EXP_FILE "simple_export.txt"  // simple export file
   #endif
-  #ifdef _CONVERT_NORMALIZE_
+  #ifdef CONVERT_NORMALIZE_FILENAME
     #define NORMAL_EXP_FILE "normal_export.txt"  // normalize export file
     #define NORMAL_EXP_REPEAT "normal_export_repeat.txt"  // normalize export repeat file
   #endif
@@ -83,7 +83,7 @@ private:
   FILE *iLog;
   FILE *iLogDetail;
 
-  #ifdef _CONVERT_NORMALIZE_
+  #ifdef CONVERT_NORMALIZE_FILENAME
   std::map<std::string, std::string>  iNormalizeHash;
   FILE *iNormalizeLog;
 
@@ -93,8 +93,8 @@ private:
   std::vector<std::string> iNormalizeRepeatVector;
   FILE *iNormalizeRepeatLog;
 
-  const unsigned char _mblen_table_utf8[KMblenTableUTF8Size];
-  #endif //_CONVERT_NORMALIZE_
+  static const unsigned char iMblenTableUTF8[KMblenTableUTF8Size];
+  #endif //CONVERT_NORMALIZE_FILENAME
 
   std::string iFilePath;
 
@@ -104,7 +104,7 @@ private:
   int iPrime;
   int iHashBase;
 
-  int GetIndex(unsigned char* aKey, int aHashBase, int aHashPrime);
+  int GetIndex(const unsigned char* aKey, int aHashBase, int aHashPrime);
   void GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength, int aDirection, int aLevel, const char* aFather);
 };
 
