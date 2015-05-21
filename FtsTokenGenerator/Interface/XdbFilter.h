@@ -39,52 +39,45 @@
 //step 1: use xdb_filter tool to filter, optimize and generate tt_tokens_list according to TomTom Addresses/POIs.
 //step 2: use xdb_gen tool to generate a xdb(non-fuzzy) from this tt_tokens_list file.
 //step 3: use xdb_dump tool to generate the non-normalized/normalized token files from this non-fuzzy xdb(with the latest fts-{tc|sc}-n.tok file), then merge them to a merge_export file.
-//step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
-// TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
+//step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file
 
-#define MAP_INIT  // To allow xdb_filter starting from reload existent raw map.
-//#define ENABLE_USER_INTERACTIVE_CONTROL // To allow user interactive remove/add tokens.
+#define MAP_INIT  // To allow xdb_filter starting from reload existent raw map tokens
+//#define ENABLE_USER_INTERACTIVE_CONTROL // To allow user interactively remove/add tokens
 
-// Enable this macro will remove all tokens end with "路".
-#define REMOVE_FULL_TOKENS_WITH_SPECIAL_END  //"路"
+// Enable this macro will remove all tokens which end with "road" in Chinese
+#define REMOVE_FULL_TOKENS_WITH_SPECIAL_END
 
 #define MAX_LINE_SIZE (1024)
+#define MAX_TOKEN_SIZE (300)
+#define MAX_UTF8_CHARACTER_LENGTH (7)
+#define MAX_UTF16_TOKEN_LENGTH (10)
 
-////////////////////// FILE PATH /////////////////////////////////////
-#define OUT_PATH_S00_SUFFIX_TOK_MAP "s00_log_map_suffix_tokens.txt"
-
-#define OUT_PATH_S01_NOT_CH "s01_log_tokens_not_ch.txt"
-#define OUT_PATH_S01_DUPLICATE "s01_log_tokens_duplicate.txt"
-#define OUT_PATH_S01_MAP_RAW "s01_log_map_raw.txt" //This is also the input file after disabled MAP_INIT.
-#define OUT_PATH_S01_MAP_RELOAD "s01_log_map_raw_reload.txt"
-
-#define OUT_PATH_S02_MAP_SUFFIX "s02_log_map_plus_suffix_tokens.txt"
-#define OUT_PATH_S02_LOG_AREA_NAME_FILE "s02_log_area_name_file.txt"
-#define OUT_PATH_S02_LOG_MAP_PLUS_AREA_NAME "s02_log_map_plus_area_name_tokens.txt"
-#define OUT_PATH_S02_LOG_REMOVE_TOK_FILE "s02_log_remove_tokens.txt"
-#define OUT_PATH_S02_LOG_MAP_AFTER_REMOVE_TOK "s02_log_map_minus_remove_tokens.txt"
-
-#define OUT_PATH_S03_MAP_WITH_ONE_WORDS "s03_log_map_plus_one_word_tokens.txt"
-#define OUT_PATH_S03_CH_ONE_WORD "s03_log_map_added_one_word_tokens.txt"
-
-#define OUT_PATH_S04_CH_NOT_FOUND "s04_log_tokens_not_found.txt"
-#define OUT_PATH_S04_CH_PART "s04_log_tokens_part.txt"
-#define OUT_PATH_S04_CH_FULL "s04_log_tokens_full.txt"
-
-#define OUT_PATH_S05_FOUND_SUFFIX "s05_log_tokens_found_suffix_tokens.txt"
-#define OUT_PATH_S05_ADDED_REMOVED_SUFFIX "s05_log_tokens_added_removed_suffix.txt"
-#define OUT_PATH_S05_MAP_OPTIMIZED "s05_log_map_optimized.txt"
+#define OUT_FILE_S00_SUFFIX_TOK_MAP "s00_log_map_suffix_tokens.txt"
+#define OUT_FILE_S01_NOT_CH "s01_log_tokens_not_ch.txt"
+#define OUT_FILE_S01_DUPLICATE "s01_log_tokens_duplicate.txt"
+#define OUT_FILE_S01_MAP_RAW "s01_log_map_raw.txt" //This is also the input file after disabled MAP_INIT
+#define OUT_FILE_S01_MAP_RELOAD "s01_log_map_raw_reload.txt"
+#define OUT_FILE_S02_MAP_SUFFIX "s02_log_map_plus_suffix_tokens.txt"
+#define OUT_FILE_S02_LOG_AREA_NAME_FILE "s02_log_area_name_file.txt"
+#define OUT_FILE_S02_LOG_MAP_PLUS_AREA_NAME "s02_log_map_plus_area_name_tokens.txt"
+#define OUT_FILE_S02_LOG_REMOVE_TOK_FILE "s02_log_remove_tokens.txt"
+#define OUT_FILE_S02_LOG_MAP_AFTER_REMOVE_TOK "s02_log_map_minus_remove_tokens.txt"
+#define OUT_FILE_S03_MAP_WITH_ONE_WORDS "s03_log_map_plus_one_word_tokens.txt"
+#define OUT_FILE_S03_CH_ONE_WORD "s03_log_map_added_one_word_tokens.txt"
+#define OUT_FILE_S04_CH_NOT_FOUND "s04_log_tokens_not_found.txt"
+#define OUT_FILE_S04_CH_PART "s04_log_tokens_part.txt"
+#define OUT_FILE_S04_CH_FULL "s04_log_tokens_full.txt"
+#define OUT_FILE_S05_FOUND_SUFFIX "s05_log_tokens_found_suffix_tokens.txt"
+#define OUT_FILE_S05_ADDED_REMOVED_SUFFIX "s05_log_tokens_added_removed_suffix.txt"
+#define OUT_FILE_S05_MAP_OPTIMIZED "s05_log_map_optimized.txt"
 #ifdef REMOVE_FULL_TOKENS_WITH_SPECIAL_END
-#define OUT_PATH_S05_REMOVED_SPECIAL_END_TOKENS "s05_log_tokens_remove_special_end.txt"
+#define OUT_FILE_S05_REMOVED_SPECIAL_END_TOKENS "s05_log_tokens_remove_special_end.txt"
 #endif
-
-#define OUT_PATH_S06_SUFFIX_NOT_FOUND "s06_log_tokens_not_found.txt"
-#define OUT_PATH_S06_SUFFIX_PART "s06_log_tokens_part.txt"
-#define OUT_PATH_S06_SUFFIX_FULL "s06_log_tokens_full.txt"
-
-#define OUT_PATH_S07_SUFFIX_FULL_NOR "s07_log_tokens_full_normalized.txt"
-#define OUT_PATH_S08_SUFFIX_FULL_FUZZY "s08_log_tokens_full_fuzzy.txt"
-////////////////////// FILE PATH /////////////////////////////////////
+#define OUT_FILE_S06_SUFFIX_NOT_FOUND "s06_log_tokens_not_found.txt"
+#define OUT_FILE_S06_SUFFIX_PART "s06_log_tokens_part.txt"
+#define OUT_FILE_S06_SUFFIX_FULL "s06_log_tokens_full.txt"
+#define OUT_FILE_S07_SUFFIX_FULL_NOR "s07_log_tokens_full_normalized.txt"
+#define OUT_FILE_S08_SUFFIX_FULL_FUZZY "s08_log_tokens_full_fuzzy.txt"
 
 class CXdbFilter
 {
@@ -101,6 +94,9 @@ private:
   char iBuffer[MAX_LINE_SIZE];
 
   ////////////////////// Search Node /////////////////////////////////////
+  #define SEARCH_TOKEN_INFO_FOUND (0)
+  #define SEARCH_TOKEN_INFO_NOT_FOUND (-1)
+
   /* header struct */
   typedef struct TNodeInfoHeader
   {
@@ -125,9 +121,6 @@ private:
     int length;
   } TPrimeNode;
 
-  #define SEARCH_TOKEN_INFO_FOUND (0)
-  #define SEARCH_TOKEN_INFO_NOT_FOUND (-1)
-
   int GetHashIndex( const unsigned char*  aKey,
                     int                   aHashBase,
                     int                   aHashPrime) const;
@@ -140,22 +133,25 @@ private:
                       FILE*           aFileXdb);
   ////////////////////// Search Node /////////////////////////////////////
 
+  ////////////////////// UTF8 Handling /////////////////////////////////////
   #define UTF8_CHAR_KIND_NONE (0)
   #define UTF8_CHAR_KIND_1 (1)  // ASCII(0x00~0x7F, 1 BYTE in UTF8)
   #define UTF8_CHAR_KIND_2 (2)  // Latin Characters(First byte range:0xC0-0xDF, 2 BYTE in UTF8)
   #define UTF8_CHAR_KIND_3 (3)  // CJKS  Characters(First byte range:0xE0-0xEF, 3 BYTE in UTF8)
   #define UTF8_CHAR_KIND_4 (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
+
   int GetUTF8CharKind(unsigned char aChar);
   int ConvUTF8ToUTF16(unsigned char* aUtf8CodeData,
                       unsigned int* aData,
                       int aDataLength);
   int IsAllChineseToken(const char* aTokenContent,
-                        int aTokenLen);
+                        int aTokenLength);
   int IsValidChineseToken(scws_res_t  aScwsCur,
                           const char* aTokenContent);
   int GetTokenTotalChineseWordCount(const char* aString);
   int GetNthChineseWordByteOffset(const char* aString,
                                   int aNthChineseWord);
+  ////////////////////// UTF8 Handling /////////////////////////////////////
 
   ////////////////////// SuffixTokenMap /////////////////////////////////////
   int InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap);
@@ -164,13 +160,13 @@ private:
 
   int IsTokenEndWithIgnoredSuffix(const char* aString,
                                   int* aSuffixOffset,
-                                  char* aTmpBuffer,
+                                  char* aTempBuffer,
                                   int aMaxSuffixTokenLength,
                                   std::map<std::string,int>& aSuffixTokenMap);
   int GetOneWordInToken(const char* aString,
-                        char* aTmpBuffer,
+                        char* aTempBuffer,
                         size_t aBufferLength,
-                        int aWordIdx);
+                        int aWordIndex);
 
   // Length of multibyte character from first byte of Utf8
   static const unsigned char iUTF8MultibyteLengthTable[256];
@@ -180,7 +176,7 @@ private:
   std::map<std::string,std::string> iNormalizerMap;
 
   int CHomophoneNormalizer_Init(const char* aFile);
-  size_t CHomophoneNormalizer_Normalize(const char* aSource, char* aOutput, size_t aLength);
+  size_t CHomophoneNormalizer_Normalize(const char* aSourceString, char* aOutputString, size_t aLength);
   void CFtsTokenizerExtChinese_ReserveStringCapacity(std::string& aString, size_t aSize, size_t aUnitSize);
 
   std::string iFilePath;
@@ -188,7 +184,7 @@ private:
   xdb_header iXdbHeader;
   TNodeInfoAttr iNodeInfoAttr;
 
-  char iTmpBuffer[MAX_LINE_SIZE];
+  char iTempBuffer[MAX_LINE_SIZE];
 
   std::string iTokenItem;
 
@@ -199,7 +195,7 @@ private:
 
   std::ofstream iOutputFile;
   std::ifstream iInputFile;
-  std::string iTmpLine;
+  std::string iTempLine;
 
   bool Init();
   bool CollectTokens();
