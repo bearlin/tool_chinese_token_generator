@@ -154,6 +154,7 @@ private:
   ////////////////////// UTF8 Handling /////////////////////////////////////
 
   ////////////////////// SuffixTokenMap /////////////////////////////////////
+  bool IsBufferStartWithBOM(char* aBuffer);
   int InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap);
   int GetMaxSuffixTokenLength(std::map<std::string,int>& aSuffixTokenMap);
   ////////////////////// SuffixTokenMap /////////////////////////////////////
@@ -173,6 +174,7 @@ private:
 
   const unsigned int KNormBufUnitSize;
   const unsigned int KCJKBytes;
+  const unsigned int ASCIIBytes;
   std::map<std::string,std::string> iNormalizerMap;
 
   int CHomophoneNormalizer_Init(const char* aFile);

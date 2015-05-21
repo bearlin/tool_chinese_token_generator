@@ -25,6 +25,7 @@ const unsigned char CXdbFilter::iUTF8MultibyteLengthTable[256] = {
 CXdbFilter::CXdbFilter() :
   KNormBufUnitSize(0x200),
   KCJKBytes(3),
+  ASCIIBytes(1),
   iTokenIndex(0)
 {
   GetConfig().iOutputTokenList = OUT_FILE_S06_SUFFIX_FULL;
@@ -679,11 +680,11 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
     #ifdef REMOVE_FULL_TOKENS_WITH_SPECIAL_END
       // Just test if this token end with special word "road" in Chinese
       tempString = it->first;
-      std::string lastWord = tempString.substr(tempString.length()-3);
+      std::string lastWord = tempString.substr(tempString.length() - KCJKBytes);
       //std::cout<<"lastWord:["<<lastWord<<"]"<<std::endl;
       //UTF-8 code of "road" in Chinese = E8 B7 AF
       std::string specialWord;
-      specialWord.resize(3);
+      specialWord.resize(KCJKBytes);
       specialWord[0] = 0xE8;
       specialWord[1] = 0xB7;
       specialWord[2] = 0xAF;
@@ -951,7 +952,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   printf("fileStage07TokenInfoFullNormalized:%s\n", iFilePath.c_str());
 
   // Start converting.
-  normalizedText.resize(32);
+  normalizedText.resize(MAX_TOKEN_SIZE);
   while (fgets(iBuffer, sizeof(iBuffer), fileStage07TokenInfoFull))
   {
     lineNumber++;
@@ -979,7 +980,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
       //printf("Converting [%s] of %s", tokenBeginningPointer, iBuffer );
 
       // Normalizer
-      //normalizedText.resize(32);
+      //normalizedText.resize(MAX_TOKEN_SIZE);
       if (enableHPNormalize)
       {
         size_t res_len = CHomophoneNormalizer_Normalize(tokenBeginningPointer, &normalizedText[0], normalizedText.capacity());
@@ -1078,16 +1079,15 @@ int CXdbFilter::GetHashIndex( const unsigned char*  aKey,
                               int                   aHashPrime) const
 {
   int length = strlen((char*)aKey);
-  int hash = aHashBase;
 
   while (length--)
   {
-    hash += (int)(hash << 5);
-    hash ^= aKey[length];
-    hash &= 0x7fffffff;
+    aHashBase += (int)(aHashBase << 5);
+    aHashBase ^= aKey[length];
+    aHashBase &= 0x7fffffff;
   }
 
-  return (hash % aHashPrime);
+  return (aHashBase % aHashPrime);
 }
 
 int CXdbFilter::SearchTokenInfo(const char*     aTokenContent,
@@ -1341,13 +1341,13 @@ int CXdbFilter::IsAllChineseToken(const char* aTokenContent,
   int index = 0;
   int utf8CharKind;
   int returnLength;
-  unsigned int utf16Data[MAX_UTF16_TOKEN_LENGTH ];
+  unsigned int utf16Data[MAX_UTF16_TOKEN_LENGTH];
 
-  if (aTokenLength == 3)
+  if (aTokenLength == KCJKBytes)
   {
     returnLength = ConvUTF8ToUTF16((unsigned char*)aTokenContent, utf16Data, 10);
 
-    if (returnLength == 1)
+    if (returnLength == ASCIIBytes)
     {
       // check for symbol
       if ((utf16Data[0] <= 0x3400) || (utf16Data[0] >= 0xFAD9))
@@ -1375,7 +1375,7 @@ int CXdbFilter::IsAllChineseToken(const char* aTokenContent,
 int CXdbFilter::IsValidChineseToken(scws_res_t  aScwsCur,
                                     const char* aTokenContent)
 {
-  if (aScwsCur->len < 3)
+  if (aScwsCur->len < KCJKBytes)
   {
     return false;
   }
@@ -1473,6 +1473,19 @@ int CXdbFilter::GetNthChineseWordByteOffset(const char* aString,
 }
 
 ////////////////////// SuffixTokenMap /////////////////////////////////////
+bool CXdbFilter::IsBufferStartWithBOM(char* aBuffer)
+{
+
+  if (((unsigned char)0xEF == (unsigned char)aBuffer[0]) &&
+      ((unsigned char)0xBB == (unsigned char)aBuffer[1]) &&
+      ((unsigned char)0xBF == (unsigned char)aBuffer[2]))
+  {
+    return true;
+  }
+
+  return false;
+}
+
 int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
 {
   FILE* fileStage00SpecialSuffixTable;
@@ -1498,9 +1511,7 @@ int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
       //printf("1iBuffer[0]:0x%X ",iBuffer[0]);
       //printf("1iBuffer[1]:0x%X ",iBuffer[1]);
       //printf("1iBuffer[2]:0x%X\n",iBuffer[2]);
-      if (((unsigned char)0xEF==(unsigned char)iBuffer[0]) &&
-            ((unsigned char)0xBB==(unsigned char)iBuffer[1]) &&
-            ((unsigned char)0xBF==(unsigned char)iBuffer[2]))
+      if (IsBufferStartWithBOM(iBuffer))
       {
         for (int i = 0; i < (strlen(iBuffer)-2); i++)
         {
@@ -1510,7 +1521,7 @@ int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
     }
 
     strtok(iBuffer,"\n\r");
-    if (strlen(iBuffer) < 3)
+    if (strlen(iBuffer) < KCJKBytes)
     {
       continue;
     }
@@ -1621,7 +1632,7 @@ int CXdbFilter::GetOneWordInToken(const char* aString,
   memset(aTempBuffer, 0, aBufferLength);
   tokenLength = strlen(aString);
 
-  if (tokenLength < 3)
+  if (tokenLength < KCJKBytes)
   {
     return false;
   }
