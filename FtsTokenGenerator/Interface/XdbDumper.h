@@ -17,13 +17,13 @@
 #include <algorithm>    // std::find std::sort
 
 // Select one of below macro:
-// XDB_GEN_TOOL_EXPORT_FILENAME will use dict_cht.utf8.xdb as input and output all nodes to simple_export.txt.
-// DETAIL_EXPORT_FILENAME will use dict_cht.utf8.xdb as input too, and output detail nodes information to detail_export.txt.
-#define XDB_GEN_TOOL_EXPORT_FILENAME
-//#define DETAIL_EXPORT_FILENAME
+// XDB_GEN_TOOL_EXPORT_FILE will use dict_cht.utf8.xdb as input and output all nodes to simple_export.txt.
+// DETAIL_EXPORT_FILE will use dict_cht.utf8.xdb as input too, and output detail nodes information to detail_export.txt.
+#define XDB_GEN_TOOL_EXPORT_FILE
+//#define DETAIL_EXPORT_FILE
 
-//CONVERT_NORMALIZE_FILENAME + XDB_GEN_TOOL_EXPORT_FILENAME will output all nodes to normal_export.txt, and its key will be normalized with char_pinyin_normalize_utf8.txt.
-//#define CONVERT_NORMALIZE_FILENAME
+//CONVERT_NORMALIZE + XDB_GEN_TOOL_EXPORT_FILE will output all nodes to normal_export.txt, and its key will be normalized with char_pinyin_normalize_utf8.txt.
+//#define CONVERT_NORMALIZE
 
 //[Normalization procedures]
 //[Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
@@ -34,15 +34,15 @@
 //step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
 // TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
 
-  #ifdef DETAIL_EXPORT_FILENAME
-    #define DETAIL_EXP_FILE "detail_export.txt"  // detail export file
+  #ifdef DETAIL_EXPORT_FILE
+    #define DETAIL_EXPORT_FILENAME "detail_export.txt"  // detail export file
   #endif
-  #ifdef XDB_GEN_TOOL_EXPORT_FILENAME
-    #define SIMPLE_EXP_FILE "simple_export.txt"  // simple export file
+  #ifdef XDB_GEN_TOOL_EXPORT_FILE
+    #define SIMPLE_EXPORT_FILENAME "simple_export.txt"  // simple export file
   #endif
-  #ifdef CONVERT_NORMALIZE_FILENAME
-    #define NORMAL_EXP_FILE "normal_export.txt"  // normalize export file
-    #define NORMAL_EXP_REPEAT "normal_export_repeat.txt"  // normalize export repeat file
+  #ifdef CONVERT_NORMALIZE
+    #define NORMAL_EXPORT_FILENAME "normal_export.txt"  // normalize export file
+    #define NORMAL_EXPORT_REPEAT_FILENAME "normal_export_repeat.txt"  // normalize export repeat file
   #endif
 
 static const int KSzLogSize = 1024;
@@ -61,7 +61,7 @@ private:
   CXdbDumperConfig iConfig;
 
   /* header struct */
-  struct xdb_header
+  typedef struct TXdbHeader
   {
     char tag[3];
     unsigned char ver;
@@ -70,31 +70,31 @@ private:
     unsigned int fsize;
     float check;
     char unused[12];
-  };
+  } TXdbHeader;
 
-  typedef struct _node_content
+  typedef struct TNodeContent
   {
     float tf;
     float idf;
     unsigned char flag;
     char attr[3];
-  } node_content;
+  } TNodeContent;
 
-  FILE *iLog;
-  FILE *iLogDetail;
+  FILE* iLog;
+  FILE* iLogDetail;
 
-  #ifdef CONVERT_NORMALIZE_FILENAME
-  std::map<std::string, std::string>  iNormalizeHash;
-  FILE *iNormalizeLog;
+  #ifdef CONVERT_NORMALIZE
+  std::map<std::string, std::string> iNormalizeHash;
+  FILE* iNormalizeLog;
 
   // For repeat normalized tokens log.
-  std::map<std::string,node_content> iNormalizeMap; //this map will save normalized string and it's node_content informations.
-  std::map<std::string,std::string> iFirstNormalizeToOriginalMap; //we will remember the first original_string -> normalized_string pair.
+  std::map<std::string, TNodeContent> iNormalizeMap; //this map will save normalized string and it's node_content informations.
+  std::map<std::string, std::string> iFirstNormalizeToOriginalMap; //we will remember the first original_string -> normalized_string pair.
   std::vector<std::string> iNormalizeRepeatVector;
-  FILE *iNormalizeRepeatLog;
+  FILE* iNormalizeRepeatLog;
 
   static const unsigned char iMblenTableUTF8[KMblenTableUTF8Size];
-  #endif //CONVERT_NORMALIZE_FILENAME
+  #endif //CONVERT_NORMALIZE
 
   std::string iFilePath;
 

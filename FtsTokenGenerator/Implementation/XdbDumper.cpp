@@ -8,7 +8,7 @@
 static const int KKeyNameSize = 256;
 static const int KAttributeSize = 4;
 
-#ifdef CONVERT_NORMALIZE_FILENAME
+#ifdef CONVERT_NORMALIZE
 static const int KSzLineSize = 256;
 static const int KSzSourceSize = 4;
 static const int KSzdestinationSize = 4;
@@ -46,33 +46,31 @@ CXdbDumper::CXdbDumper() :
   ,iHashBase(0)
   ,iLogDetail(NULL)
   ,iLog(NULL)
-#ifdef CONVERT_NORMALIZE_FILENAME
+#ifdef CONVERT_NORMALIZE
   ,iNormalizeLog(NULL)
   ,iNormalizeRepeatLog(NULL)
 #endif  
 {
-  std::cout << "CXdbDumper" << std::endl;
 }
 
 CXdbDumper::~CXdbDumper()
 {
-  std::cout << "~CXdbDumper" << std::endl;
-  if (NULL == iLogDetail)
+  if (iLogDetail != NULL)
   {
     fclose(iLogDetail);
   }
-  if (NULL == iLog)
+  if (iLog != NULL)
   {
     fclose(iLog);
   }
-  #ifdef CONVERT_NORMALIZE_FILENAME
-  if (NULL == iNormalizeLog)
+  #ifdef CONVERT_NORMALIZE
+  if (iNormalizeLog != NULL)
   {
-    fclose(iLog);
+    fclose(iNormalizeLog);
   }
-  if (NULL == iNormalizeRepeatLog)
+  if (iNormalizeRepeatLog != NULL)
   {
-    fclose(iLog);
+    fclose(iNormalizeRepeatLog);
   }
   #endif  
 }
@@ -84,33 +82,35 @@ bool CXdbDumper::Run()
   std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
   std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
 
-  FILE *fd;
-  struct xdb_header xdbHeader;
+  FILE* fd;
+  TXdbHeader xdbHeader;
   int travelIndex;
   unsigned int forwardOffset;
   unsigned int destinationOffset;
   unsigned int destinationLength;
   size_t readSize = 0;
 
-#ifdef DETAIL_EXPORT_FILENAME
-  iFilePath = GetConfig().iLogPath + DETAIL_EXP_FILE;
+#ifdef DETAIL_EXPORT_FILE
+  iFilePath = GetConfig().iLogPath + DETAIL_EXPORT_FILENAME;
   iLogDetail = fopen(iFilePath.c_str(), "w");
-  if (NULL == iLogDetail)
+  if (iLogDetail == NULL)
   {
     printf("iLogDetail err:%s\n", iFilePath.c_str());
-    fclose(iLogDetail);
     return false;
   }
   printf("iLogDetail :%s\n", iFilePath.c_str());
 #endif
-#ifdef XDB_GEN_TOOL_EXPORT_FILENAME
-  GetConfig().iOutputDumpText = SIMPLE_EXP_FILE;
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
+  GetConfig().iOutputDumpText = SIMPLE_EXPORT_FILENAME;
   iFilePath = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
   iLog = fopen(iFilePath.c_str(), "w");
-  if (NULL == iLog)
+  if (iLog == NULL)
   {
     printf("iLog err:%s\n", iFilePath.c_str());
-    fclose(iLog);
+#ifdef DETAIL_EXPORT_FILE
+    fclose(iLogDetail);
+    iLogDetail = NULL;
+#endif
     return false;
   }
   printf("iLog :%s\n", iFilePath.c_str());
@@ -118,38 +118,64 @@ bool CXdbDumper::Run()
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputScwsXdb;
   fd = fopen(iFilePath.c_str(),"rb");
-  if (NULL == fd)
+  if (fd == NULL)
   {
     printf("fd err:%s\n", iFilePath.c_str());
-    fclose(fd);
+#ifdef DETAIL_EXPORT_FILE
+    fclose(iLogDetail);
+    iLogDetail = NULL;
+#endif
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
+    fclose(iLog);
+    iLog = NULL;
+#endif
     return false;
   }
   printf("fd :%s\n", iFilePath.c_str());
 
-#ifdef CONVERT_NORMALIZE_FILENAME
+#ifdef CONVERT_NORMALIZE
   // Read mapping into tables
-  FILE *normalizeFd;
-  char szLine[KSzLineSize], *pFind;
+  FILE* normalizeFd;
+  char* pFind;
+  char szLine[KSzLineSize];
   int tokenIndex, szLineLength;
   char szSource[KSzSourceSize], szDestination[KSzdestinationSize];
 
-  GetConfig().iOutputDumpText = NORMAL_EXP_FILE;
+  GetConfig().iOutputDumpText = NORMAL_EXPORT_FILENAME;
   iFilePath = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
   iNormalizeLog = fopen(iFilePath.c_str(), "w" ); 
-  if (NULL == iNormalizeLog)
+  if (iNormalizeLog == NULL)
   {
     printf("iNormalizeLog err:%s\n", iFilePath.c_str());
-    fclose(iNormalizeLog);
+    fclose(fd);
+#ifdef DETAIL_EXPORT_FILE
+    fclose(iLogDetail);
+    iLogDetail = NULL;
+#endif
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
+    fclose(iLog);
+    iLog = NULL;
+#endif
     return false;
   }
   printf("iNormalizeLog :%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputNormalizeMap;
   normalizeFd = fopen(iFilePath.c_str(), "r" );
-  if (NULL == normalizeFd)
+  if (normalizeFd == NULL)
   {
     printf("normalizeFd err:%s\n", iFilePath.c_str());
-    fclose(normalizeFd);
+    fclose(iNormalizeLog);
+    iNormalizeLog = NULL;
+    fclose(fd);	
+#ifdef DETAIL_EXPORT_FILE
+    fclose(iLogDetail);
+    iLogDetail = NULL;
+#endif
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
+    fclose(iLog);
+    iLog = NULL;
+#endif
     return false;
   }
   printf("normalizeFd :%s\n", iFilePath.c_str());
@@ -158,12 +184,23 @@ bool CXdbDumper::Run()
   iNormalizeMap.clear();
   iNormalizeRepeatVector.clear();
 
-  iFilePath = GetConfig().iLogPath + NORMAL_EXP_REPEAT;
+  iFilePath = GetConfig().iLogPath + NORMAL_EXPORT_REPEAT_FILENAME;
   iNormalizeRepeatLog = fopen(iFilePath.c_str(), "w");
-  if (NULL == iNormalizeRepeatLog)
+  if (iNormalizeRepeatLog == NULL)
   {
     printf("iNormalizeRepeatLog err:%s\n", iFilePath.c_str());
-    fclose(iNormalizeRepeatLog);
+    fclose(iNormalizeLog);
+    iNormalizeLog = NULL;
+    fclose(fd);
+    fclose(normalizeFd);
+#ifdef DETAIL_EXPORT_FILE
+    fclose(iLogDetail);
+    iLogDetail = NULL;
+#endif
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
+    fclose(iLog);
+    iLog = NULL;
+#endif
     return false;
   }
   printf("iNormalizeRepeatLog :%s\n", iFilePath.c_str());
@@ -173,7 +210,7 @@ bool CXdbDumper::Run()
     szLineLength = strlen(szLine);
     szLineLength--;
 
-    while ( ('\r' == szLine[szLineLength]) || ('\n' == szLine[szLineLength]) )
+    while (('\r' == szLine[szLineLength]) || ('\n' == szLine[szLineLength]))
     {
       szLineLength--;
     }
@@ -200,11 +237,11 @@ bool CXdbDumper::Run()
     iNormalizeHash[szSource] = szDestination;
   }
   fclose(normalizeFd);
-#endif //CONVERT_NORMALIZE_FILENAME
+#endif //CONVERT_NORMALIZE
 
-  printf("XDB header size=%ld\n", sizeof(struct xdb_header));
-  readSize = fread(&xdbHeader, 1, sizeof(struct xdb_header), fd);
-  if (readSize != sizeof(struct xdb_header)*1)
+  printf("XDB header size=%ld\n", sizeof(TXdbHeader));
+  readSize = fread(&xdbHeader, 1, sizeof(TXdbHeader), fd);
+  if (readSize != sizeof(TXdbHeader))
   {
     fputs("Reading error 01", stderr);
     exit(EXIT_FAILURE);
@@ -241,7 +278,7 @@ bool CXdbDumper::Run()
       exit(EXIT_FAILURE);
     }
 
-    if (0 != destinationLength) 
+    if (destinationLength != 0) 
     {
       printf("travelIndex=%d destinationOffset=%d destinationLength=%d\n", travelIndex, destinationOffset, destinationLength);
       GetRecord(fd, destinationOffset, destinationLength, 0, 0, "");
@@ -253,9 +290,9 @@ bool CXdbDumper::Run()
     travelIndex++;
   } while (travelIndex < xdbHeader.prime);
 
-#ifdef CONVERT_NORMALIZE_FILENAME
-  char *pFindPrev;
-  char *pFindCurr;
+#ifdef CONVERT_NORMALIZE
+  char* pFindPrev;
+  char* pFindCurr;
   char szLinePrev[KSzLinePrevSize], szLineCurr[KSzLineCurrSize];
   int repeatCnt;
   int toklen;
@@ -268,7 +305,7 @@ bool CXdbDumper::Run()
   repeatCnt = 0;
   toklen = 0;
   totalCnt = 0;
-  for (std::vector<std::string>::iterator normalizeRepeatVectorIterator = iNormalizeRepeatVector.begin() ; normalizeRepeatVectorIterator != iNormalizeRepeatVector.end(); ++normalizeRepeatVectorIterator)
+  for (std::vector<std::string>::iterator normalizeRepeatVectorIterator = iNormalizeRepeatVector.begin(); normalizeRepeatVectorIterator != iNormalizeRepeatVector.end(); ++normalizeRepeatVectorIterator)
   {
     // Collect statistic informations.
     //----------------------------------------
@@ -321,11 +358,11 @@ bool CXdbDumper::Run()
   {
     fprintf(iNormalizeRepeatLog, "total_cnt:%d\n", totalCnt);
   }
-#endif //CONVERT_NORMALIZE_FILENAME
+#endif //CONVERT_NORMALIZE
 
   fclose(fd);
   fclose(iLog); 
-#ifdef CONVERT_NORMALIZE_FILENAME
+#ifdef CONVERT_NORMALIZE
   fclose(iNormalizeLog); 
   fclose(iNormalizeRepeatLog); 
 #endif
@@ -358,7 +395,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   char keyLength;
   unsigned char keyName[KKeyNameSize];
   unsigned char attribute[KAttributeSize];
-  node_content content;
+  TNodeContent content;
   size_t readSize = 0;
 
   fseek(aFd, aOffset, SEEK_SET);
@@ -415,8 +452,8 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   //key_name[k_len+1] = '\"';
   //key_name[k_len+2] = '\n';
   //fputs((const char*)key_name, iLog);
-  readSize = fread(&content, 1, sizeof(node_content), aFd);
-  if (readSize != sizeof(node_content))
+  readSize = fread(&content, 1, sizeof(TNodeContent), aFd);
+  if (readSize != sizeof(TNodeContent))
   {
     fputs("Reading error 12", stderr);
     exit(EXIT_FAILURE);
@@ -424,12 +461,12 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   if ((leftOffset > 0) && (leftLength > 0))
   {
-    GetRecord(aFd, leftOffset, leftLength, 1, aLevel + 1,(char*)keyName);
+    GetRecord(aFd, leftOffset, leftLength, 1, aLevel + 1, (char*)keyName);
   }
 
   if ((rightOffset > 0) && (rightLength > 0))
   {
-    GetRecord(aFd, rightOffset, rightLength, 2, aLevel + 1,(char*)keyName);
+    GetRecord(aFd, rightOffset, rightLength, 2, aLevel + 1, (char*)keyName);
   }
 
   iWordCount++;
@@ -441,7 +478,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   //sprintf(szLog, "%s\n", key_name ); 
 
-#ifdef DETAIL_EXPORT_FILENAME
+#ifdef DETAIL_EXPORT_FILE
   // Detail log
   sprintf(iSzLog, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
     aLevel, (0 == aDirection) ? 'N': (1 == aDirection) ?'L':'R', iWordCount, leftOffset, leftLength, rightOffset, rightLength, keyLength, aFather, 
@@ -457,7 +494,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 #endif
 
   memset(attribute, 0, KAttributeSize);
-#ifdef XDB_GEN_TOOL_EXPORT_FILENAME
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
   // OWN toolsusage
   memcpy(attribute, content.attr, 3);
   sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", keyName, content.tf, content.idf, content.flag, attribute);
@@ -465,13 +502,13 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   // PHP usage
 #endif
 
-#ifdef CONVERT_NORMALIZE_FILENAME
+#ifdef CONVERT_NORMALIZE
   unsigned char normalizeKeyName[KNormalizeKeyNameSize];
   unsigned char chtUTF8[KChtUTF8Size];
   int keyLength;
   int charUTF8Length;
   std::string charUTF8;
-  std::map<std::string, std::string> ::const_iterator findIterator;
+  std::map<std::string, std::string>::const_iterator findIterator;
 
   // convert by normalize hash
   memset(normalizeKeyName, 0, KNormalizeKeyNameSize);
@@ -482,7 +519,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   {
     charUTF8Length = iMblenTableUTF8[keyName[index]];
 
-    if (3 != charUTF8Length) 
+    if (charUTF8Length != 3) 
     {
       memcpy(&normalizeKeyName[index], &keyName[index], charUTF8Length);
     } 
@@ -515,7 +552,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   {
     std::string originalString;
     std::string normalizeString;
-    std::map<std::string,node_content>::iterator normalizeMapIterator;
+    std::map<std::string, TNodeContent>::iterator normalizeMapIterator;
     std::vector<std::string>::iterator normalizeRepeatVectorIterator;
 
     originalString = (char*)keyName;
@@ -556,7 +593,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
     else
     {
       // This is first time we get this key, so save infos to iNormalizeMap and iFirstNormalizeToOriginalMap.
-      iNormalizeMap.insert(std::pair<std::string,node_content>(normalizeString, content));
+      iNormalizeMap.insert(std::pair<std::string, TNodeContent>(normalizeString, content));
       iFirstNormalizeToOriginalMap.insert(std::pair<std::string,std::string>(normalizeString, originalString));
     }
   }
@@ -565,6 +602,6 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   memcpy(attribute, content.attr, 3);
   sprintf(iSzLog, "%s\t%f\t%f\t%d\t%s\n", normalizeKeyName, content.tf, content.idf, content.flag, attribute);
   fputs(iSzLog, iNormalizeLog);
-#endif //CONVERT_NORMALIZE_FILENAME
+#endif //CONVERT_NORMALIZE
 }
 
