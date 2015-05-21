@@ -121,9 +121,9 @@ private:
     int length;
   } TPrimeNode;
 
-  int GetHashIndex( const unsigned char*  aKey,
-                    int                   aHashBase,
-                    int                   aHashPrime) const;
+  int GetHashIndex(const unsigned char*  aKey,
+                   int                   aHashBase,
+                   int                   aHashPrime) const;
   int SearchTokenInfo(const char*     aTokenContent,
                       long            aNodeOffset,
                       long            aNodeLength,
@@ -145,7 +145,7 @@ private:
                       unsigned int* aData,
                       int aDataLength);
   int IsAllChineseToken(const char* aTokenContent,
-                        int aTokenLength);
+                        unsigned int aTokenLength);
   int IsValidChineseToken(scws_res_t  aScwsCur,
                           const char* aTokenContent);
   int GetTokenTotalChineseWordCount(const char* aString);
