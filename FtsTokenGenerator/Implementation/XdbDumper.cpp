@@ -8,6 +8,11 @@
 static const int KKeyNameSize = 256;
 static const int KAttributeSize = 4;
 
+#ifdef DETAIL_EXPORT_FILE
+static const int KNoDirection = 0;
+static const int KLeftDirection = 1;
+#endif
+
 #ifdef CONVERT_NORMALIZE
 static const int KSzLineSize = 256;
 static const int KSzSourceSize = 4;
@@ -79,8 +84,8 @@ bool CXdbDumper::Run()
 {
   std::cout << "Running CXdbDumper" << std::endl;
   std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
-  std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
-  std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
+  std::cout << "iOutputPath:" << GetConfig().iOutputPath << std::endl;
+  std::cout << "iLogPath:" << GetConfig().iLogPath << std::endl;
 
   FILE* fd;
   TXdbHeader xdbHeader;
@@ -117,7 +122,7 @@ bool CXdbDumper::Run()
 #endif
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputScwsXdb;
-  fd = fopen(iFilePath.c_str(),"rb");
+  fd = fopen(iFilePath.c_str(), "rb");
   if (fd == NULL)
   {
     printf("fd err:%s\n", iFilePath.c_str());
@@ -481,11 +486,11 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 #ifdef DETAIL_EXPORT_FILE
   // Detail log
   sprintf(iSzLog, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
-    aLevel, (0 == aDirection) ? 'N': (1 == aDirection) ?'L':'R', iWordCount, leftOffset, leftLength, rightOffset, rightLength, keyLength, aFather, 
+    aLevel, (KNoDirection == aDirection) ? 'N': (KLeftDirection == aDirection) ?'L':'R', iWordCount, leftOffset, leftLength, rightOffset, rightLength, keyLength, aFather, 
     content.tf, content.idf, content.flag, 
-    (0 == content.attr[0]) ? 0x01:content.attr[0],
-    (0 == content.attr[1]) ? 0x01:content.attr[1],
-    (0 == content.attr[2]) ? 0x01:content.attr[2],
+    (KNodeAttributeDefaultValue == content.attr[0]) ? 0x01:content.attr[0],
+    (KNodeAttributeDefaultValue == content.attr[1]) ? 0x01:content.attr[1],
+    (KNodeAttributeDefaultValue == content.attr[2]) ? 0x01:content.attr[2],
     keyName,
     GetIndex(keyName,iHashBase, iPrime)
     );
