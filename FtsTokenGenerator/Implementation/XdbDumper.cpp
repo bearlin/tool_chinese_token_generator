@@ -64,26 +64,19 @@ CXdbDumper::~CXdbDumper()
   if (iLogDetail != NULL)
   {
     fclose(iLogDetail);
-    iLogDetail = NULL;
   }
-
   if (iLog != NULL)
   {
     fclose(iLog);
-    iLog = NULL;
   }
-
   #ifdef CONVERT_NORMALIZE
   if (iNormalizeLog != NULL)
   {
     fclose(iNormalizeLog);
-    iNormalizeLog = NULL;
   }
-
   if (iNormalizeRepeatLog != NULL)
   {
     fclose(iNormalizeRepeatLog);
-    iNormalizeRepeatLog = NULL;
   }
   #endif  
 }
@@ -121,8 +114,11 @@ bool CXdbDumper::Run()
   {
     printf("iLog err:%s\n", iFilePath.c_str());
 #ifdef DETAIL_EXPORT_FILE
-    fclose(iLogDetail);
-    iLogDetail = NULL;
+    if (iLogDetail != NULL)
+    {
+      fclose(iLogDetail);
+      iLogDetail = NULL;
+    }
 #endif
     return false;
   }
@@ -135,12 +131,18 @@ bool CXdbDumper::Run()
   {
     printf("fd err:%s\n", iFilePath.c_str());
 #ifdef DETAIL_EXPORT_FILE
-    fclose(iLogDetail);
-    iLogDetail = NULL;
+    if (iLogDetail != NULL)
+    {
+      fclose(iLogDetail);
+      iLogDetail = NULL;
+    }
 #endif
 #ifdef XDB_GEN_TOOL_EXPORT_FILE
-    fclose(iLog);
-    iLog = NULL;
+    if (iLog != NULL)
+    {
+      fclose(iLog);
+      iLog = NULL;
+    }
 #endif
     return false;
   }
@@ -160,15 +162,24 @@ bool CXdbDumper::Run()
   if (iNormalizeLog == NULL)
   {
     printf("iNormalizeLog err:%s\n", iFilePath.c_str());
-    fclose(fd);
-    fd = NULL;
+    if (fd != NULL)
+    {
+      fclose(fd);
+      fd = NULL;
+    }
 #ifdef DETAIL_EXPORT_FILE
-    fclose(iLogDetail);
-    iLogDetail = NULL;
+    if (iLogDetail != NULL)
+    {
+      fclose(iLogDetail);
+      iLogDetail = NULL;
+    }
 #endif
-#ifdef XDB_GEN_TOOL_EXPORT_FILE
-    fclose(iLog);
-    iLog = NULL;
+#ifdef XDB_GEN_TOOL_EXPORT_FILE  
+    if (iLog != NULL)
+    {
+      fclose(iLog);
+      iLog = NULL;
+    }
 #endif
     return false;
   }
@@ -181,15 +192,24 @@ bool CXdbDumper::Run()
     printf("normalizeFd err:%s\n", iFilePath.c_str());
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
-    fclose(fd);	
-    fd = NULL;
+    if (fd != NULL)
+    {
+      fclose(fd);
+      fd = NULL;
+    }
 #ifdef DETAIL_EXPORT_FILE
-    fclose(iLogDetail);
-    iLogDetail = NULL;
+    if (iLogDetail != NULL)
+    {
+      fclose(iLogDetail);
+      iLogDetail = NULL;
+    }
 #endif
 #ifdef XDB_GEN_TOOL_EXPORT_FILE
-    fclose(iLog);
-    iLog = NULL;
+    if (iLog != NULL)
+    {
+      fclose(iLog);
+      iLog = NULL;
+    }
 #endif
     return false;
   }
@@ -206,17 +226,29 @@ bool CXdbDumper::Run()
     printf("iNormalizeRepeatLog err:%s\n", iFilePath.c_str());
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
-    fclose(fd);
-    fd = NULL;
-    fclose(normalizeFd);
-    normalizeFd = NULL;
+    if (fd != NULL)
+    {
+      fclose(fd);
+      fd = NULL;
+    }
+    if (normalizeFd != NULL)
+    {
+      fclose(normalizeFd);
+      normalizeFd = NULL;
+    }  
 #ifdef DETAIL_EXPORT_FILE
-    fclose(iLogDetail);
-    iLogDetail = NULL;
+    if (iLogDetail != NULL)
+    {
+      fclose(iLogDetail);
+      iLogDetail = NULL;
+    }
 #endif
-#ifdef XDB_GEN_TOOL_EXPORT_FILE
-    fclose(iLog);
-    iLog = NULL;
+#ifdef XDB_GEN_TOOL_EXPORT_FILE 
+    if (iLog != NULL)
+    {
+      fclose(iLog);
+      iLog = NULL;
+    }
 #endif
     return false;
   }
@@ -253,8 +285,11 @@ bool CXdbDumper::Run()
     }
     iNormalizeHash[szSource] = szDestination;
   }
-  fclose(normalizeFd);
-  normalizeFd = NULL;
+  if (normalizeFd != NULL)
+  {
+    fclose(normalizeFd);
+    normalizeFd = NULL;
+  }
 #endif //CONVERT_NORMALIZE
 
   printf("XDB header size=%ld\n", sizeof(TXdbHeader));
@@ -377,16 +412,26 @@ bool CXdbDumper::Run()
     fprintf(iNormalizeRepeatLog, "total_cnt:%d\n", totalCnt);
   }
 #endif //CONVERT_NORMALIZE
-
-  fclose(fd);
-  fd = NULL;
-  fclose(iLog);
-  iLog = NULL;
+  if (fd != NULL)
+  {
+    fclose(fd);
+  }
+  if (iLog != NULL)
+  {
+    fclose(iLog);
+    iLog = NULL;
+  }
 #ifdef CONVERT_NORMALIZE
-  fclose(iNormalizeLog); 
-  iNormalizeLog = NULL;
-  fclose(iNormalizeRepeatLog); 
-  iNormalizeRepeatLog = NULL;
+  if (iNormalizeLog != NULL)
+  {
+    fclose(iNormalizeLog);
+    iNormalizeLog = NULL;
+  }
+  if (iNormalizeRepeatLog != NULL)
+  {
+    fclose(iNormalizeRepeatLog);
+    iNormalizeRepeatLog = NULL;
+  }
 #endif
 
   return true;
@@ -502,7 +547,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
 #ifdef DETAIL_EXPORT_FILE
   // Detail log
-  sprintf(iSzLog, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
+  sprintf(iSzLog, "Level[%d] Dir=%c word[%ld] l_offset=%d l_len=%d r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c attr[1]=%c attr[2]=%c key=\"%s\" prime_index=%d\n", 
     aLevel, (KNoDirection == aDirection) ? 'N': (KLeftDirection == aDirection) ?'L':'R', iWordCount, leftOffset, leftLength, rightOffset, rightLength, keyLength, aFather, 
     content.tf, content.idf, content.flag, 
     (KNodeAttributeDefaultValue == content.attr[0]) ? 0x01:content.attr[0],
