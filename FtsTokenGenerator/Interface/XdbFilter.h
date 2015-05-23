@@ -121,9 +121,8 @@ private:
     int length;
   } TPrimeNode;
 
-  int GetHashIndex(const unsigned char*  aKey,
-                   int                   aHashBase,
-                   int                   aHashPrime) const;
+  int GetHashIndex(const unsigned char*  aKey, int aHashBase, int aHashPrime) const;
+
   int SearchTokenInfo(const char*     aTokenContent,
                       long            aNodeOffset,
                       long            aNodeLength,
@@ -141,16 +140,11 @@ private:
   #define UTF8_CHAR_KIND_4 (4)  // UTF-32 Characters(First byte range:0xF0-0xF7, 4 BYTE in UTF8)
 
   int GetUTF8CharKind(unsigned char aChar);
-  int ConvUTF8ToUTF16(unsigned char* aUtf8CodeData,
-                      unsigned int* aData,
-                      int aDataLength);
-  int IsAllChineseToken(const char* aTokenContent,
-                        unsigned int aTokenLength);
-  int IsValidChineseToken(scws_res_t  aScwsCur,
-                          const char* aTokenContent);
+  int ConvUTF8ToUTF16(unsigned char* aUtf8CodeData, unsigned int* aData, int aDataLength);
+  int IsAllChineseToken(const char* aTokenContent, unsigned int aTokenLength);
+  int IsValidChineseToken(scws_res_t aScwsCur, const char* aTokenContent);
   int GetTokenTotalChineseWordCount(const char* aString);
-  int GetNthChineseWordByteOffset(const char* aString,
-                                  int aNthChineseWord);
+  int GetNthChineseWordByteOffset(const char* aString, int aNthChineseWord);
   ////////////////////// UTF8 Handling /////////////////////////////////////
 
   ////////////////////// SuffixTokenMap /////////////////////////////////////
@@ -159,15 +153,16 @@ private:
   int GetMaxSuffixTokenLength(std::map<std::string,int>& aSuffixTokenMap);
   ////////////////////// SuffixTokenMap /////////////////////////////////////
 
-  int IsTokenEndWithIgnoredSuffix(const char* aString,
-                                  int* aSuffixOffset,
-                                  char* aTempBuffer,
-                                  int aMaxSuffixTokenLength,
+  int IsTokenEndWithIgnoredSuffix(const char*                aString,
+                                  int*                       aSuffixOffset,
+                                  char*                      aTempBuffer,
+                                  int                        aMaxSuffixTokenLength,
                                   std::map<std::string,int>& aSuffixTokenMap);
+
   int GetOneWordInToken(const char* aString,
-                        char* aTempBuffer,
-                        size_t aBufferLength,
-                        int aWordIndex);
+                        char*       aTempBuffer,
+                        size_t      aBufferLength,
+                        int         aWordIndex);
 
   // Length of multibyte character from first byte of Utf8
   static const unsigned char iUTF8MultibyteLengthTable[256];
