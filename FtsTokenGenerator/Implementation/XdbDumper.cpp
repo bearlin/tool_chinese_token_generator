@@ -254,7 +254,7 @@ bool CXdbDumper::Run()
   }
   printf("iNormalizeRepeatLog :%s\n", iFilePath.c_str());
   
-  while (fgets(szLine, sizeof(szLine), normalizeFd)) 
+  while (fgets(szLine, sizeof(szLine), normalizeFd) != NULL) 
   {
     szLineLength = strlen(szLine);
     szLineLength--;
