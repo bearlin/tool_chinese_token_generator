@@ -55,7 +55,7 @@ CXdbDumper::CXdbDumper() :
 #ifdef CONVERT_NORMALIZE
   ,iNormalizeLog(NULL)
   ,iNormalizeRepeatLog(NULL)
-#endif  
+#endif
 {
 }
 
@@ -78,7 +78,7 @@ CXdbDumper::~CXdbDumper()
   {
     fclose(iNormalizeRepeatLog);
   }
-  #endif  
+  #endif
 }
 
 bool CXdbDumper::Run()
@@ -158,7 +158,7 @@ bool CXdbDumper::Run()
 
   GetConfig().iOutputDumpText = NORMAL_EXPORT_FILENAME;
   iFilePath = GetConfig().iOutputPath + GetConfig().iOutputDumpText;
-  iNormalizeLog = fopen(iFilePath.c_str(), "w" ); 
+  iNormalizeLog = fopen(iFilePath.c_str(), "w"); 
   if (iNormalizeLog == NULL)
   {
     printf("iNormalizeLog err:%s\n", iFilePath.c_str());
@@ -174,7 +174,7 @@ bool CXdbDumper::Run()
       iLogDetail = NULL;
     }
 #endif
-#ifdef XDB_GEN_TOOL_EXPORT_FILE  
+#ifdef XDB_GEN_TOOL_EXPORT_FILE
     if (iLog != NULL)
     {
       fclose(iLog);
@@ -186,7 +186,7 @@ bool CXdbDumper::Run()
   printf("iNormalizeLog :%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputNormalizeMap;
-  normalizeFd = fopen(iFilePath.c_str(), "r" );
+  normalizeFd = fopen(iFilePath.c_str(), "r");
   if (normalizeFd == NULL)
   {
     printf("normalizeFd err:%s\n", iFilePath.c_str());
@@ -235,7 +235,7 @@ bool CXdbDumper::Run()
     {
       fclose(normalizeFd);
       normalizeFd = NULL;
-    }  
+    }
 #ifdef DETAIL_EXPORT_FILE
     if (iLogDetail != NULL)
     {
@@ -397,7 +397,7 @@ bool CXdbDumper::Run()
       }
     }
   //----------------------------------------
-    
+  
   // Just log this item.
     fprintf(iNormalizeRepeatLog, "%s", (*normalizeRepeatVectorIterator).c_str());
   }
@@ -468,7 +468,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   fseek(aFd, aOffset, SEEK_SET);
   //r_len = XDB_MAXKLEN+17;
   //if(r_len > len) r_len = len;
-  //readSize = fread(buff, 1, r_len, fd);  
+  //readSize = fread(buff, 1, r_len, fd);
   //if (readSize != r_len*1) {fputs("Reading error 04", stderr); exit(EXIT_FAILURE);}
 
   readSize = fread(&leftOffset, 1, sizeof(unsigned int), aFd);

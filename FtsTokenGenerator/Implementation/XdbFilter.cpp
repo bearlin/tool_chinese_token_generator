@@ -1068,9 +1068,7 @@ bool CXdbFilter::MergeToFuzzyTokens()
   return true;
 }
 ////////////////////// Search Node /////////////////////////////////////
-int CXdbFilter::GetHashIndex(const unsigned char*  aKey,
-                             int                   aHashBase,
-                             int                   aHashPrime) const
+int CXdbFilter::GetHashIndex(const unsigned char* aKey, int aHashBase, int aHashPrime) const
 {
   int length = strlen((char*)aKey);
 
@@ -1084,13 +1082,13 @@ int CXdbFilter::GetHashIndex(const unsigned char*  aKey,
   return (aHashBase % aHashPrime);
 }
 
-int CXdbFilter::SearchTokenInfo(const char*     aTokenContent,
-                                long            aNodeOffset,
-                                long            aNodeLength,
-                                int             aHashBase,
-                                int             aHashPrime,
-                                TNodeInfoAttr*  aAttribute,
-                                FILE*           aFileXdb)
+int CXdbFilter::SearchTokenInfo(const char*    aTokenContent,
+                                long           aNodeOffset,
+                                long           aNodeLength,
+                                int            aHashBase,
+                                int            aHashPrime,
+                                TNodeInfoAttr* aAttribute,
+                                FILE*          aFileXdb)
 {
   int hashIndex;
   long fileOffset;
@@ -1239,9 +1237,7 @@ int CXdbFilter::GetUTF8CharKind(unsigned char aChar)
   return UTF8_CHAR_KIND_NONE;
 }
 
-int CXdbFilter::ConvUTF8ToUTF16(unsigned char* aUtf8CodeData,
-                                unsigned int* aData,
-                                int aDataLength)
+int CXdbFilter::ConvUTF8ToUTF16(unsigned char* aUtf8CodeData, unsigned int* aData, int aDataLength)
 {
   unsigned char* utf8CodePointer = NULL;
   unsigned char utf8Code;
@@ -1322,8 +1318,7 @@ int CXdbFilter::ConvUTF8ToUTF16(unsigned char* aUtf8CodeData,
   return resultLength;
 }
 
-int CXdbFilter::IsAllChineseToken(const char* aTokenContent,
-                                  unsigned int aTokenLength)
+int CXdbFilter::IsAllChineseToken(const char* aTokenContent, unsigned int aTokenLength)
 {
   unsigned int index = 0;
   unsigned int utf8CharKind;
@@ -1359,8 +1354,7 @@ int CXdbFilter::IsAllChineseToken(const char* aTokenContent,
   return true;
 }
 
-int CXdbFilter::IsValidChineseToken(scws_res_t  aScwsCur,
-                                    const char* aTokenContent)
+int CXdbFilter::IsValidChineseToken(scws_res_t aScwsCur, const char* aTokenContent)
 {
   if (aScwsCur->len < KCJKBytes)
   {
@@ -1416,8 +1410,7 @@ int CXdbFilter::GetTokenTotalChineseWordCount(const char* aString)
   return totalChineseWordCount;
 }
 
-int CXdbFilter::GetNthChineseWordByteOffset(const char* aString,
-                                            int aNthChineseWord)
+int CXdbFilter::GetNthChineseWordByteOffset(const char* aString, int aNthChineseWord)
 {
   int tokenLength = 0;
   int index = 0;
@@ -1551,10 +1544,10 @@ int CXdbFilter::GetMaxSuffixTokenLength(std::map<std::string,int>& aSuffixTokenM
 }
 ////////////////////// SuffixTokenMap /////////////////////////////////////
 
-int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char* aString,
-                                            int* aSuffixOffset,
-                                            char* aTempBuffer,
-                                            int aMaxSuffixTokenLength,
+int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char*                aString,
+                                            int*                       aSuffixOffset,
+                                            char*                      aTempBuffer,
+                                            int                        aMaxSuffixTokenLength,
                                             std::map<std::string,int>& aSuffixTokenMap)
 {
   int tokenLength = 0;
@@ -1606,9 +1599,9 @@ int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char* aString,
 }
 
 int CXdbFilter::GetOneWordInToken(const char* aString,
-                                  char* aTempBuffer,
-                                  size_t aBufferLength,
-                                  int aWordindex)
+                                  char*       aTempBuffer,
+                                  size_t      aBufferLength,
+                                  int         aWordindex)
 {
   unsigned int tokenLength = 0;
   unsigned int index = 0;
@@ -1651,7 +1644,7 @@ int CXdbFilter::GetOneWordInToken(const char* aString,
 int CXdbFilter::CHomophoneNormalizer_Init(const char* aFile)
 {
   FILE* fileStage07NormalizationMap;
-  char  tempString[MAX_LINE_SIZE];
+  char tempString[MAX_LINE_SIZE];
 
   fileStage07NormalizationMap = fopen(aFile, "r");
   if (fileStage07NormalizationMap == NULL)
@@ -1671,7 +1664,7 @@ int CXdbFilter::CHomophoneNormalizer_Init(const char* aFile)
 
     pinyinCharacter = strtok(tempString, ",");
     sourceCharacter = pinyinCharacter ? strtok(NULL, ",") : NULL;
-    mappedCharacter = sourceCharacter ?    strtok(NULL, ",") : NULL;
+    mappedCharacter = sourceCharacter ? strtok(NULL, ",") : NULL;
 
     if (pinyinCharacter && sourceCharacter && mappedCharacter)
     {
