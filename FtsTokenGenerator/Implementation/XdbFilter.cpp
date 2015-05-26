@@ -667,15 +667,15 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
       std::string lastWord = tempString.substr(tempString.length() - KCJKBytes);
       //std::cout << "lastWord:[" << lastWord << "]" << std::endl;
       //UTF-8 code of "road" in Chinese = E8 B7 AF
-      char chineseRoadCharacter[3];
-      chineseRoadCharacter[0] = 0xE8;
-      chineseRoadCharacter[1] = 0xB7;
-      chineseRoadCharacter[2] = 0xAF;
-      std::string specialWord(chineseRoadCharacter);
+      std::string specialWord;
+      specialWord.resize(KCJKBytes);
+      specialWord[0] = 0xE8;
+      specialWord[1] = 0xB7;
+      specialWord[2] = 0xAF;
       //std::cout << "specialWord:[" << specialWord << "]" << std::endl;
       if (lastWord == specialWord)
       {
-        //std::cout << "[" << tempString << "] end with special word [" << specialWord << "]" << std::endl;
+        std::cout << "[" << tempString << "] end with special word [" << specialWord << "]" << std::endl;
 
         //remove this token from iTokenMapOpt.
         iTokenMapOpt.erase(it->first); // erasing by key
