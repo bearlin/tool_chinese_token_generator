@@ -20,12 +20,12 @@
 #include <algorithm>
 
 CXdbGenerator::CXdbGenerator() :
+  iInputTokenListFile(NULL),
+  iXdbFile(NULL),
 #ifdef ENABLE_LOG
   iLogFile(NULL),
-  iLogRepeatPathFile(NULL),
+  iLogRepeatPathFile(NULL)
 #endif //ENABLE_LOG
-  iInputTokenListFile(NULL),
-  iXdbFile(NULL)
 {
 }
 

@@ -27,15 +27,15 @@ static const int KDestinationTokenIndex = 2;
 #endif
 
 CXdbDumper::CXdbDumper() :
-  iWordCount(0)
-  ,iPrime(0)
-  ,iHashBase(0)
+  iLog(NULL)
   ,iLogDetail(NULL)
-  ,iLog(NULL)
 #ifdef CONVERT_NORMALIZE
   ,iNormalizeLog(NULL)
   ,iNormalizeRepeatLog(NULL)
 #endif
+  ,iWordCount(0)
+  ,iPrime(0)
+  ,iHashBase(0)
 {
 }
 
