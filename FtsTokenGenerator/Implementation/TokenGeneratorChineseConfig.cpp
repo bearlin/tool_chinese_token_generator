@@ -5,6 +5,9 @@
 #include "TokenGeneratorChineseConfig.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CTokenGeneratorChineseConfig::CTokenGeneratorChineseConfig() :
   iInputPath("../config/default/input/"),
   iOutputPath("../config/default/output_ALL/"),
@@ -36,4 +39,5 @@ void CTokenGeneratorChineseConfig::SetLogPath(const std::string& aLogPath)
   iLogPath = aLogPath;
 }
 
+} // namespace NFtsTokenGenerator
 

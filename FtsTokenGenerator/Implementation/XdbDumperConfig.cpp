@@ -5,6 +5,9 @@
 #include "XdbDumperConfig.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CXdbDumperConfig::CXdbDumperConfig()
 {
 }
@@ -27,4 +30,6 @@ const std::string CXdbDumperConfig::GetOutputDumpText() const
 {
   return iOutputDumpText;
 }
+
+} // namespace NFtsTokenGenerator
 

@@ -10,6 +10,9 @@
 #include <vector>
 #include <cstdio>
 
+namespace NFtsTokenGenerator
+{
+
 #define ENABLE_LOG
 #define LOG_FILE_NAME "log(s06_log_tokens_full.txt).txt"
 #define LOG_REPEAT_FILE_NAME "log_repeat(s06_log_tokens_full.txt).txt"
@@ -76,5 +79,7 @@ private:
   void CloseFile();
   static bool CompareNode(const TNodeInfo& aNodeInfo1, const TNodeInfo& aNodeInfo2);
 };
+
+} // namespace NFtsTokenGenerator
 
 #endif // XDB_GENERATOR_H

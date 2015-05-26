@@ -7,6 +7,9 @@
 #include "TokenGeneratorTai.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CFtsTokenGenerator::CFtsTokenGenerator() :
   iLanguageType(EChinese)
 {
@@ -43,4 +46,6 @@ bool CFtsTokenGenerator::Run()
     return false;
   }
 }
+
+} // namespace NFtsTokenGenerator
 

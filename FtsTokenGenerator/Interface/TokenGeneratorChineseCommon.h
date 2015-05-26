@@ -2,10 +2,13 @@
 // This file contains the Chinese token generator common interface
 //
 
-#ifndef __TOKEN_GENERATOR_CHINESE_COMMON_H__
-#define __TOKEN_GENERATOR_CHINESE_COMMON_H__
+#ifndef TOKEN_GENERATOR_CHINESE_COMMON_H
+#define TOKEN_GENERATOR_CHINESE_COMMON_H
 
 #include <string>
+
+namespace NFtsTokenGenerator
+{
 
 class CTokenGeneratorChineseCommon
 {
@@ -18,4 +21,6 @@ public:
   static const unsigned char iUTF8MultibyteLengthTable[KMblenTableUTF8Size];
 };
 
-#endif // __TOKEN_GENERATOR_CHINESE_COMMON_H__
+} // namespace NFtsTokenGenerator
+
+#endif // TOKEN_GENERATOR_CHINESE_COMMON_H

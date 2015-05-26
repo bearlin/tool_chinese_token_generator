@@ -2,10 +2,13 @@
 // This file contains the Chinese token filter config interface
 //
 
-#ifndef __XDB_FILTER_CONFIG_H__
-#define __XDB_FILTER_CONFIG_H__
+#ifndef XDB_FILTER_CONFIG_H
+#define XDB_FILTER_CONFIG_H
 
 #include "TokenGeneratorChineseConfig.h"
+
+namespace NFtsTokenGenerator
+{
 
 class CXdbFilterConfig : public CTokenGeneratorChineseConfig
 {
@@ -36,4 +39,6 @@ public:
   std::string iOutputTokenListFuzzy;
 };
 
-#endif // __XDB_FILTER_CONFIG_H__
+} // namespace NFtsTokenGenerator
+
+#endif // XDB_FILTER_CONFIG_H

@@ -1,5 +1,7 @@
 //
 // This file contains the CXdbGenerator implementation 
+//
+
 // [Normalization procedures]
 // [Abandon] step 0: use xdb_dump tool to dump the original simple_export file from original raw xdb.
 // [Abandon] step 1: Add/Delete/Update tokens in the original simple_export file and save to another updated simple_export file.
@@ -9,7 +11,6 @@
 // step 4: use xdb_gen tool generate a final normalized xdb(fuzzy) from this merge_export file.
 // TODO: We can just skip step 3(skip xdb_dump), because we can just generage a normalized tt_tokens_list after step 1(we can get both tt_tokens_list(non-normailzed) and tt_tokens_list(normailzed) together).
 
-
 #include "XdbGenerator.h"
 #include "xdict.h"
 #include "xdb.h"
@@ -18,6 +19,9 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+
+namespace NFtsTokenGenerator
+{
 
 CXdbGenerator::CXdbGenerator() :
   iInputTokenListFile(NULL),
@@ -516,3 +520,6 @@ void CXdbGenerator::WriteSortedDataToXdb(int aStart, int aEnd, unsigned int aNod
     WriteSortedDataToXdb(newStart, aEnd, filePosistion, aNodeOffset, aPrime, aIter, aFileXdb);
   }
 }
+
+} // namespace NFtsTokenGenerator
+

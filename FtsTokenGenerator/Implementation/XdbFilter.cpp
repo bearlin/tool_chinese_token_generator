@@ -4,6 +4,9 @@
 
 #include "XdbFilter.h"
 
+namespace NFtsTokenGenerator
+{
+
 CXdbFilter::CXdbFilter() :
   KNormBufUnitSize(0x200),
   KCJKBytes(3),
@@ -1717,4 +1720,6 @@ void CXdbFilter::CFtsTokenizerExtChinese_ReserveStringCapacity(std::string& aStr
   const size_t allocateSize = (aSize + aUnitSize - 1) & ~(aUnitSize - 1); // pack with aUnitSize
   aString.resize(allocateSize);
 }
+
+} // namespace NFtsTokenGenerator
 

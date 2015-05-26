@@ -2,11 +2,14 @@
 // This file contains the Implementation of FTS token generator interface
 //
 
-#ifndef __FTS_TOKEN_GENERATOR_H__
-#define __FTS_TOKEN_GENERATOR_H__
+#ifndef FTS_TOKEN_GENERATOR_H
+#define FTS_TOKEN_GENERATOR_H
 
 #include "IFtsTokenGenerator.h"
 #include <string>
+
+namespace NFtsTokenGenerator
+{
 
 class CFtsTokenGenerator : public IFtsTokenGenerator
 {
@@ -22,4 +25,6 @@ private:
   TLanguageType iLanguageType;
 };
 
-#endif // __FTS_TOKEN_GENERATOR_H__
+} // namespace NFtsTokenGenerator
+
+#endif // FTS_TOKEN_GENERATOR_H

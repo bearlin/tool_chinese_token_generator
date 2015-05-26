@@ -8,6 +8,9 @@
 #include "XdbGenerator.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 #define ENABLE_XDBFILTER
 #define ENABLE_XDBGENERATOR
 //#define ENABLE_XDBDUMPER
@@ -123,4 +126,6 @@ bool CTokenGeneratorChinese::Run()
 
   return true;
 }
+
+} // namespace NFtsTokenGenerator
 

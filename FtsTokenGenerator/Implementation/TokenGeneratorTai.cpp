@@ -5,6 +5,9 @@
 #include "TokenGeneratorTai.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CTokenGeneratorTai::CTokenGeneratorTai()
 {
 }
@@ -21,4 +24,6 @@ bool CTokenGeneratorTai::Run()
 
   return true;
 }
+
+} // namespace NFtsTokenGenerator
 

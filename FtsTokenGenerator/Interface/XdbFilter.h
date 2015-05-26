@@ -21,6 +21,9 @@
 #include "xdict.h"
 #include "scws.h"
 
+namespace NFtsTokenGenerator
+{
+
 #if defined(WIN32)
   #define strcasecmp _stricmp
 #endif
@@ -202,5 +205,7 @@ private:
   bool ConvertToNormalizedTokens();
   bool MergeToFuzzyTokens();
 };
+
+} // namespace NFtsTokenGenerator
 
 #endif // XDB_FILTER_H_

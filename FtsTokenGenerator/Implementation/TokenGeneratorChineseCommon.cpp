@@ -5,6 +5,9 @@
 #include "TokenGeneratorChineseCommon.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 const unsigned char CTokenGeneratorChineseCommon::iUTF8MultibyteLengthTable[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -30,4 +33,6 @@ CTokenGeneratorChineseCommon::CTokenGeneratorChineseCommon()
 CTokenGeneratorChineseCommon::~CTokenGeneratorChineseCommon()
 {
 }
+
+} // namespace NFtsTokenGenerator
 

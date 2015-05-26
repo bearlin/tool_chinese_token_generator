@@ -5,6 +5,9 @@
 #include "XdbDumper.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 static const int KKeyNameSize = 256;
 static const int KAttributeSize = 4;
 
@@ -651,4 +654,6 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
   fputs(iSzLog, iNormalizeLog);
 #endif //CONVERT_NORMALIZE
 }
+
+} // namespace NFtsTokenGenerator
 

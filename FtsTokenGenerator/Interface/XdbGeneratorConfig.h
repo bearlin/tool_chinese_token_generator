@@ -2,10 +2,13 @@
 // This file contains the Chinese token generator config interface
 //
 
-#ifndef __XDB_GENERATOR_CONFIG_H__
-#define __XDB_GENERATOR_CONFIG_H__
+#ifndef XDB_GENERATOR_CONFIG_H
+#define XDB_GENERATOR_CONFIG_H
 
 #include "TokenGeneratorChineseConfig.h"
+
+namespace NFtsTokenGenerator
+{
 
 class CXdbGeneratorConfig : public CTokenGeneratorChineseConfig
 {
@@ -21,4 +24,6 @@ public:
   std::string iOutputXdb;
 };
 
-#endif // __XDB_GENERATOR_CONFIG_H__
+} // namespace NFtsTokenGenerator
+
+#endif // XDB_GENERATOR_CONFIG_H

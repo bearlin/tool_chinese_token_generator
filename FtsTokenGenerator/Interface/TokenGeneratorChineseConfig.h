@@ -2,10 +2,13 @@
 // This file contains the Chinese token generator config interface
 //
 
-#ifndef __TOKEN_GENERATOR_CHINESE_CONFIG_H__
-#define __TOKEN_GENERATOR_CHINESE_CONFIG_H__
+#ifndef TOKEN_GENERATOR_CHINESE_CONFIG_H
+#define TOKEN_GENERATOR_CHINESE_CONFIG_H
 
 #include <string>
+
+namespace NFtsTokenGenerator
+{
 
 class CTokenGeneratorChineseConfig
 {
@@ -23,4 +26,6 @@ public:
   std::string iLogPath;
 };
 
-#endif // __TOKEN_GENERATOR_CHINESE_CONFIG_H__
+} // namespace NFtsTokenGenerator
+
+#endif // TOKEN_GENERATOR_CHINESE_CONFIG_H

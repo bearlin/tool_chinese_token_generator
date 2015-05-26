@@ -2,11 +2,14 @@
 // This file contains the Tai token generator interface
 //
 
-#ifndef __TOKEN_GENERATOR_TAI_H__
-#define __TOKEN_GENERATOR_TAI_H__
+#ifndef TOKEN_GENERATOR_TAI_H
+#define TOKEN_GENERATOR_TAI_H
 
 #include "FtsTokenGenerator.h"
 #include <string>
+
+namespace NFtsTokenGenerator
+{
 
 class CTokenGeneratorTai
 {
@@ -20,4 +23,6 @@ private:
 
 };
 
-#endif // __TOKEN_GENERATOR_TAI_H__
+} // namespace NFtsTokenGenerator
+
+#endif // TOKEN_GENERATOR_TAI_H

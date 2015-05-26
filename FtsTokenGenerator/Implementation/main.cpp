@@ -6,6 +6,11 @@
 #include <iostream>
 #include <cstdlib>
 
+using ::NFtsTokenGenerator::CFtsTokenGenerator ;
+using ::NFtsTokenGenerator::TLanguageType;
+using ::NFtsTokenGenerator::EChinese;
+using ::NFtsTokenGenerator::ETai;
+
 int main(int argc, char* argv[])
 {
   CFtsTokenGenerator tokenGenerator;

@@ -5,6 +5,9 @@
 #include "XdbFilterConfig.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CXdbFilterConfig::CXdbFilterConfig() :
   iInputScwsXdb("")
   , iInputScwsRule("")
@@ -72,4 +75,6 @@ const std::string CXdbFilterConfig::GetOutputTokenListFuzzy() const
 {
   return iOutputTokenListFuzzy;
 }
+
+} // namespace NFtsTokenGenerator
 

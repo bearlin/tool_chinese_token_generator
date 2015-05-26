@@ -2,10 +2,13 @@
 // This file contains the Chinese token dumper config interface
 //
 
-#ifndef __XDB_DUMPER_CONFIG_H__
-#define __XDB_DUMPER_CONFIG_H__
+#ifndef XDB_DUMPER_CONFIG_H
+#define XDB_DUMPER_CONFIG_H
 
 #include "TokenGeneratorChineseConfig.h"
+
+namespace NFtsTokenGenerator
+{
 
 class CXdbDumperConfig : public CTokenGeneratorChineseConfig
 {
@@ -23,4 +26,6 @@ public:
 
 };
 
-#endif // __XDB_DUMPER_CONFIG_H__
+} // namespace NFtsTokenGenerator
+
+#endif // XDB_DUMPER_CONFIG_H

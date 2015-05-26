@@ -5,6 +5,9 @@
 #include "XdbGeneratorConfig.h"
 #include <iostream>
 
+namespace NFtsTokenGenerator
+{
+
 CXdbGeneratorConfig::CXdbGeneratorConfig() :
   iInputTokenList("")
   , iOutputXdb("")
@@ -29,4 +32,6 @@ const std::string CXdbGeneratorConfig::GetOutputXdb() const
 {
   return iOutputXdb;
 }
+
+} // namespace NFtsTokenGenerator
 

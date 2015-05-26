@@ -2,8 +2,8 @@
 // This file contains the Chinese token dumper interface
 //
 
-#ifndef __XDB_DUMPER_H__
-#define __XDB_DUMPER_H__
+#ifndef XDB_DUMPER_H
+#define XDB_DUMPER_H
 
 #include "XdbDumperConfig.h"
 
@@ -15,6 +15,9 @@
 #include <vector>
 #include <map>
 #include <algorithm>    // std::find std::sort
+
+namespace NFtsTokenGenerator
+{
 
 // Select one of below macro:
 // XDB_GEN_TOOL_EXPORT_FILE will use dict_cht.utf8.xdb as input and output all nodes to simple_export.txt.
@@ -105,4 +108,6 @@ private:
   void GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength, int aDirection, int aLevel, const char* aFather);
 };
 
-#endif // __XDB_DUMPER_H__
+} // namespace NFtsTokenGenerator
+
+#endif // XDB_DUMPER_H

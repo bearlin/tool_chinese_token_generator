@@ -2,10 +2,13 @@
 // This file contains the interface of FTS token generator
 //
 
-#ifndef __IFTS_TOKEN_GENERATOR_H__
-#define __IFTS_TOKEN_GENERATOR_H__
+#ifndef IFTS_TOKEN_GENERATOR_H
+#define IFTS_TOKEN_GENERATOR_H
 
 #include <string>
+
+namespace NFtsTokenGenerator
+{
 
 enum TLanguageType
 {
@@ -22,4 +25,6 @@ public:
   virtual bool Run() = 0;
 };
 
-#endif // __IFTS_TOKEN_GENERATOR_H__
+} // namespace NFtsTokenGenerator
+
+#endif // IFTS_TOKEN_GENERATOR_H
