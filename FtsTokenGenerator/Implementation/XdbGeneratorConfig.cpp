@@ -9,12 +9,10 @@ CXdbGeneratorConfig::CXdbGeneratorConfig() :
   iInputTokenList("")
   , iOutputXdb("")
 {
-  std::cout << "CXdbGeneratorConfig" << std::endl;
 }
 
 CXdbGeneratorConfig::~CXdbGeneratorConfig()
 {
-  std::cout << "~CXdbGeneratorConfig" << std::endl;
 }
 
 void CXdbGeneratorConfig::SetInputTokenList(const std::string& aInputTokenList)

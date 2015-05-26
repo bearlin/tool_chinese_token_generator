@@ -14,18 +14,17 @@
 
 CTokenGeneratorChinese::CTokenGeneratorChinese()
 {
-  //std::cout << "CTokenGeneratorChinese" << std::endl;
 }
 
 CTokenGeneratorChinese::~CTokenGeneratorChinese()
 {
-  //std::cout << "~CTokenGeneratorChinese" << std::endl;
 }
 
 bool CTokenGeneratorChinese::Run()
 {
   bool runSuccess = false;
 
+  std::cout << "Running CTokenGeneratorChinese..." << std::endl;
 #ifdef ENABLE_XDBFILTER
   // ============================ CXdbFilter ============================
   // Set CXdbFilter In/Out/Log path

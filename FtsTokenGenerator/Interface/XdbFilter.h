@@ -6,6 +6,7 @@
 #define XDB_FILTER_H
 
 #include "XdbFilterConfig.h"
+#include "TokenGeneratorChineseCommon.h"
 
 #include <iostream>
 #include <string>
@@ -163,9 +164,6 @@ private:
                         char*       aTempBuffer,
                         size_t      aBufferLength,
                         int         aWordIndex);
-
-  // Length of multibyte character from first byte of Utf8
-  static const unsigned char iUTF8MultibyteLengthTable[256];
 
   const unsigned int KNormBufUnitSize;
   const unsigned int KCJKBytes;

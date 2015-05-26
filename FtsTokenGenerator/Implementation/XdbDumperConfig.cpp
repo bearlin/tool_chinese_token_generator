@@ -7,12 +7,10 @@
 
 CXdbDumperConfig::CXdbDumperConfig()
 {
-  std::cout << "CXdbDumperConfig" << std::endl;
 }
 
 CXdbDumperConfig::~CXdbDumperConfig()
 {
-  std::cout << "~CXdbDumperConfig" << std::endl;
 }
 
 void CXdbDumperConfig::SetInputScwsXdb(const std::string& aInputScwsXdb)

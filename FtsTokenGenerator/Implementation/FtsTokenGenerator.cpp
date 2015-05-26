@@ -10,12 +10,10 @@
 CFtsTokenGenerator::CFtsTokenGenerator() :
   iLanguageType(EChinese)
 {
-  //std::cout << "CFtsTokenGenerator: default iLanguageType=" << iLanguageType << std::endl;
 }
 
 CFtsTokenGenerator::~CFtsTokenGenerator()
 {
-  //std::cout << "~CFtsTokenGenerator" << std::endl;
 }
 
 void CFtsTokenGenerator::SetLanguageType(const TLanguageType aType)

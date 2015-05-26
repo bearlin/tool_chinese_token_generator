@@ -24,27 +24,7 @@ static const int KNormalizeKeyNameSize = 256;
 static const int KChtUTF8Size = 4;
 static const int KSourceTokenIndex = 1;
 static const int KDestinationTokenIndex = 2;
-
-const unsigned char CXdbDumper::iMblenTableUTF8[KMblenTableUTF8Size] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 };
 #endif
-
-
 
 CXdbDumper::CXdbDumper() :
   iWordCount(0)
@@ -584,7 +564,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   for (int index = 0; index < keyLength; )
   {
-    charUTF8Length = iMblenTableUTF8[keyName[index]];
+    charUTF8Length = CTokenGeneratorChineseConfig::iUTF8MultibyteLengthTable[keyName[index]];
 
     if (charUTF8Length != 3) 
     {

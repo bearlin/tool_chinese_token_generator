@@ -7,21 +7,17 @@
 
 CTokenGeneratorTai::CTokenGeneratorTai()
 {
-  std::cout << "CTokenGeneratorTai" << std::endl;
 }
 
 CTokenGeneratorTai::~CTokenGeneratorTai()
 {
-  std::cout << "~CTokenGeneratorTai" << std::endl;
 }
 
 bool CTokenGeneratorTai::Run()
 {
-  std::cout << "Running CTokenGeneratorTai" << std::endl;
-
   // run tai tokenizer engine...
   // TODO.
-  std::cout << "CTokenGeneratorTai not support yet!!!" << std::endl;
+  std::cout << "Running CTokenGeneratorTai... (For Thai language, we still don't know if it need a token generating process or not)" << std::endl;
 
   return true;
 }

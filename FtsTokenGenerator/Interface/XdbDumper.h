@@ -46,8 +46,7 @@
   #endif
 
 static const int KSzLogSize = 1024;
-static const int KMblenTableUTF8Size = 256;
-  
+
 class CXdbDumper
 {
 public:
@@ -92,8 +91,6 @@ private:
   std::map<std::string, std::string> iFirstNormalizeToOriginalMap; //we will remember the first original_string -> normalized_string pair.
   std::vector<std::string> iNormalizeRepeatVector;
   FILE* iNormalizeRepeatLog;
-
-  static const unsigned char iMblenTableUTF8[KMblenTableUTF8Size];
   #endif //CONVERT_NORMALIZE
 
   std::string iFilePath;

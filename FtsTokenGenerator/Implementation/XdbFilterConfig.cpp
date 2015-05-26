@@ -17,12 +17,10 @@ CXdbFilterConfig::CXdbFilterConfig() :
   , iOutputTokenListNormalized("")
   , iOutputTokenListFuzzy("")
 {
-  std::cout << "CXdbFilterConfig" << std::endl;
 }
 
 CXdbFilterConfig::~CXdbFilterConfig()
 {
-  std::cout << "~CXdbFilterConfig" << std::endl;
 }
 
 void CXdbFilterConfig::SetInputScwsXdb(const std::string& aInputScwsXdb)

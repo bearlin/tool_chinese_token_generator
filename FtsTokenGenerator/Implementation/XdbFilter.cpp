@@ -4,24 +4,6 @@
 
 #include "XdbFilter.h"
 
-const unsigned char CXdbFilter::iUTF8MultibyteLengthTable[256] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 };
-
 CXdbFilter::CXdbFilter() :
   KNormBufUnitSize(0x200),
   KCJKBytes(3),
@@ -1701,7 +1683,7 @@ size_t CXdbFilter::CHomophoneNormalizer_Normalize(const char* aSourceString, cha
 
   for (utf8FirstByteOffset = 0; inputString[utf8FirstByteOffset];)
   {
-    size_t characterLengthInBytes = iUTF8MultibyteLengthTable[inputString[utf8FirstByteOffset]];
+    size_t characterLengthInBytes = CTokenGeneratorChineseCommon::iUTF8MultibyteLengthTable[inputString[utf8FirstByteOffset]];
 
     if (KCJKBytes != characterLengthInBytes) /* not CJK */
     {

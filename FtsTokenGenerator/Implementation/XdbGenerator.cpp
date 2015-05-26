@@ -19,24 +19,6 @@
 #include <string>
 #include <algorithm>
 
-const unsigned char CXdbGenerator::iUTF8MultibyteLengthTable[256] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1 };
-
 CXdbGenerator::CXdbGenerator() :
 #ifdef ENABLE_LOG
   iLogFile(NULL),
@@ -182,10 +164,10 @@ bool CXdbGenerator::Run()
 
     // Generate partial tokens for this raw token.
     // parse the part
-    int totalLength = iUTF8MultibyteLengthTable[(unsigned char)(str[0])];
+    int totalLength = CTokenGeneratorChineseCommon::iUTF8MultibyteLengthTable[(unsigned char)(str[0])];
     while (1)
     {
-      totalLength += iUTF8MultibyteLengthTable[(unsigned char)(str[totalLength])];
+      totalLength += CTokenGeneratorChineseCommon::iUTF8MultibyteLengthTable[(unsigned char)(str[totalLength])];
       if (totalLength >= length)
       {
         break;
