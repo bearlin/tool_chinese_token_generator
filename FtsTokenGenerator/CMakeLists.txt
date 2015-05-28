@@ -11,8 +11,10 @@ set(FTSTOKENGENERATOR_ROOT
   CACHE STRING "FTSTOKENGENERATOR_ROOT directory")
 
 add_subdirectory(
-  ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libscws
-  ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/libscws)
+  #${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libscws1.2.1
+  #${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/libscws1.2.1)
+  ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libscws1.2.2
+  ${CMAKE_CURRENT_BINARY_DIR}/ThirdParty/libscws1.2.2)
 
 set(FTSTOKENGENERATOR_API_INCLUDES
   ${FTSTOKENGENERATOR_ROOT}/Interface/
