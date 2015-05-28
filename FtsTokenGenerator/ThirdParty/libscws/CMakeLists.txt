@@ -1,4 +1,4 @@
-project(libscws)
+project(scws)
 
 set(LIBSCWS_ROOT ${PROJECT_SOURCE_DIR}
   CACHE STRING "LIBSCWS_ROOT directory")
