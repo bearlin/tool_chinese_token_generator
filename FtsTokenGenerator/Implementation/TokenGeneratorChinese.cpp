@@ -17,9 +17,9 @@ namespace NFtsTokenGenerator
 
 #define TRANDITIONAL_CHINESE
 #ifdef TRANDITIONAL_CHINESE
-  #define CHINESE_FOLDER "TC/"
+  #define CHINESE_FOLDER "TC"
 #else
-  #define CHINESE_FOLDER "SC/"
+  #define CHINESE_FOLDER "SC"
 #endif //TRANDITIONAL_CHINESE
 
 CTokenGeneratorChinese::CTokenGeneratorChinese()
