@@ -17,9 +17,9 @@ namespace NFtsTokenGenerator
 
 #define TRANDITIONAL_CHINESE
 #ifdef TRANDITIONAL_CHINESE
-  #define CHINESE_FOLDER "TC"
+  #define CHINESE_FOLDER "TC/"
 #else
-  #define CHINESE_FOLDER "SC"
+  #define CHINESE_FOLDER "SC/"
 #endif //TRANDITIONAL_CHINESE
 
 CTokenGeneratorChinese::CTokenGeneratorChinese()
@@ -40,8 +40,8 @@ bool CTokenGeneratorChinese::Run()
   // Set CXdbFilter In/Out/Log path
   CXdbFilter xdbFilter;
   xdbFilter.GetConfig().SetInputPath("../config/XdbFilter/" CHINESE_FOLDER "/input/");
-  xdbFilter.GetConfig().SetOutputPath("../config/XdbFilter/" CHINESE_FOLDER "/output_ALL/");
-  xdbFilter.GetConfig().SetLogPath("../config/XdbFilter/" CHINESE_FOLDER "/output_ALL/");
+  xdbFilter.GetConfig().SetOutputPath("../config/XdbFilter/" CHINESE_FOLDER "/output/");
+  xdbFilter.GetConfig().SetLogPath("../config/XdbFilter/" CHINESE_FOLDER "/log/");
 
   // Set I/O path
 #ifdef TRANDITIONAL_CHINESE
@@ -59,7 +59,6 @@ bool CTokenGeneratorChinese::Run()
   xdbFilter.GetConfig().SetInputAreaName("areas/05_all_area_map02.txt");
   xdbFilter.GetConfig().SetInputRemoveToken("_removed_tokens_table.txt");
   xdbFilter.GetConfig().SetInputSourceData("ALL.txt");
-  //xdbFilter.GetConfig().SetInputSourceData("test.txt");
 
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
@@ -80,9 +79,9 @@ bool CTokenGeneratorChinese::Run()
   // Set CXdbGenerator In/Out/Log path
   CXdbGenerator xdbGenerator;
   xdbGenerator.GetConfig().SetInputPath(xdbFilter.GetConfig().GetOutputPath());
-  //xdbGenerator.GetConfig().SetInputPath("../config/XdbGenerator/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
-  xdbGenerator.GetConfig().SetOutputPath("../config/XdbGenerator/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
-  xdbGenerator.GetConfig().SetLogPath("../config/XdbGenerator/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/1_simple_gen/");
+  //xdbGenerator.GetConfig().SetInputPath("../config/XdbGenerator/" CHINESE_FOLDER "/input/");
+  xdbGenerator.GetConfig().SetOutputPath("../config/XdbGenerator/" CHINESE_FOLDER "/output/");
+  xdbGenerator.GetConfig().SetLogPath("../config/XdbGenerator/" CHINESE_FOLDER "/log/");
 
   // Set I/O path of fuzzy xdb
   xdbGenerator.GetConfig().SetInputTokenList(xdbFilter.GetConfig().GetOutputTokenListFuzzy());
@@ -117,18 +116,23 @@ bool CTokenGeneratorChinese::Run()
 #ifdef ENABLE_XDBDUMPER
   // ============================ CXdbDumper ===========================
   CXdbDumper xdbDumper;
-  xdbDumper.GetConfig().SetInputPath("../config/XdbDumper/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/");
-  xdbDumper.GetConfig().SetOutputPath("../config/XdbDumper/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/");
-  xdbDumper.GetConfig().SetLogPath("../config/XdbDumper/" CHINESE_FOLDER "/Normalization_20131017_v01_xdb_filter_optimized/");
+  xdbDumper.GetConfig().SetInputPath("../config/XdbDumper/" CHINESE_FOLDER "/input/");
+  xdbDumper.GetConfig().SetOutputPath("../config/XdbDumper/" CHINESE_FOLDER "/output/");
+  xdbDumper.GetConfig().SetLogPath("../config/XdbDumper/" CHINESE_FOLDER "/log/");
 
   xdbDumper.GetConfig().SetInputScwsXdb("xdb(s06_log_tokens_full.txt).xdb");
-  //xdbDumper.GetConfig().SetInputScwsXdb("xdb/dict.utf8.xdb");
+#ifdef TRANDITIONAL_CHINESE
   xdbDumper.GetConfig().SetInputNormalizeMap("fts-tc-n.tok");
-  //xdbDumper.GetConfig().SetInputNormalizeMap("fts-sc-n.tok");
+#else
+  xdbDumper.GetConfig().SetInputNormalizeMap("fts-sc-n.tok");
+#endif
 
   runSuccess = xdbDumper.Run();
   if (false == runSuccess)
+  {
+    std::cout << "xdbDumper.Run() error!!!" << std::endl;
     return false;
+  }
 
   // Output results token list path
   std::cout << "xdbDumper OutputTokenList path:" << xdbDumper.GetConfig().GetOutputPath() + xdbDumper.GetConfig().GetOutputDumpText()<< std::endl;
