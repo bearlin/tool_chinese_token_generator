@@ -15,7 +15,9 @@ class CTokenGeneratorTai
 {
 public:
   CTokenGeneratorTai();
-  ~CTokenGeneratorTai();
+  // Empty virtual destructor avoids warning:
+  // Class has virtual functions and accessible non-virtual destructor [-Wnon-virtual-dtor]
+  virtual ~CTokenGeneratorTai();
 
   virtual bool Run();
 

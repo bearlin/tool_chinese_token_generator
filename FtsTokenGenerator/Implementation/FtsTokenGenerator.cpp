@@ -24,7 +24,7 @@ void CFtsTokenGenerator::SetLanguageType(const TLanguageType aType)
   iLanguageType = aType;
 }
 
-const TLanguageType CFtsTokenGenerator::GetLanguageType() const
+TLanguageType CFtsTokenGenerator::GetLanguageType() const
 {
   return iLanguageType;
 }
