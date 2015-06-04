@@ -7,6 +7,10 @@
 namespace NFtsTokenGenerator
 {
 
+#if defined(WIN32)
+  #define strcasecmp _stricmp
+#endif
+
 CXdbFilter::CXdbFilter() :
   KNormBufUnitSize(0x200),
   KCJKBytes(3),

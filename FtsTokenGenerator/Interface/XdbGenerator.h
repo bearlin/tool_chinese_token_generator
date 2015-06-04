@@ -13,15 +13,6 @@
 namespace NFtsTokenGenerator
 {
 
-#define ENABLE_LOG
-#define LOG_FILE_NAME "log(s06_log_tokens_full.txt).txt"
-#define LOG_REPEAT_FILE_NAME "log_repeat(s06_log_tokens_full.txt).txt"
-#define MAX_NODE_COUNT 127
-#define XDB_HASH_BASE 0xf422f // Check xtree_new function in xtree.c
-#define NO_FATHER -1
-#define DIR_LEFT 0
-#define DIR_RIGHT 1
-
 /* header struct */
 typedef struct TXdb_header
 {
