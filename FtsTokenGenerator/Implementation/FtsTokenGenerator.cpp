@@ -4,8 +4,11 @@
 
 #include "FtsTokenGenerator.h"
 #include "TokenGeneratorChinese.h"
-#include "TokenGeneratorTai.h"
+#include "TokenGeneratorThai.h"
 #include <iostream>
+
+#include "TTLog.h"
+DEFINE_LOGGER(gLogCFtsTokenGenerator, "CFtsTokenGenerator")
 
 namespace NFtsTokenGenerator
 {
@@ -35,14 +38,14 @@ bool CFtsTokenGenerator::Run()
     CTokenGeneratorChinese chineseTokenGenerator;
     return chineseTokenGenerator.Run();
   }
-  else if (ETai == iLanguageType)
+  else if (EThai == iLanguageType)
   {
-    CTokenGeneratorTai taiTokenGenerator;
-    return taiTokenGenerator.Run();
+    CTokenGeneratorThai thaiTokenGenerator;
+    return thaiTokenGenerator.Run();
   }
   else
   {
-    std::cout << "Unsupported language type:" << iLanguageType << std::endl;
+    LOG_INFO(gLogCFtsTokenGenerator, "Unsupported language type:%d\n", static_cast<int>(iLanguageType));
     return false;
   }
 }

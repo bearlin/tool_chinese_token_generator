@@ -18,6 +18,7 @@ add_subdirectory(
 
 set(FTSTOKENGENERATOR_API_INCLUDES
   ${FTSTOKENGENERATOR_ROOT}/Interface/
+  ${FTSTOKENGENERATOR_ROOT}/Imports/FakeNavKit/
   CACHE STRING "FTSTOKENGENERATOR_API_INCLUDES path")
 
 include_directories(

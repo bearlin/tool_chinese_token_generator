@@ -11,6 +11,9 @@
 #include <string>
 #include <algorithm>
 
+#include "TTLog.h"
+DEFINE_LOGGER(gLogCXdbGenerator, "CXdbGenerator")
+
 namespace NFtsTokenGenerator
 {
 
@@ -30,10 +33,10 @@ CXdbGenerator::~CXdbGenerator()
 
 bool CXdbGenerator::Run()
 {
-  std::cout << "Running CXdbGenerator" << std::endl;
-  std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
-  std::cout << "iOutputPath:" << GetConfig().iOutputPath<< std::endl;
-  std::cout << "iLogPath:" << GetConfig().iLogPath<< std::endl;
+  LOG_INFO(gLogCXdbGenerator, "Running CXdbGenerator...\n");
+  LOG_INFO(gLogCXdbGenerator, "iInputPath:%s\n", (GetConfig().iInputPath).c_str());
+  LOG_INFO(gLogCXdbGenerator, "iOutputPath:%s\n", (GetConfig().iOutputPath).c_str());
+  LOG_INFO(gLogCXdbGenerator, "iLogPath:%s\n", (GetConfig().iLogPath).c_str());
 
   if (!OpenFile())
   {
@@ -107,7 +110,7 @@ bool CXdbGenerator::Run()
     //Skip partial tokens from the raw input file..
     if (!(nodeInfo.flag & SCWS_WORD_FULL))
     {
-      std::cout << "skip_part: " << line;
+      LOG_INFO(gLogCXdbGenerator, "skip_part: %s\n", line.c_str());
       continue;
     }
     
@@ -193,27 +196,27 @@ bool CXdbGenerator::Run()
       }
     }
   }
-  std::cout << "Total read line: " << lineCount << std::endl;
-  std::cout <<"Validation checking................................................." << std::endl;
+  LOG_INFO(gLogCXdbGenerator, "Total read line: %d\n", lineCount);
+  LOG_INFO(gLogCXdbGenerator, "Validation checking.................................................\n");
 
   for (int index = 0; index < SCWS_XDICT_PRIME; index++)
   {
     if (nodes[index].size() > MAX_NODE_COUNT)
     {
       CloseFile();
-      std::cout << "PRIME[ " << index << " ] illegal!!!  Count = " << nodes[index].size() << std::endl;
+      LOG_INFO(gLogCXdbGenerator, "PRIME[ %d ] illegal!!!  Count = %ld\n", index, nodes[index].size());
       return false;
     }
   }
 
-  std::cout << "Sorting................................................." << std::endl;
+  LOG_INFO(gLogCXdbGenerator, "Sorting.................................................\n");
 
   for (int index = 0; index < SCWS_XDICT_PRIME; index++)
   {
     std::sort(nodes[index].begin(), nodes[index].end(), CompareNode);
   }
 
-  std::cout << "\n\nWriting XDB to " << (GetConfig().GetOutputPath() + GetConfig().GetOutputXdb()) << std::endl;
+  LOG_INFO(gLogCXdbGenerator, "Writing XDB to %s\n", (GetConfig().GetOutputPath() + GetConfig().GetOutputXdb()).c_str());
   TXdb_header xdbHeader;
   memset(&xdbHeader, 0, sizeof(TXdb_header));
   memcpy(&xdbHeader.tag, XDB_TAGNAME, 3);
@@ -298,7 +301,7 @@ bool CXdbGenerator::OpenFile()
 
   if (iInputTokenListFile == NULL)
   {
-    std::cout << "[ERROR] Unable to open input token list file:" << tempFilePath << " to read." << std::endl;
+    LOG_INFO(gLogCXdbGenerator, "[ERROR] Unable to open input token list file:%s to read.\n", tempFilePath.c_str());
     return false;
   }
 
@@ -308,7 +311,7 @@ bool CXdbGenerator::OpenFile()
   if (iXdbFile == NULL)
   {
     CloseFile();
-    std::cout << "[ERROR] Unable to create xdb file :" << tempFilePath << std::endl;
+    LOG_INFO(gLogCXdbGenerator, "[ERROR] Unable to create xdb file :%s\n", tempFilePath.c_str());
     return false;
   }
 
@@ -318,7 +321,7 @@ bool CXdbGenerator::OpenFile()
   if (iLogFile == NULL)
   {
     CloseFile();
-    std::cout << "[ERROR] Unable to create log file :" << tempFilePath << std::endl;
+    LOG_INFO(gLogCXdbGenerator, "[ERROR] Unable to create log file :%s\n", tempFilePath.c_str());
     return false;
   }
 
@@ -328,7 +331,7 @@ bool CXdbGenerator::OpenFile()
   if (iLogRepeatPathFile == NULL)
   {
     CloseFile();
-    std::cout << "[ERROR] Unable to create log repeat path file :" << tempFilePath << std::endl;
+    LOG_INFO(gLogCXdbGenerator, "[ERROR] Unable to create log repeat path file :%s\n", tempFilePath.c_str());
     return false;
   }
 #endif //ENABLE_LOG

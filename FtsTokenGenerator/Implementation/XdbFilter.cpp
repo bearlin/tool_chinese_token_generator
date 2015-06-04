@@ -4,6 +4,9 @@
 
 #include "XdbFilter.h"
 
+#include "TTLog.h"
+DEFINE_LOGGER(gLogCXdbFilter, "CXdbFilter")
+
 namespace NFtsTokenGenerator
 {
 
@@ -28,10 +31,10 @@ CXdbFilter::~CXdbFilter()
 
 bool CXdbFilter::Run()
 {
-  std::cout << "Running CXdbFilter" << std::endl;
-  std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
-  std::cout << "iOutputPath:" << GetConfig().iOutputPath << std::endl;
-  std::cout << "iLogPath:" << GetConfig().iLogPath << std::endl;
+  LOG_INFO(gLogCXdbFilter, "Running CXdbFilter...\n");
+  LOG_INFO(gLogCXdbFilter, "iInputPath:%s\n", (GetConfig().iInputPath).c_str());
+  LOG_INFO(gLogCXdbFilter, "iOutputPath:%s\n", (GetConfig().iOutputPath).c_str());
+  LOG_INFO(gLogCXdbFilter, "iLogPath:%s\n", (GetConfig().iLogPath).c_str());
 
   if (!Init() || 
       !CollectTokens() || 
@@ -58,10 +61,10 @@ bool CXdbFilter::Init()
 {
   // Stage 0: Initializations.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 0: Initializations.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 0: Initializations.\n");
   if (!InitSuffixTokenMap(iSuffixTokenMap))
   {
-    printf("ERROR: cann't init the SuffixTokenMap!\n");
+    LOG_INFO(gLogCXdbFilter, "ERROR: cann't init the SuffixTokenMap!\n");
     return false;
   }
 
@@ -83,7 +86,7 @@ bool CXdbFilter::CollectTokens()
   // Stage 1: Collect token list from "input raw file" or "saved iTokenMap log file" to iTokenMap.
   //------------------------------------------------------------------------------------------------
 #ifdef MAP_INIT
-  printf("Stage 1: Collect token list from \"input raw file\" to iTokenMap.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 1: Collect token list from \"input raw file\" to iTokenMap.\n");
   char tempToken[MAX_LINE_SIZE];
   scws_t scwsHandle;
   scws_res_t scwsResults, scwsCurrentResult;
@@ -102,25 +105,25 @@ bool CXdbFilter::CollectTokens()
   fileStage01NotChinese = fopen(iFilePath.c_str(), "w");
   if (fileStage01NotChinese == NULL)
   {
-    printf("fileStage01NotChinese err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage01NotChinese err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("fileStage01NotChinese:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage01NotChinese:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S01_DUPLICATE;
   fileStage01Duplicated = fopen(iFilePath.c_str(), "w");
   if (fileStage01Duplicated == NULL)
   {
-    printf("fileStage01Duplicated err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage01Duplicated err:%s\n", iFilePath.c_str());
     fclose(fileStage01NotChinese);
     return false;
   }
-  printf("fileStage01Duplicated:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage01Duplicated:%s\n", iFilePath.c_str());
 
   scwsHandle = scws_new();
   if (scwsHandle == false)
   {
-    printf("ERROR: cann't init the scwsHandle!\n");
+    LOG_INFO(gLogCXdbFilter, "ERROR: cann't init the scwsHandle!\n");
     fclose(fileStage01NotChinese);
     fclose(fileStage01Duplicated);
     return false;
@@ -132,7 +135,7 @@ bool CXdbFilter::CollectTokens()
   status = scws_set_dict(scwsHandle, iFilePath.c_str(), SCWS_XDICT_XDB);
   if (status != 0)
   {
-    printf("Err: Failed to set the dict file:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "Err: Failed to set the dict file:%s\n", iFilePath.c_str());
     fclose(fileStage01NotChinese);
     fclose(fileStage01Duplicated);
     return false;
@@ -142,23 +145,23 @@ bool CXdbFilter::CollectTokens()
   scws_set_rule(scwsHandle, iFilePath.c_str());
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputSourceData;
-  printf("input src:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "input src:%s\n", iFilePath.c_str());
   fileStage01Raw = fopen(iFilePath.c_str(), "r");
   if (fileStage01Raw == NULL)
   {
-    printf("fileStage01Raw err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage01Raw err:%s\n", iFilePath.c_str());
     fclose(fileStage01NotChinese);
     fclose(fileStage01Duplicated);
     return false;
   }
-  printf("fileStage01Raw:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage01Raw:%s\n", iFilePath.c_str());
 
   while (fgets(lineText, MAX_LINE_SIZE, fileStage01Raw) != NULL)
   {
     lineNumber++;
     if ((lineNumber % 100000) == 0)
     {
-      printf("Parsing Line(%d)....\n", lineNumber);
+      LOG_INFO(gLogCXdbFilter, "Parsing Line(%d)....\n", lineNumber);
     }
 
     if (strlen(lineText) == 0)
@@ -175,7 +178,7 @@ bool CXdbFilter::CollectTokens()
       lineTextToScws[textSize++] = *(ptrLine++);
     }
 
-    //printf("%s\n", lineTextToScws);
+    //LOG_INFO(gLogCXdbFilter, "%s\n", lineTextToScws);
     scws_send_text(scwsHandle, lineTextToScws, textSize);
     while ((scwsResults = (scwsCurrentResult = scws_get_result(scwsHandle))))
     {
@@ -213,7 +216,7 @@ bool CXdbFilter::CollectTokens()
     }
   }
   scws_free(scwsHandle);
-  printf("Total Parsing Line(%d)....\n", lineNumber);
+  LOG_INFO(gLogCXdbFilter, "Total Parsing Line(%d)....\n", lineNumber);
 
   // Log iTokenMap
   iFilePath = GetConfig().iLogPath + OUT_FILE_S01_MAP_RAW;
@@ -229,7 +232,7 @@ bool CXdbFilter::CollectTokens()
 
 #else //MAP_INIT
 
-  printf("Stage 1: Collect token list from \"saved iTokenMap log file\" to iTokenMap.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 1: Collect token list from \"saved iTokenMap log file\" to iTokenMap.\n");
 
   std::string string1;
   std::string string2;
@@ -243,10 +246,10 @@ bool CXdbFilter::CollectTokens()
   if (!iInputFile.is_open())
   {
     // show message:
-    std::cout << "Error opening file: " << iFilePath << std::endl;
+    LOG_INFO(gLogCXdbFilter, "Error opening file: %s\n", iFilePath.c_str());
     return false;
   }
-  printf("Re-load token list from iTokenMap log file:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "Re-load token list from iTokenMap log file:%s\n", iFilePath.c_str());
 
   iTokenMap.clear();
   while (std::getline(iInputFile, iTempLine).good())
@@ -255,7 +258,6 @@ bool CXdbFilter::CollectTokens()
     string1 = iTempLine.substr(0, position);
     string2 = iTempLine.substr(position + 1, std::string::npos);
     tempIndex = atoi(string2.c_str());
-    //std::cout << "iTempLine:" << iTempLine << " string1:" << string1 << " string2:" << string2 << " string2.c_str():" << string2.c_str() << std::endl;
 
     iTokenMap.insert(std::pair<std::string,int>(string1, tempIndex));
 
@@ -270,7 +272,7 @@ bool CXdbFilter::CollectTokens()
 
   // Log reloaded iTokenMap.
   iFilePath = GetConfig().iLogPath + OUT_FILE_S01_MAP_RELOAD;
-  printf("Re-load token list:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "Re-load token list:%s\n", iFilePath.c_str());
   iOutputFile.open(iFilePath.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = iTokenMap.begin(); it != iTokenMap.end(); ++it)
   {
@@ -288,7 +290,7 @@ bool CXdbFilter::AddExtraTokens()
 {
   // Stage 2: Add "additional tokens" from _ignored_suffix_table_{tc|sc}_utf8.txt to iTokenMap.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 2: Add \"additional tokens\" from _ignored_suffix_table_{tc|sc}_utf8.txt to iTokenMap.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 2: Add \"additional tokens\" from _ignored_suffix_table_{tc|sc}_utf8.txt to iTokenMap.\n");
 
   std::string string1;
   std::string string2;
@@ -301,7 +303,7 @@ bool CXdbFilter::AddExtraTokens()
     {
       // Word not found, add to map.
       iTokenMap.insert(std::pair<std::string,int>(it->first, ++iTokenIndex));
-      printf("Not Found [%s] added as : %s|%d\n", it->first.c_str(), it->first.c_str(), iTokenIndex);
+      LOG_INFO(gLogCXdbFilter, "Not Found [%s] added as : %s|%d\n", it->first.c_str(), it->first.c_str(), iTokenIndex);
     }
   }
 
@@ -317,7 +319,7 @@ bool CXdbFilter::AddExtraTokens()
 
 // Stage 2.1: Add "AreaName tokens" from {TC|SC}\input\areas\05_all_area_map02.txt to iTokenMap.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 2.1: Add \"AreaName tokens\" from {TC|SC}\\input\\areas\\05_all_area_map02.txt to iTokenMap.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 2.1: Add \"AreaName tokens\" from {TC|SC}\\input\\areas\\05_all_area_map02.txt to iTokenMap.\n");
 
   // Load area name token list from file to iAllAreaMap.
   iFilePath = GetConfig().iInputPath + GetConfig().iInputAreaName;
@@ -325,7 +327,7 @@ bool CXdbFilter::AddExtraTokens()
   if (!iInputFile.is_open())
   {
     // show message:
-    std::cout << "Error opening file: " << iFilePath << std::endl;
+    LOG_INFO(gLogCXdbFilter, "Error opening file: %s\n", iFilePath.c_str());
     return false;
   }
 
@@ -359,7 +361,7 @@ bool CXdbFilter::AddExtraTokens()
     {
       // Word not found, add to map.
       iTokenMap.insert(std::pair<std::string,int>(it->first, ++iTokenIndex));
-      printf("Not Found [%s] added as : %s|%d\n", it->first.c_str(), it->first.c_str(), iTokenIndex);
+      LOG_INFO(gLogCXdbFilter, "Not Found [%s] added as : %s|%d\n", it->first.c_str(), it->first.c_str(), iTokenIndex);
     }
   }
 
@@ -380,7 +382,7 @@ bool CXdbFilter::RemoveUnwantTokens()
 {
   // Stage 2.2: Remove "unwant tokens" from {TC|SC}\input\_removed_tokens_table.txt from iTokenMap.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 2.2: Remove \"unwant tokens\" from {TC|SC}\\input\\_removed_tokens_table.txt from iTokenMap.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 2.2: Remove \"unwant tokens\" from {TC|SC}\\input\\_removed_tokens_table.txt from iTokenMap.\n");
 
   std::map<std::string,int> unwantTokensMap;
   std::string string1;
@@ -392,7 +394,7 @@ bool CXdbFilter::RemoveUnwantTokens()
   if (!iInputFile.is_open())
   {
     // show message:
-    std::cout << "Error opening file: " << iFilePath << std::endl;
+    LOG_INFO(gLogCXdbFilter, "Error opening file: %s\n", iFilePath.c_str());
     return false;
   }
 
@@ -411,7 +413,7 @@ bool CXdbFilter::RemoveUnwantTokens()
 
     position = iTempLine.find_first_of(" \n\r\0");
     string1 = iTempLine.substr(0, position);
-    std::cout << "iTempLine:" << iTempLine << " string1:" << string1 << std::endl;
+    LOG_INFO(gLogCXdbFilter, "iTempLine:%s string1:%s\n", iTempLine.c_str(), string1.c_str());
 
     unwantTokensMap.insert(std::pair<std::string,int>(string1, 1));
   }
@@ -454,7 +456,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
 {
   // Stage 3: Add "missing one word tokens" from iTokenMap into iTokenMap_with_one_word.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 3: Add \"missing one word tokens\" from iTokenMap into iTokenMap_with_one_word.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 3: Add \"missing one word tokens\" from iTokenMap into iTokenMap_with_one_word.\n");
 
   // Copy iTokenMap to iTokenMap_with_one_word.
   for (std::map<std::string,int>::iterator it = iTokenMap.begin(); it != iTokenMap.end(); ++it)
@@ -479,7 +481,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
       {
         // Word not found, add to map.
         iTokenMapWithOneWord.insert(std::pair<std::string,int>(tempWord, ++iTokenIndex));
-        //printf("Added One Word: %s|%d\n", tempWord, iTokenIndex);
+        //LOG_INFO(gLogCXdbFilter, "Added One Word: %s|%d\n", tempWord, iTokenIndex);
         iOutputFile << tempWord << "|" << iTokenIndex << std::endl;
       }
     }
@@ -498,7 +500,7 @@ bool CXdbFilter::AddMissingOneWordTokens()
 
   // Stage 4: [JUST FOR LOG] Retreive every map item's info from xdb, then log info to files.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 4: [JUST FOR LOG] Retreive every map item's info from xdb, then log info to files.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 4: [JUST FOR LOG] Retreive every map item's info from xdb, then log info to files.\n");
 
   FILE* fileStage04FullChineseToken;
   FILE* fileStage04PartChineseToken;
@@ -510,44 +512,44 @@ bool CXdbFilter::AddMissingOneWordTokens()
   fileStage04FullChineseToken = fopen(iFilePath.c_str(), "w");
   if (fileStage04FullChineseToken == NULL)
   {
-    printf("fileStage04FullChineseToken err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage04FullChineseToken err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("fileStage04FullChineseToken:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage04FullChineseToken:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S04_CH_PART;
   fileStage04PartChineseToken = fopen(iFilePath.c_str(), "w");
   if (fileStage04PartChineseToken == NULL)
   {
-    printf("fileStage04PartChineseToken err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage04PartChineseToken err:%s\n", iFilePath.c_str());
     fclose(fileStage04FullChineseToken);
     return false;
   }
-  printf("fileStage04PartChineseToken:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage04PartChineseToken:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S04_CH_NOT_FOUND;
   fileStage04ChineseTokenNotFound = fopen(iFilePath.c_str(), "w");
   if (fileStage04ChineseTokenNotFound == NULL)
   {
-    printf("fileStage04ChineseTokenNotFound err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage04ChineseTokenNotFound err:%s\n", iFilePath.c_str());
     fclose(fileStage04FullChineseToken);
     fclose(fileStage04PartChineseToken);
     return false;
   }
-  printf("fileStage04ChineseTokenNotFound:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage04ChineseTokenNotFound:%s\n", iFilePath.c_str());
 
   // get xdb header
   iFilePath = GetConfig().iInputPath + GetConfig().iInputScwsXdb;
   iFileXdb = fopen(iFilePath.c_str(), "rb");
   if (iFileXdb == NULL)
   {
-    printf("iFileXdb err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "iFileXdb err:%s\n", iFilePath.c_str());
     fclose(fileStage04FullChineseToken);
     fclose(fileStage04PartChineseToken);
     fclose(fileStage04ChineseTokenNotFound);
     return false;
   }
-  printf("iFileXdb:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "iFileXdb:%s\n", iFilePath.c_str());
 
   readSize = fread(&iXdbHeader, 1, sizeof(xdb_header), iFileXdb);
   if (readSize != sizeof(xdb_header))
@@ -594,7 +596,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
 {
   // Stage 5: Start to build iTokenMapOpt by parsing special suffix of each token in iTokenMapWithOneWord.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 5: Start to build iTokenMapOpt by parsing special suffix of each token in iTokenMapWithOneWord.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 5: Start to build iTokenMapOpt by parsing special suffix of each token in iTokenMapWithOneWord.\n");
 
   FILE* fileStage05LogAddedAndRemovedSuffix;
   int maxSuffixTokenLength = 0;
@@ -609,23 +611,23 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
   fileStage05LogRemovedSpecialEndingTokens = fopen(iFilePath.c_str(), "w");
   if (fileStage05LogRemovedSpecialEndingTokens == NULL)
   {
-    printf("fileStage05LogRemovedSpecialEndingTokens err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage05LogRemovedSpecialEndingTokens err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("fileStage05LogRemovedSpecialEndingTokens:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage05LogRemovedSpecialEndingTokens:%s\n", iFilePath.c_str());
 #endif
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S05_ADDED_REMOVED_SUFFIX;
   fileStage05LogAddedAndRemovedSuffix = fopen(iFilePath.c_str(), "w");
   if (fileStage05LogAddedAndRemovedSuffix == NULL)
   {
-    printf("fileStage05LogAddedAndRemovedSuffix err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage05LogAddedAndRemovedSuffix err:%s\n", iFilePath.c_str());
   #ifdef REMOVE_FULL_TOKENS_WITH_SPECIAL_END
     fclose(fileStage05LogRemovedSpecialEndingTokens);
   #endif
     return false;
   }
-  printf("fileStage05LogAddedAndRemovedSuffix:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage05LogAddedAndRemovedSuffix:%s\n", iFilePath.c_str());
 
   maxSuffixTokenLength = GetMaxSuffixTokenLength(iSuffixTokenMap);
 
@@ -633,7 +635,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
   iOutputFile.open(iFilePath.c_str(), std::ofstream::out);
   for (std::map<std::string,int>::iterator it = iTokenMapWithOneWord.begin(); it != iTokenMapWithOneWord.end(); ++it)
   {
-    //std::cout << it->first << std::endl;
+    //LOG_INFO(gLogCXdbFilter, "%s\n", it->first.c_str());
     suffixOffset = 0;
 
     // We will add this full token to iTokenMapOpt.
@@ -654,21 +656,22 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
       // Just test if this token end with special word "road" in Chinese
       tempString = it->first;
       std::string lastWord = tempString.substr(tempString.length() - KCJKBytes);
-      //std::cout << "lastWord:[" << lastWord << "]" << std::endl;
+      //LOG_INFO(gLogCXdbFilter, "lastWord:[%s]\n", lastWord.c_str());
+
       //UTF-8 code of "road" in Chinese = E8 B7 AF
       std::string specialWord;
       specialWord.resize(KCJKBytes);
       specialWord[0] = 0xE8;
       specialWord[1] = 0xB7;
       specialWord[2] = 0xAF;
-      //std::cout << "specialWord:[" << specialWord << "]" << std::endl;
+      //LOG_INFO(gLogCXdbFilter, "specialWord:[%s]\n", specialWord.c_str());
       if (lastWord == specialWord)
       {
-        std::cout << "[" << tempString << "] end with special word [" << specialWord << "]" << std::endl;
+        LOG_INFO(gLogCXdbFilter, "[%s] end with special word [%s]\n", tempString.c_str(), specialWord.c_str());
 
         //remove this token from iTokenMapOpt.
         iTokenMapOpt.erase(it->first); // erasing by key
-        std::cout << "Remove special[" << it->first << "][" << it->second << "] from iTokenMapOpt!" << std::endl;
+        LOG_INFO(gLogCXdbFilter, "Remove special[%s][%d] from iTokenMapOpt!\n", it->first.c_str(), it->second);
         fprintf(fileStage05LogRemovedSpecialEndingTokens, "Remove special end token [%s][%d] from token_map_opt!\n", it->first.c_str(), it->second);
       }
     #endif //REMOVE_FULL_TOKENS_WITH_SPECIAL_END
@@ -677,7 +680,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
       tempString = it->first;
       tempString.erase(suffixOffset, std::string::npos);
     #ifdef ENABLE_USER_INTERACTIVE_CONTROL //Ask user.
-      std::cout << "FoundIgnoredSuffixToken:[" << it->first << "]" << " AfterRemoveSuffix:[" << tempString << "]" << std::endl;
+      LOG_INFO(gLogCXdbFilter, "FoundIgnoredSuffixToken:[%s] AfterRemoveSuffix:[%s]\n", it->first.c_str(), tempString.c_str());
     #endif
 
       // Is the removed-suffix-token exist in iTokenMapWithOneWord?
@@ -686,18 +689,18 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
         //Add to iTokenMapOpt.
         iTokenMapOpt.insert(std::pair<std::string,int>(tempString, it->second));
 
-        //std::cout << "[" << tempString << "] alread in map" << std::endl;
+        //LOG_INFO(gLogCXdbFilter, "[%s] alread in map\n", tempString.c_str());
         fprintf(fileStage05LogAddedAndRemovedSuffix, "Removed-suffix-token ALREADY in old map:[%s] and [%s] ADDED to new map!\n", tempString.c_str(), it->first.c_str());
       #ifdef ENABLE_USER_INTERACTIVE_CONTROL //Notify user.
-        std::cout << "Removed-suffix-token ALREADY in old map:[" << tempString << "] and [" << it->first << "] ADDED to new map!" << std::endl;
+        LOG_INFO(gLogCXdbFilter, "Removed-suffix-token ALREADY in old map:[%s] and [%s] ADDED to new map!\n", tempString.c_str(), it->first.c_str());
       #endif
       }
       else // Removed-suffix-token NOT in map.
       {
-        //std::cout << "[" << tempString << "] NOT in map" << std::endl;
+        //LOG_INFO(gLogCXdbFilter, "[%s] NOT in map\n", tempString.c_str());
       #ifdef ENABLE_USER_INTERACTIVE_CONTROL //Ask user.
-        std::cout << "Removed-suffix-token NOT in old map:[" << tempString << "] " << std::endl;
-        std::cout << "Enter 'y' to add both [" << tempString << "] and [" << it->first << "], otherwise will just add [" << it->first << "]. (y/n):";
+        LOG_INFO(gLogCXdbFilter, "Removed-suffix-token NOT in old map:[%s] \n", tempString.c_str());
+        LOG_INFO(gLogCXdbFilter, "Enter 'y' to add both [%s] and [%s], otherwise will just add [%s]. (y/n):\n", tempString.c_str(), it->first.c_str(), it->first.c_str());
         std::cin >> removeSuffixToken;
       #else //Force add.
         removeSuffixToken = 'y';
@@ -709,7 +712,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
           iTokenMapOpt.insert(std::pair<std::string,int>(tempString, ++iTokenIndex));
           fprintf(fileStage05LogAddedAndRemovedSuffix, "Removed-suffix-token NOT in old map:[%s] and [%s] ADDED to new map!\n", tempString.c_str(), it->first.c_str());
         #ifdef ENABLE_USER_INTERACTIVE_CONTROL //Ask user.
-          std::cout << "SUCCESSFULLY ADDED [" << tempString << "] and [" << it->first << "] to new map!" << std::endl;
+          LOG_INFO(gLogCXdbFilter, "SUCCESSFULLY ADDED [%s] and [%s] to new map!\n", tempString.c_str(), it-first.c_str());
         #endif
         }
         else
@@ -717,7 +720,7 @@ bool CXdbFilter::RemoveSpecialSuffixTokens()
           // skip this token.
           fprintf(fileStage05LogAddedAndRemovedSuffix, "Removed-suffix-token NOT in old map: SKIP ADDING [%s], RESERVED [%s] to new map\n", tempString.c_str(), it->first.c_str());
         #ifdef ENABLE_USER_INTERACTIVE_CONTROL //Ask user.
-          std::cout << "Removed-suffix-token NOT in old map: SKIP ADDING [" << tempString << "], RESERVED [" << it->first << "] to new map" << std::endl;
+          LOG_INFO(gLogCXdbFilter, "Removed-suffix-token NOT in old map: SKIP ADDING [%s], RESERVED [%s] to new map\n", tempString.c_str(), it-first.c_str());
         #endif
           continue;
         }
@@ -747,7 +750,7 @@ bool CXdbFilter::RetrieveTokenInfo()
 {
   // Stage 6: Retreive every optimized map item's info from xdb.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 6: Retreive every optimized map item's info from xdb.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 6: Retreive every optimized map item's info from xdb.\n");
 
   FILE* fileStage06TokenInfoFull;
   FILE* fileStage06TokenInfoPartial;
@@ -772,34 +775,34 @@ bool CXdbFilter::RetrieveTokenInfo()
   fileStage06TokenInfoFull = fopen(iFilePath.c_str(), "w");
   if (fileStage06TokenInfoFull == NULL)
   {
-    printf("fileStage06TokenInfoFull err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoFull err:%s\n", iFilePath.c_str());
     fclose(iFileXdb);
     return false;
   }
-  printf("fileStage06TokenInfoFull:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoFull:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S06_SUFFIX_PART;
   fileStage06TokenInfoPartial = fopen(iFilePath.c_str(), "w");
   if (fileStage06TokenInfoPartial == NULL)
   {
-    printf("fileStage06TokenInfoPartial err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoPartial err:%s\n", iFilePath.c_str());
     fclose(iFileXdb);
     fclose(fileStage06TokenInfoFull);
     return false;
   }
-  printf("fileStage06TokenInfoPartial:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoPartial:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iLogPath + OUT_FILE_S06_SUFFIX_NOT_FOUND;
   fileStage06TokenInfoNotFound = fopen(iFilePath.c_str(), "w");
   if (fileStage06TokenInfoNotFound == NULL)
   {
-    printf("fileStage06TokenInfoNotFound err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoNotFound err:%s\n", iFilePath.c_str());
     fclose(iFileXdb);
     fclose(fileStage06TokenInfoFull);
     fclose(fileStage06TokenInfoPartial);
     return false;
   }
-  printf("fileStage06TokenInfoNotFound:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage06TokenInfoNotFound:%s\n", iFilePath.c_str());
 
   // Start to parse each token in iTokenMapOpt.
   for (std::map<std::string,int>::iterator it = iTokenMapOpt.begin(); it != iTokenMapOpt.end(); ++it)
@@ -889,7 +892,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
 {
   // Stage 7: Convert results to normalized form.
   //------------------------------------------------------------------------------------------------
-  printf("Stage 7: Convert results to normalized form.\n");
+  LOG_INFO(gLogCXdbFilter, "Stage 7: Convert results to normalized form.\n");
 
   FILE* fileStage07TokenInfoFull;
   FILE* fileStage07TokenInfoFullNormalized;
@@ -903,12 +906,12 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   iFilePath = GetConfig().iInputPath + GetConfig().iInputNormalizeMap;
   if (!CHomophoneNormalizer_Init(iFilePath.c_str()))
   {
-    printf("CHomophoneNormalizer_Init err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "CHomophoneNormalizer_Init err:%s\n", iFilePath.c_str());
     enableHPNormalize = 0;
   }
   else
   {
-    printf("CHomophoneNormalizer_Init OK\n");
+    LOG_INFO(gLogCXdbFilter, "CHomophoneNormalizer_Init OK\n");
     enableHPNormalize = 1;
   }
 
@@ -916,20 +919,20 @@ bool CXdbFilter::ConvertToNormalizedTokens()
   fileStage07TokenInfoFull = fopen(iFilePath.c_str(), "r");
   if (fileStage07TokenInfoFull == NULL)
   {
-    printf("fileStage07TokenInfoFull err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage07TokenInfoFull err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("fileStage07TokenInfoFull:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage07TokenInfoFull:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iOutputPath + OUT_FILE_S07_SUFFIX_FULL_NOR;
   fileStage07TokenInfoFullNormalized = fopen(iFilePath.c_str(), "w");
   if (fileStage07TokenInfoFullNormalized == NULL)
   {
-    printf("fileStage07TokenInfoFullNormalized err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage07TokenInfoFullNormalized err:%s\n", iFilePath.c_str());
     fclose(fileStage07TokenInfoFull);
     return false;
   }
-  printf("fileStage07TokenInfoFullNormalized:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage07TokenInfoFullNormalized:%s\n", iFilePath.c_str());
 
   // Start converting.
   normalizedText.resize(MAX_TOKEN_SIZE);
@@ -938,7 +941,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     lineNumber++;
     if (lineNumber % 1000 == 0)
     {
-      printf("Converting Line(%d)....\n", lineNumber);
+      LOG_INFO(gLogCXdbFilter, "Converting Line(%d)....\n", lineNumber);
     }
 
     if ((iBuffer[0] == '#') || (iBuffer[0] == ';'))
@@ -957,7 +960,7 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     tokenBeginningPointer = strtok(iTempBuffer, "\t ");
     if (tokenBeginningPointer != NULL)
     {
-      //printf("Converting [%s] of %s", tokenBeginningPointer, iBuffer);
+      //LOG_INFO(gLogCXdbFilter, "Converting [%s] of %s", tokenBeginningPointer, iBuffer);
 
       // Normalizer
       //normalizedText.resize(MAX_TOKEN_SIZE);
@@ -967,21 +970,21 @@ bool CXdbFilter::ConvertToNormalizedTokens()
 
         if (res_len != 0) // Buffer size is too small
         {
-          //printf("@@@ Buffer size is too small, tokenBeginningPointer length=%d,  normalizedText.size()=%d,  normalizedText.capacity()=%d\n", res_len, normalizedText.size(), normalizedText.capacity());
+          //LOG_INFO(gLogCXdbFilter, "@@@ Buffer size is too small, tokenBeginningPointer length=%d,  normalizedText.size()=%d,  normalizedText.capacity()=%d\n", res_len, normalizedText.size(), normalizedText.capacity());
           CFtsTokenizerExtChinese_ReserveStringCapacity(normalizedText, res_len, KNormBufUnitSize);
 
           if ((res_len = CHomophoneNormalizer_Normalize(tokenBeginningPointer, &normalizedText[0], normalizedText.capacity())))
           {
-            printf("Normalize error=%ld\n", res_len);
+            LOG_INFO(gLogCXdbFilter, "Normalize error=%ld\n", res_len);
             return false;
           }
         }
-        //printf("normalizedText.c_str():%s\n", normalizedText.c_str());
-        //printf("strlen(normalizedText.c_str()):%d\n", strlen(normalizedText.c_str()));
+        //LOG_INFO(gLogCXdbFilter, "normalizedText.c_str():%s\n", normalizedText.c_str());
+        //LOG_INFO(gLogCXdbFilter, "strlen(normalizedText.c_str()):%d\n", strlen(normalizedText.c_str()));
 
-        //printf("AAA Un-Normali aString:%s", iBuffer);
+        //LOG_INFO(gLogCXdbFilter, "AAA Un-Normali aString:%s", iBuffer);
         strncpy(iBuffer, normalizedText.c_str(), strlen(normalizedText.c_str()));
-        //printf("BBB Normalized aString:%s", iBuffer);
+        //LOG_INFO(gLogCXdbFilter, "BBB Normalized aString:%s", iBuffer);
 
         //log to file.
         fprintf(fileStage07TokenInfoFullNormalized, "%s", iBuffer);
@@ -989,10 +992,10 @@ bool CXdbFilter::ConvertToNormalizedTokens()
     }
     else
     {
-      printf("Failed converting:%s", iBuffer);
+      LOG_INFO(gLogCXdbFilter, "Failed converting:%s", iBuffer);
     }
   }
-  printf("Total converting Line(%d)....\n", lineNumber);
+  LOG_INFO(gLogCXdbFilter, "Total converting Line(%d)....\n", lineNumber);
 
   fclose(fileStage07TokenInfoFull);
   fclose(fileStage07TokenInfoFullNormalized);
@@ -1013,31 +1016,31 @@ bool CXdbFilter::MergeToFuzzyTokens()
   fileStage08TokenListFuzzy = fopen(iFilePath.c_str(), "w");
   if (fileStage08TokenListFuzzy == NULL)
   {
-    printf("fileStage08TokenListFuzzy err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "fileStage08TokenListFuzzy err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("fileStage08TokenListFuzzy:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage08TokenListFuzzy:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().GetOutputPath() + GetConfig().GetOutputTokenList();
   fileStage08TokenList = fopen(iFilePath.c_str(), "r");
   if (fileStage08TokenList == NULL)
   {
-    printf("Error open fileStage08TokenList: %s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "Error open fileStage08TokenList: %s\n", iFilePath.c_str());
     fclose(fileStage08TokenListFuzzy);
     return false;
   }
-  printf("fileStage08TokenList:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage08TokenList:%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().GetOutputPath() + GetConfig().GetOutputTokenListNormalized();
   fileStage08TokenListNormalized = fopen(iFilePath.c_str(), "r");
   if (fileStage08TokenListNormalized == NULL)
   {
-    printf("Error open fileStage08TokenListNormalized: %s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "Error open fileStage08TokenListNormalized: %s\n", iFilePath.c_str());
     fclose(fileStage08TokenListFuzzy);
     fclose(fileStage08TokenList);
     return false;
   }
-  printf("fileStage08TokenListNormalized:%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbFilter, "fileStage08TokenListNormalized:%s\n", iFilePath.c_str());
 
   while (fgets(iBuffer, sizeof(iBuffer), fileStage08TokenList) != NULL)
   {
@@ -1089,7 +1092,7 @@ int CXdbFilter::SearchTokenInfo(const char*    aTokenContent,
 
   if (aFileXdb == NULL)
   {
-    printf("SearchTokenInfoaFileXdb err\n");
+    LOG_INFO(gLogCXdbFilter, "SearchTokenInfoaFileXdb err\n");
     return SEARCH_TOKEN_INFO_NOT_FOUND;
   }
 
@@ -1395,7 +1398,7 @@ int CXdbFilter::GetTokenTotalChineseWordCount(const char* aString)
     index += utf8CharKind;
   }
 
-  //printf("GetTokenTotalChineseWordCount[%s]=%d\n", aString, totalChineseWordCount);
+  //LOG_INFO(gLogCXdbFilter, "GetTokenTotalChineseWordCount[%s]=%d\n", aString, totalChineseWordCount);
   return totalChineseWordCount;
 }
 
@@ -1432,7 +1435,7 @@ int CXdbFilter::GetNthChineseWordByteOffset(const char* aString, int aNthChinese
 
     if ((index / UTF8_CHAR_KIND_3) == aNthChineseWord)
     {
-      //printf("GetNthChineseWordByteOffset: aString:[%s] Nth:[%d] offset:[%d]\n", aString, aNthChineseWord, index);
+      //LOG_INFO(gLogCXdbFilter, "GetNthChineseWordByteOffset: aString:[%s] Nth:[%d] offset:[%d]\n", aString, aNthChineseWord, index);
       return index;
     }
     index += utf8CharKind;
@@ -1466,7 +1469,7 @@ int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
   fileStage00SpecialSuffixTable = fopen(iFilePath.c_str(), "r");
   if (fileStage00SpecialSuffixTable == NULL)
   {
-    printf("Error fopen suffix table file: %s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbFilter, "Error fopen suffix table file: %s\n", iFilePath.c_str());
     return false;
   }
 
@@ -1477,9 +1480,9 @@ int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
 
     if (lineNumber == 1) // for skip BOM
     {
-      //printf("1iBuffer[0]:0x%X ",iBuffer[0]);
-      //printf("1iBuffer[1]:0x%X ",iBuffer[1]);
-      //printf("1iBuffer[2]:0x%X\n",iBuffer[2]);
+      //LOG_INFO(gLogCXdbFilter, "1iBuffer[0]:0x%X ",iBuffer[0]);
+      //LOG_INFO(gLogCXdbFilter, "1iBuffer[1]:0x%X ",iBuffer[1]);
+      //LOG_INFO(gLogCXdbFilter, "1iBuffer[2]:0x%X\n",iBuffer[2]);
       if (IsBufferStartWithBOM(iBuffer))
       {
         for (int i = 0; i < (strlen(iBuffer)-2); i++)
@@ -1500,14 +1503,14 @@ int CXdbFilter::InitSuffixTokenMap(std::map<std::string,int>& aSuffixTokenMap)
       continue;
     }
 
-    //printf("SuffixTable lineNumber:%d = %s", lineNumber, iBuffer);
+    //LOG_INFO(gLogCXdbFilter, "SuffixTable lineNumber:%d = %s", lineNumber, iBuffer);
     //strtok(iBuffer,"\n\r");
     suffixToken = iBuffer;
     if (aSuffixTokenMap.end() == aSuffixTokenMap.find(suffixToken))
     {
       // Word not found, add to map.
       aSuffixTokenMap.insert(std::pair<std::string,int>(suffixToken, ++tokenNumber));
-      //printf("add suffixToken:%s|%d\n", suffixToken.c_str(),tokenNumber);
+      //LOG_INFO(gLogCXdbFilter, "add suffixToken:%s|%d\n", suffixToken.c_str(),tokenNumber);
     }
   }
   fclose(fileStage00SpecialSuffixTable);
@@ -1556,7 +1559,7 @@ int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char*                aString,
   }
 
   tokenTotalChineseWordCount = GetTokenTotalChineseWordCount(aTempBuffer);
-  //printf("aString[%s] tokenTotalChineseWordCount[%d] aMaxSuffixTokenLength[%d]\n", aString, tokenTotalChineseWordCount, aMaxSuffixTokenLength);
+  //LOG_INFO(gLogCXdbFilter, "aString[%s] tokenTotalChineseWordCount[%d] aMaxSuffixTokenLength[%d]\n", aString, tokenTotalChineseWordCount, aMaxSuffixTokenLength);
 
   if (aMaxSuffixTokenLength >= tokenTotalChineseWordCount)
   {
@@ -1571,7 +1574,7 @@ int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char*                aString,
   {
     chineseNthWordByteOffset = GetNthChineseWordByteOffset(aTempBuffer, (tokenTotalChineseWordCount - suffixWordCount));
     stringPointer = aTempBuffer + chineseNthWordByteOffset;
-    //printf("suffixWordCount[%d] chineseNthWordByteOffset[%d] stringPointer[%s]\n", suffixWordCount, chineseNthWordByteOffset, stringPointer);
+    //LOG_INFO(gLogCXdbFilter, "suffixWordCount[%d] chineseNthWordByteOffset[%d] stringPointer[%s]\n", suffixWordCount, chineseNthWordByteOffset, stringPointer);
 
     // Compare stringPointer with all words(with length suffixWordCount) in _ignored_suffix_table_{tc|sc}_utf8.txt.
     suffixString = stringPointer;
@@ -1579,7 +1582,7 @@ int CXdbFilter::IsTokenEndWithIgnoredSuffix(const char*                aString,
     {
       // Found suffix!
       *aSuffixOffset = chineseNthWordByteOffset;
-      //printf("aString[%s] Suffix[%s] *aSuffixOffset[%d]\n", aString, suffixString.c_str(), *aSuffixOffset);
+      //LOG_INFO(gLogCXdbFilter, "aString[%s] Suffix[%s] *aSuffixOffset[%d]\n", aString, suffixString.c_str(), *aSuffixOffset);
       return true;
     }
   }
@@ -1597,7 +1600,7 @@ int CXdbFilter::GetOneWordInToken(const char* aString,
   unsigned int utf8CharKind = 0;
   int found = 0;
 
-  //printf("GetOneWordInTokenaString:[%s] aWordindex:%d\n", aString, aWordindex);
+  //LOG_INFO(gLogCXdbFilter, "GetOneWordInTokenaString:[%s] aWordindex:%d\n", aString, aWordindex);
   memset(aTempBuffer, 0, aBufferLength);
   tokenLength = strlen(aString);
 
@@ -1620,7 +1623,7 @@ int CXdbFilter::GetOneWordInToken(const char* aString,
       found = 1;
       memcpy(aTempBuffer, &aString[index], UTF8_CHAR_KIND_3);
       aTempBuffer[UTF8_CHAR_KIND_3] = '\0';   /* null character manually added */
-      //printf("GetOneWordInToken:%s\n", aTempBuffer);
+      //LOG_INFO(gLogCXdbFilter, "GetOneWordInToken:%s\n", aTempBuffer);
       break;
     }
 
@@ -1638,7 +1641,7 @@ int CXdbFilter::CHomophoneNormalizer_Init(const char* aFile)
   fileStage07NormalizationMap = fopen(aFile, "r");
   if (fileStage07NormalizationMap == NULL)
   {
-    printf("Error fopen homophone map file: %s\n", aFile);
+    LOG_INFO(gLogCXdbFilter, "Error fopen homophone map file: %s\n", aFile);
     return false;
   }
 
@@ -1668,7 +1671,7 @@ int CXdbFilter::CHomophoneNormalizer_Init(const char* aFile)
   }
 
   fclose(fileStage07NormalizationMap);
-  printf("Read Homophone mapping into map DONE, total=%d.\n", insertCount);
+  LOG_INFO(gLogCXdbFilter, "Read Homophone mapping into map DONE, total=%d.\n", insertCount);
 
   return true;
 }
@@ -1680,7 +1683,7 @@ size_t CXdbFilter::CHomophoneNormalizer_Normalize(const char* aSourceString, cha
   size_t returnLength = 0;
   const unsigned char* inputString = (const unsigned char*)aSourceString;
 
-  //printf("CHomophoneNormalizer_Normalize aSourceString:%s aLength:%d\n", aSourceString, aLength);
+  //LOG_INFO(gLogCXdbFilter, "CHomophoneNormalizer_Normalize aSourceString:%s aLength:%d\n", aSourceString, aLength);
   stringLength = strlen(aSourceString);
   if ((stringLength + 1) > aLength)
   {
@@ -1714,7 +1717,7 @@ size_t CXdbFilter::CHomophoneNormalizer_Normalize(const char* aSourceString, cha
   }
 
   aOutputString[utf8FirstByteOffset] = 0;
-  //printf("HPNormalized result:%s\n", aOutputString);
+  //LOG_INFO(gLogCXdbFilter, "HPNormalized result:%s\n", aOutputString);
   returnLength = 0;
   return returnLength;
 }

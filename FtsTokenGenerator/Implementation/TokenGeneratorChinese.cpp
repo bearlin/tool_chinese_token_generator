@@ -8,6 +8,9 @@
 #include "XdbGenerator.h"
 #include <iostream>
 
+#include "TTLog.h"
+DEFINE_LOGGER(gLogCTokenGeneratorChinese, "CTokenGeneratorChinese")
+
 namespace NFtsTokenGenerator
 {
 
@@ -34,7 +37,7 @@ bool CTokenGeneratorChinese::Run()
 {
   bool runSuccess = false;
 
-  std::cout << "Running CTokenGeneratorChinese..." << std::endl;
+  LOG_INFO(gLogCTokenGeneratorChinese, "Running CTokenGeneratorChinese...\n");
 #ifdef ENABLE_XDBFILTER
   // ============================ CXdbFilter ============================
   // Set CXdbFilter In/Out/Log path
@@ -63,14 +66,14 @@ bool CTokenGeneratorChinese::Run()
   runSuccess = xdbFilter.Run();
   if (false == runSuccess)
   {
-    std::cout << "xdbFilter.Run() error!!!" << std::endl;
+    LOG_INFO(gLogCTokenGeneratorChinese, "xdbFilter.Run() error!!!\n");
     return false;
   }
 
   // Output results token list path
-  std::cout << "xdbFilter OutputTokenList path:" << xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenList()<< std::endl;
-  std::cout << "xdbFilter OutputTokenListNormalized path:" << xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenListNormalized()<< std::endl;
-  std::cout << "xdbFilter OutputTokenListFuzzy path:" << xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenListFuzzy()<< std::endl;
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbFilter OutputTokenList path:%s\n", (xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenList()).c_str());
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbFilter OutputTokenListNormalized path:%s\n", (xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenListNormalized()).c_str());
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbFilter OutputTokenListFuzzy path:%s\n", (xdbFilter.GetConfig().GetOutputPath() + xdbFilter.GetConfig().GetOutputTokenListFuzzy()).c_str());
   // ====================================================================
 #endif // ENABLE_XDBFILTER
 
@@ -91,12 +94,12 @@ bool CTokenGeneratorChinese::Run()
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
   {
-    std::cout << "xdbGenerator.Run() for fuzzy xdb error!!!" << std::endl;
+    LOG_INFO(gLogCTokenGeneratorChinese, "xdbGenerator.Run() for fuzzy xdb error!!!\n");
     return false;
   }
 
   // Output results xdb path
-  std::cout << "xdbGenerator fuzzy xdb path:" <<xdbGenerator.GetConfig().GetOutputPath() + xdbGenerator.GetConfig().GetOutputXdb() << std::endl;
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbGenerator fuzzy xdb path:%s\n", (xdbGenerator.GetConfig().GetOutputPath() + xdbGenerator.GetConfig().GetOutputXdb()).c_str());
 
   // Set I/O path of non-fuzzy xdb
   xdbGenerator.GetConfig().SetInputTokenList(xdbFilter.GetConfig().GetOutputTokenList());
@@ -104,12 +107,12 @@ bool CTokenGeneratorChinese::Run()
   runSuccess = xdbGenerator.Run();
   if (false == runSuccess)
   {
-    std::cout << "xdbGenerator.Run() for non-fuzzy xdb error!!!" << std::endl;
+    LOG_INFO(gLogCTokenGeneratorChinese, "xdbGenerator.Run() for non-fuzzy xdb error!!!\n");
     return false;
   }
 
   // Output results xdb path
-  std::cout << "xdbGenerator non-fuzzy xdb path:" <<xdbGenerator.GetConfig().GetOutputPath() + xdbGenerator.GetConfig().GetOutputXdb() << std::endl;
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbGenerator non-fuzzy xdb path:%s\n", (xdbGenerator.GetConfig().GetOutputPath() + xdbGenerator.GetConfig().GetOutputXdb()).c_str());
   // =============================================================
 #endif // ENABLE_XDBGENERATOR
 
@@ -130,12 +133,12 @@ bool CTokenGeneratorChinese::Run()
   runSuccess = xdbDumper.Run();
   if (false == runSuccess)
   {
-    std::cout << "xdbDumper.Run() error!!!" << std::endl;
+    LOG_INFO(gLogCTokenGeneratorChinese, "xdbDumper.Run() error!!!\n");
     return false;
   }
 
   // Output results token list path
-  std::cout << "xdbDumper OutputTokenList path:" << xdbDumper.GetConfig().GetOutputPath() + xdbDumper.GetConfig().GetOutputDumpText()<< std::endl;
+  LOG_INFO(gLogCTokenGeneratorChinese, "xdbDumper OutputTokenList path:%s\n", (xdbDumper.GetConfig().GetOutputPath() + xdbDumper.GetConfig().GetOutputDumpText()).c_str());
   // ===================================================================
 #endif // ENABLE_XDBDUMPER
 

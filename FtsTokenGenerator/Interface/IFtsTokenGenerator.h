@@ -13,8 +13,8 @@ namespace NFtsTokenGenerator
 enum TLanguageType
 {
   EChinese  = 0,
-  ETai      = 1,
-  EMax      = ETai
+  EThai     = 1,
+  EMax      = EThai
 };
 
 class IFtsTokenGenerator

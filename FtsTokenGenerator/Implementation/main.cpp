@@ -6,10 +6,13 @@
 #include <iostream>
 #include <cstdlib>
 
-using ::NFtsTokenGenerator::CFtsTokenGenerator ;
+#include "TTLog.h"
+DEFINE_LOGGER(gLogFtsTokenGeneratorMain, "FtsTokenGeneratorMain")
+
+using ::NFtsTokenGenerator::CFtsTokenGenerator;
 using ::NFtsTokenGenerator::TLanguageType;
 using ::NFtsTokenGenerator::EChinese;
-using ::NFtsTokenGenerator::ETai;
+using ::NFtsTokenGenerator::EThai;
 
 int main(int argc, char* argv[])
 {
@@ -17,19 +20,19 @@ int main(int argc, char* argv[])
 
   // Set token generator language type
   tokenGenerator.SetLanguageType(EChinese);
-  //tokenGenerator.SetLanguageType(ETai);
+  //tokenGenerator.SetLanguageType(EThai);
   TLanguageType currentLanguage = tokenGenerator.GetLanguageType();
-  std::cout << "currentLanguage:" << currentLanguage << std::endl;
+  LOG_INFO(gLogFtsTokenGeneratorMain, "currentLanguage:%d\n", currentLanguage);
 
   // Run token generator
   if (true == tokenGenerator.Run())
   {
-    std::cout << "token generating successfully!" << std::endl;
+    LOG_INFO(gLogFtsTokenGeneratorMain, "token generating successfully!\n");
     return EXIT_SUCCESS;
   }
   else
   {
-    std::cout << "token generating failed!" << std::endl;
+    LOG_INFO(gLogFtsTokenGeneratorMain, "token generating failed!\n");
     return EXIT_FAILURE;
   }
 }

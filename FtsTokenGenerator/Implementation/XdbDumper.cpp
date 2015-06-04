@@ -5,6 +5,9 @@
 #include "XdbDumper.h"
 #include <iostream>
 
+#include "TTLog.h"
+DEFINE_LOGGER(gLogCXdbDumper, "CXdbDumper")
+
 namespace NFtsTokenGenerator
 {
 
@@ -66,10 +69,10 @@ CXdbDumper::~CXdbDumper()
 
 bool CXdbDumper::Run()
 {
-  std::cout << "Running CXdbDumper" << std::endl;
-  std::cout << "iInputPath:" << GetConfig().iInputPath << std::endl;
-  std::cout << "iOutputPath:" << GetConfig().iOutputPath << std::endl;
-  std::cout << "iLogPath:" << GetConfig().iLogPath << std::endl;
+  LOG_INFO(gLogCXdbDumper, "Running CXdbDumper...\n");
+  LOG_INFO(gLogCXdbDumper, "iInputPath:%s\n", (GetConfig().iInputPath).c_str());
+  LOG_INFO(gLogCXdbDumper, "iOutputPath:%s\n", (GetConfig().iOutputPath).c_str());
+  LOG_INFO(gLogCXdbDumper, "iLogPath:%s\n", (GetConfig().iLogPath).c_str());
 
   FILE* fd;
   TXdbHeader xdbHeader;
@@ -84,10 +87,10 @@ bool CXdbDumper::Run()
   iLogDetail = fopen(iFilePath.c_str(), "w");
   if (iLogDetail == NULL)
   {
-    printf("iLogDetail err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "iLogDetail err:%s\n", iFilePath.c_str());
     return false;
   }
-  printf("iLogDetail :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "iLogDetail :%s\n", iFilePath.c_str());
 #endif
 #ifdef XDB_GEN_TOOL_EXPORT_FILE
   GetConfig().iOutputDumpText = SIMPLE_EXPORT_FILENAME;
@@ -95,7 +98,7 @@ bool CXdbDumper::Run()
   iLog = fopen(iFilePath.c_str(), "w");
   if (iLog == NULL)
   {
-    printf("iLog err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "iLog err:%s\n", iFilePath.c_str());
 #ifdef DETAIL_EXPORT_FILE
     if (iLogDetail != NULL)
     {
@@ -105,14 +108,14 @@ bool CXdbDumper::Run()
 #endif
     return false;
   }
-  printf("iLog :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "iLog :%s\n", iFilePath.c_str());
 #endif
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputScwsXdb;
   fd = fopen(iFilePath.c_str(), "rb");
   if (fd == NULL)
   {
-    printf("fd err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "fd err:%s\n", iFilePath.c_str());
 #ifdef DETAIL_EXPORT_FILE
     if (iLogDetail != NULL)
     {
@@ -129,7 +132,7 @@ bool CXdbDumper::Run()
 #endif
     return false;
   }
-  printf("fd :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "fd :%s\n", iFilePath.c_str());
 
 #ifdef CONVERT_NORMALIZE
   // Read mapping into tables
@@ -144,7 +147,7 @@ bool CXdbDumper::Run()
   iNormalizeLog = fopen(iFilePath.c_str(), "w"); 
   if (iNormalizeLog == NULL)
   {
-    printf("iNormalizeLog err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "iNormalizeLog err:%s\n", iFilePath.c_str());
     if (fd != NULL)
     {
       fclose(fd);
@@ -166,13 +169,13 @@ bool CXdbDumper::Run()
 #endif
     return false;
   }
-  printf("iNormalizeLog :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "iNormalizeLog :%s\n", iFilePath.c_str());
 
   iFilePath = GetConfig().iInputPath + GetConfig().iInputNormalizeMap;
   normalizeFd = fopen(iFilePath.c_str(), "r");
   if (normalizeFd == NULL)
   {
-    printf("normalizeFd err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "normalizeFd err:%s\n", iFilePath.c_str());
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
     if (fd != NULL)
@@ -196,7 +199,7 @@ bool CXdbDumper::Run()
 #endif
     return false;
   }
-  printf("normalizeFd :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "normalizeFd :%s\n", iFilePath.c_str());
 
   // For repeat normalized tokens log.
   iNormalizeMap.clear();
@@ -206,7 +209,7 @@ bool CXdbDumper::Run()
   iNormalizeRepeatLog = fopen(iFilePath.c_str(), "w");
   if (iNormalizeRepeatLog == NULL)
   {
-    printf("iNormalizeRepeatLog err:%s\n", iFilePath.c_str());
+    LOG_INFO(gLogCXdbDumper, "iNormalizeRepeatLog err:%s\n", iFilePath.c_str());
     fclose(iNormalizeLog);
     iNormalizeLog = NULL;
     if (fd != NULL)
@@ -235,7 +238,7 @@ bool CXdbDumper::Run()
 #endif
     return false;
   }
-  printf("iNormalizeRepeatLog :%s\n", iFilePath.c_str());
+  LOG_INFO(gLogCXdbDumper, "iNormalizeRepeatLog :%s\n", iFilePath.c_str());
   
   while (fgets(szLine, sizeof(szLine), normalizeFd) != NULL) 
   {
@@ -275,7 +278,7 @@ bool CXdbDumper::Run()
   }
 #endif //CONVERT_NORMALIZE
 
-  printf("XDB header size=%ld\n", sizeof(TXdbHeader));
+  LOG_INFO(gLogCXdbDumper, "XDB header size=%ld\n", sizeof(TXdbHeader));
   readSize = fread(&xdbHeader, 1, sizeof(TXdbHeader), fd);
   if (readSize != sizeof(TXdbHeader))
   {
@@ -283,10 +286,10 @@ bool CXdbDumper::Run()
     exit(EXIT_FAILURE);
   }
 
-  //printf("unsigned int size=%d\n", sizeof(unsigned int) );
-  printf("unsigned base=%d\n", xdbHeader.base);
-  printf("unsigned size=%d\n", xdbHeader.fsize);
-  printf("unsigned prime=%d\n", xdbHeader.prime);
+  //LOG_INFO(gLogCXdbDumper, "unsigned int size=%d\n", sizeof(unsigned int) );
+  LOG_INFO(gLogCXdbDumper, "unsigned base=%d\n", xdbHeader.base);
+  LOG_INFO(gLogCXdbDumper, "unsigned size=%d\n", xdbHeader.fsize);
+  LOG_INFO(gLogCXdbDumper, "unsigned prime=%d\n", xdbHeader.prime);
 
   iPrime = xdbHeader.prime;
   iHashBase = xdbHeader.base;
@@ -316,7 +319,7 @@ bool CXdbDumper::Run()
 
     if (destinationLength != 0) 
     {
-      printf("travelIndex=%d destinationOffset=%d destinationLength=%d\n", travelIndex, destinationOffset, destinationLength);
+      LOG_INFO(gLogCXdbDumper, "travelIndex=%d destinationOffset=%d destinationLength=%d\n", travelIndex, destinationOffset, destinationLength);
       GetRecord(fd, destinationOffset, destinationLength, 0, 0, "");
       iWordCount = 0;
 
@@ -345,23 +348,23 @@ bool CXdbDumper::Run()
   {
     // Collect statistic informations.
     //----------------------------------------
-    //printf("repeatCnt(%d)\n", repeatCnt);
+    //LOG_INFO(gLogCXdbDumper, "repeatCnt(%d)\n", repeatCnt);
     if (normalizeRepeatVectorIterator == iNormalizeRepeatVector.begin())
     {
       strcpy(szLinePrev, (*normalizeRepeatVectorIterator).c_str());
-      //printf("11AA szLinePrev %s", szLinePrev);
+      //LOG_INFO(gLogCXdbDumper, "11AA szLinePrev %s", szLinePrev);
       pFindPrev = strtok(szLinePrev, "<");
-      //printf("11BB pFindPrev %s\n", pFindPrev);
+      //LOG_INFO(gLogCXdbDumper, "11BB pFindPrev %s\n", pFindPrev);
       repeatCnt++;
       fprintf(iNormalizeRepeatLog, "------------------------ [X] x (X) \n");
     }
     else
     {
       strcpy(szLineCurr, (*normalizeRepeatVectorIterator).c_str());
-      //printf("22AA szLineCurr %s", szLineCurr);
+      //LOG_INFO(gLogCXdbDumper, "22AA szLineCurr %s", szLineCurr);
       pFindCurr = strtok(szLineCurr, "<");
-      //printf("22BB pFindPrev %s\n", pFindPrev);
-      //printf("22BB pFindCurr %s\n", pFindCurr);
+      //LOG_INFO(gLogCXdbDumper, "22BB pFindPrev %s\n", pFindPrev);
+      //LOG_INFO(gLogCXdbDumper, "22BB pFindCurr %s\n", pFindCurr);
 
       if (strcmp(pFindPrev, pFindCurr) == 0)
       {
@@ -521,7 +524,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
 
   iWordCount++;
   /*
-  printf("Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c key=%s\n", 
+  LOG_INFO(gLogCXdbDumper, "Level[%d] Dir=%c word[%ld] l_offset=%ld l_len=%ld r_offset=%d r_len=%d k_len=%d father=%s tf=%f idf=%f flag=%d attr[0]=%c key=%s\n", 
     level, (0 == direction) ? 'N': (1 == direction) ?'L':'R', iWordCount, l_offset, l_len, r_offset, r_len, k_len, father, 
     ct.tf, ct.idf, ct.flag, ct.attr[0], key_name );
     */
@@ -584,7 +587,7 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
       findIterator = iNormalizeHash.find(charUTF8);
       if (findIterator == iNormalizeHash.end()) 
       {
-        printf("NOT Found  [%x][%x][%x]...................\n", chtUTF8[0], chtUTF8[1], chtUTF8[2]);
+        LOG_INFO(gLogCXdbDumper, "NOT Found  [%x][%x][%x]...................\n", chtUTF8[0], chtUTF8[1], chtUTF8[2]);
         memcpy(&normalizeKeyName[index], &keyName[index], charUTF8Length);
       } 
       else 
@@ -611,8 +614,8 @@ void CXdbDumper::GetRecord(FILE *aFd, unsigned int aOffset, unsigned int aLength
     if (iNormalizeMap.end() != normalizeMapIterator)
     {
       // This is repeat string.
-      //printf("Repeat: [%s<=%s\t%f\t%f\t%d\t%s] v.s. ",nor_str.c_str(), iFirstNormalizeToOriginalMap[nor_str].c_str(), nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
-      //printf("[%s<=%s\t%f\t%f\t%d\t%s]\n",normal_key_name, key_name, ct.tf, ct.idf, ct.flag, ct.attr);
+      //LOG_INFO(gLogCXdbDumper, "Repeat: [%s<=%s\t%f\t%f\t%d\t%s] v.s. ",nor_str.c_str(), iFirstNormalizeToOriginalMap[nor_str].c_str(), nor_map_it->second.tf, nor_map_it->second.idf, nor_map_it->second.flag, nor_map_it->second.attr);
+      //LOG_INFO(gLogCXdbDumper, "[%s<=%s\t%f\t%f\t%d\t%s]\n",normal_key_name, key_name, ct.tf, ct.idf, ct.flag, ct.attr);
 
       // get original one info.
       sprintf(iSzLog, "%s<=%s\t%f\t%f\t%d\t%s\n", normalizeString.c_str(), iFirstNormalizeToOriginalMap[normalizeString].c_str(), 
