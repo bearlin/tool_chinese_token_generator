@@ -1,6 +1,6 @@
-//
+////////////////////////////////////////////////////////////////////////////////
 // This file contains the Chinese token generator common interface
-//
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef TOKEN_GENERATOR_CHINESE_COMMON_H
 #define TOKEN_GENERATOR_CHINESE_COMMON_H
@@ -17,7 +17,7 @@ public:
   virtual ~CTokenGeneratorChineseCommon();
 
   static const int KMblenTableUTF8Size = 256;
-  // Length of multibyte character from first byte of Utf8
+  //! \brief Length of multibyte character from first byte of Utf8
   static const unsigned char iUTF8MultibyteLengthTable[KMblenTableUTF8Size];
 };
 

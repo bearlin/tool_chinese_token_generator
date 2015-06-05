@@ -1,6 +1,6 @@
-//
-// This file contains the interface of FTS token generator
-//
+////////////////////////////////////////////////////////////////////////////////
+// This file contains the FTS token generator interface
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef IFTS_TOKEN_GENERATOR_H
 #define IFTS_TOKEN_GENERATOR_H
@@ -20,8 +20,8 @@ enum TLanguageType
 class IFtsTokenGenerator
 {
 public:
-  // Empty virtual destructor avoids warning:
-  // Class has virtual functions and accessible non-virtual destructor [-Wnon-virtual-dtor]
+  //! \brief Empty virtual destructor avoids warning:
+  //!        Class has virtual functions and accessible non-virtual destructor [-Wnon-virtual-dtor]
   virtual ~IFtsTokenGenerator() {}
 
   virtual void SetLanguageType(const TLanguageType aType) = 0;
